@@ -12,6 +12,8 @@ class Product extends Model
 {
     use Translatable, SoftDeletes;
 
+    public $translationModel = ProductTranslation::class;
+
     public $translatedAttributes = [
         'name',
         'description',

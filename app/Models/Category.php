@@ -11,6 +11,8 @@ class Category extends Model
 {
     use Translatable, SoftDeletes;
 
+    public $translationModel = CategoryTranslation::class;
+
     public $translatedAttributes = [
         'name',
         'description',
