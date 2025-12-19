@@ -13,7 +13,20 @@ return new class extends Migration
     {
         Schema::create('product_translations', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->string('locale')->index();
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->text('short_description')->nullable();
+            $table->json('ingredients')->nullable();
+            $table->json('benefits')->nullable();
+            $table->json('usage_instructions')->nullable();
+            $table->string('meta_title')->nullable();
+            $table->text('meta_description')->nullable();
+            $table->string('meta_keywords')->nullable();
             $table->timestamps();
+
+            $table->unique(['product_id', 'locale']);
         });
     }
 
