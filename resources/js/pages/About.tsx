@@ -1,20 +1,24 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { Footer } from '@/components/rosacare/Footer';
 import { HeritageSection } from '@/components/rosacare/HeritageSection';
 import { WhyRosaCareSection } from '@/components/rosacare/WhyRosaCareSection';
 import { BenefitsSection } from '@/components/rosacare/BenefitsSection';
+import { Navbar } from '@/components/rosacare/Navbar';
 
 interface AboutProps {
     locale?: string;
 }
 
-export default function About({ locale = 'en' }: AboutProps) {
+export default function About({ locale = 'ar' }: AboutProps) {
     const isRTL = locale === 'ar';
+    const page = usePage<any>();
+    const menuItems = page.props.menuItems || [];
 
     return (
         <>
             <Head title={locale === 'ar' ? 'من نحن - روزاكير' : 'About Us - RosaCare'} />
             <div className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <Navbar menuItems={menuItems} locale={locale} />
                 <section className="py-20 bg-secondary/30">
                     <div className="container mx-auto px-4">
                         <div className={`max-w-4xl mx-auto ${isRTL ? 'rtl' : 'ltr'}`}>

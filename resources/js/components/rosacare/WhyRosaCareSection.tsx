@@ -4,7 +4,7 @@ interface WhyRosaCareSectionProps {
     locale?: string;
 }
 
-export function WhyRosaCareSection({ locale = 'en' }: WhyRosaCareSectionProps) {
+export function WhyRosaCareSection({ locale = 'ar' }: WhyRosaCareSectionProps) {
     const isRTL = locale === 'ar';
 
     const reasons = [

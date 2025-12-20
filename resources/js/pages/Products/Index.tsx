@@ -1,6 +1,7 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { ProductCard } from '@/components/rosacare/ProductCard';
 import { Footer } from '@/components/rosacare/Footer';
+import { Navbar } from '@/components/rosacare/Navbar';
 import { Button } from '@/components/ui/button';
 
 interface Product {
@@ -39,13 +40,16 @@ interface ProductsIndexProps {
     locale?: string;
 }
 
-export default function ProductsIndex({ products, categories, selectedCategory, locale = 'en' }: ProductsIndexProps) {
+export default function ProductsIndex({ products, categories, selectedCategory, locale = 'ar' }: ProductsIndexProps) {
     const isRTL = locale === 'ar';
+    const page = usePage<any>();
+    const menuItems = page.props.menuItems || [];
 
     return (
         <>
             <Head title={locale === 'ar' ? 'المنتجات - روزاكير' : 'Products - RosaCare'} />
             <div className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <Navbar menuItems={menuItems} locale={locale} />
                 <section className="py-20 bg-secondary/30">
                     <div className="container mx-auto px-4">
                         <h1 className={`text-4xl md:text-5xl font-bold mb-8 text-center ${isRTL ? 'rtl' : 'ltr'}`}>

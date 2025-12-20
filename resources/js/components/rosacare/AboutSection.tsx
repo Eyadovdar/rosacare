@@ -2,7 +2,7 @@ interface AboutSectionProps {
     locale?: string;
 }
 
-export function AboutSection({ locale = 'en' }: AboutSectionProps) {
+export function AboutSection({ locale = 'ar' }: AboutSectionProps) {
     const isRTL = locale === 'ar';
 
     return (

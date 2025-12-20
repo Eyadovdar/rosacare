@@ -25,8 +25,8 @@ class SetLocale
             App::setLocale($locale);
             Session::put('locale', $locale);
         } else {
-            // Check session or default
-            $locale = Session::get('locale', config('app.locale', 'en'));
+            // Check session or default to Arabic
+            $locale = Session::get('locale', config('app.locale', 'ar'));
             App::setLocale($locale);
         }
 

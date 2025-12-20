@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Sparkles, Heart, Flower } from 'lucide-react';
+import { SparklesIcon, HeartIcon, GiftIcon } from '@heroicons/react/24/outline';
 
 interface Category {
     id: number;
@@ -19,9 +19,9 @@ interface CategoryShowcaseProps {
     locale?: string;
 }
 
-export function CategoryShowcase({ categories, locale = 'en' }: CategoryShowcaseProps) {
+export function CategoryShowcase({ categories, locale = 'ar' }: CategoryShowcaseProps) {
     const isRTL = locale === 'ar';
-    const defaultIcons = [Sparkles, Heart, Flower];
+    const defaultIcons = [SparklesIcon, HeartIcon, GiftIcon];
 
     return (
         <section className="py-20 bg-secondary/30">

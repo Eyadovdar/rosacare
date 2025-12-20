@@ -8,6 +8,7 @@ import { HeritageSection } from '@/components/rosacare/HeritageSection';
 import { WhyRosaCareSection } from '@/components/rosacare/WhyRosaCareSection';
 import { CTABanner } from '@/components/rosacare/CTABanner';
 import { Footer } from '@/components/rosacare/Footer';
+import { Navbar } from '@/components/rosacare/Navbar';
 
 interface Category {
     id: number;
@@ -35,19 +36,44 @@ interface Product {
     }>;
 }
 
+interface NavigationMenuItem {
+    id: number;
+    type: string;
+    url?: string;
+    icon?: string;
+    page?: string;
+    category_id?: number;
+    open_in_new_tab: boolean;
+    sort_order: number;
+    is_active: boolean;
+    translations: Array<{
+        locale: string;
+        label: string;
+    }>;
+    category?: {
+        slug: string;
+        translations: Array<{
+            locale: string;
+            name: string;
+        }>;
+    };
+}
+
 interface HomeProps {
     categories: Category[];
     featuredProducts: Product[];
+    menuItems?: NavigationMenuItem[];
     locale?: string;
 }
 
-export default function Home({ categories, featuredProducts, locale = 'en' }: HomeProps) {
+export default function Home({ categories, featuredProducts, menuItems = [], locale = 'ar' }: HomeProps) {
     const isRTL = locale === 'ar';
 
     return (
         <>
             <Head title="RosaCare - Authentic Damask Rose Products" />
             <div className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <Navbar menuItems={menuItems} locale={locale} />
                 <HeroSection locale={locale} />
                 <AboutSection locale={locale} />
                 {categories.length > 0 && <CategoryShowcase categories={categories} locale={locale} />}

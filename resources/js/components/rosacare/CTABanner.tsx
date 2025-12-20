@@ -5,7 +5,7 @@ interface CTABannerProps {
     locale?: string;
 }
 
-export function CTABanner({ locale = 'en' }: CTABannerProps) {
+export function CTABanner({ locale = 'ar' }: CTABannerProps) {
     const isRTL = locale === 'ar';
 
     return (

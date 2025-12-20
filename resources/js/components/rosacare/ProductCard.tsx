@@ -25,7 +25,7 @@ interface ProductCardProps {
     locale?: string;
 }
 
-export function ProductCard({ product, locale = 'en' }: ProductCardProps) {
+export function ProductCard({ product, locale = 'ar' }: ProductCardProps) {
     const translation = product.translations.find(t => t.locale === locale) || product.translations[0];
     const featuredImage = product.media?.find(m => m.collection_name === 'featured') || product.media?.[0];
     const currentPrice = product.sale_price ?? product.price;

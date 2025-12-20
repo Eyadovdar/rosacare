@@ -1,5 +1,6 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { Footer } from '@/components/rosacare/Footer';
+import { Navbar } from '@/components/rosacare/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,8 +11,10 @@ interface ContactProps {
     locale?: string;
 }
 
-export default function Contact({ locale = 'en' }: ContactProps) {
+export default function Contact({ locale = 'ar' }: ContactProps) {
     const isRTL = locale === 'ar';
+    const page = usePage<any>();
+    const menuItems = page.props.menuItems || [];
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -31,6 +34,7 @@ export default function Contact({ locale = 'en' }: ContactProps) {
         <>
             <Head title={locale === 'ar' ? 'اتصل بنا - روزاكير' : 'Contact Us - RosaCare'} />
             <div className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <Navbar menuItems={menuItems} locale={locale} />
                 <section className="py-20 bg-secondary/30">
                     <div className="container mx-auto px-4">
                         <div className="max-w-2xl mx-auto">

@@ -2,7 +2,7 @@ interface HeritageSectionProps {
     locale?: string;
 }
 
-export function HeritageSection({ locale = 'en' }: HeritageSectionProps) {
+export function HeritageSection({ locale = 'ar' }: HeritageSectionProps) {
     const isRTL = locale === 'ar';
 
     return (

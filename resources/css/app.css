@@ -9,7 +9,7 @@
 
 @theme {
     --font-sans:
-        'Cairo', 'Noto Arabic', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Tajawal', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
 
@@ -149,5 +149,12 @@
 
     body {
         @apply bg-background text-foreground;
+    }
+
+    /* Apply Tajawal font for Arabic locale */
+    html[dir="rtl"],
+    html[lang="ar"],
+    [dir="rtl"] {
+        font-family: 'Tajawal', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
     }
 }

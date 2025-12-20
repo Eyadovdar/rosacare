@@ -4,7 +4,7 @@ interface FooterProps {
     locale?: string;
 }
 
-export function Footer({ locale = 'en' }: FooterProps) {
+export function Footer({ locale = 'ar' }: FooterProps) {
     const isRTL = locale === 'ar';
     const currentYear = new Date().getFullYear();
 

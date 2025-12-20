@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\NavigationMenuItem;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -44,6 +46,12 @@ class HandleInertiaRequests extends Middleware
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'locale' => app()->getLocale(),
             'supportedLocales' => ['ar', 'en'],
+            'menuItems' => \Schema::hasTable('navigation_menu_items')
+                ? NavigationMenuItem::where('is_active', true)
+                    ->with(['translations', 'category.translations'])
+                    ->orderBy('sort_order')
+                    ->get()
+                : collect(),
             'auth' => [
                 'user' => $request->user(),
             ],

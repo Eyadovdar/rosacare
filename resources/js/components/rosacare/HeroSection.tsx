@@ -5,7 +5,7 @@ interface HeroSectionProps {
     locale?: string;
 }
 
-export function HeroSection({ locale = 'en' }: HeroSectionProps) {
+export function HeroSection({ locale = 'ar' }: HeroSectionProps) {
     const isRTL = locale === 'ar';
 
     return (

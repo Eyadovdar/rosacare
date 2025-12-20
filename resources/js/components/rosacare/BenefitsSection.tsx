@@ -1,4 +1,4 @@
-import { Sparkles, Heart, Droplets, Leaf } from 'lucide-react';
+import { SparklesIcon, HeartIcon, BeakerIcon, SunIcon } from '@heroicons/react/24/outline';
 
 interface Benefit {
     icon: React.ReactNode;
@@ -10,33 +10,33 @@ interface BenefitsSectionProps {
     locale?: string;
 }
 
-export function BenefitsSection({ locale = 'en' }: BenefitsSectionProps) {
+export function BenefitsSection({ locale = 'ar' }: BenefitsSectionProps) {
     const isRTL = locale === 'ar';
 
     const benefits: Benefit[] = [
         {
-            icon: <Sparkles className="w-12 h-12" />,
+            icon: <SparklesIcon className="w-12 h-12" />,
             title: locale === 'ar' ? 'فوائد للبشرة' : 'Skin Benefits',
             description: locale === 'ar'
                 ? 'ترطيب عميق وتنعيم البشرة وتقليل التجاعيد والخطوط الدقيقة'
                 : 'Deep hydration, skin smoothing, and reduction of wrinkles and fine lines',
         },
         {
-            icon: <Heart className="w-12 h-12" />,
+            icon: <HeartIcon className="w-12 h-12" />,
             title: locale === 'ar' ? 'العافية والاسترخاء' : 'Wellness & Relaxation',
             description: locale === 'ar'
                 ? 'خصائص مهدئة طبيعية تساعد على الاسترخاء وتخفيف التوتر'
                 : 'Natural soothing properties that help with relaxation and stress relief',
         },
         {
-            icon: <Leaf className="w-12 h-12" />,
+            icon: <SunIcon className="w-12 h-12" />,
             title: locale === 'ar' ? 'القيمة الغذائية' : 'Nutritional Value',
             description: locale === 'ar'
                 ? 'غنية بالفيتامينات ومضادات الأكسدة الطبيعية المفيدة للصحة'
                 : 'Rich in vitamins and natural antioxidants beneficial for health',
         },
         {
-            icon: <Droplets className="w-12 h-12" />,
+            icon: <BeakerIcon className="w-12 h-12" />,
             title: locale === 'ar' ? '100% طبيعي' : '100% Natural',
             description: locale === 'ar'
                 ? 'منتجات طبيعية خالصة بدون إضافات كيميائية أو مواد حافظة'

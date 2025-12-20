@@ -1,6 +1,7 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { ProductCard } from '@/components/rosacare/ProductCard';
 import { Footer } from '@/components/rosacare/Footer';
+import { Navbar } from '@/components/rosacare/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -39,8 +40,10 @@ interface ProductsShowProps {
     locale?: string;
 }
 
-export default function ProductsShow({ product, relatedProducts, locale = 'en' }: ProductsShowProps) {
+export default function ProductsShow({ product, relatedProducts, locale = 'ar' }: ProductsShowProps) {
     const isRTL = locale === 'ar';
+    const page = usePage<any>();
+    const menuItems = page.props.menuItems || [];
     const translation = product.translations.find(t => t.locale === locale) || product.translations[0];
     const categoryTranslation = product.category.translations.find(t => t.locale === locale) || product.category.translations[0];
     const featuredImage = product.media?.find(m => m.collection_name === 'featured') || product.media?.[0];
@@ -51,6 +54,7 @@ export default function ProductsShow({ product, relatedProducts, locale = 'en' }
         <>
             <Head title={`${translation.name} - RosaCare`} />
             <div className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <Navbar menuItems={menuItems} locale={locale} />
                 <section className="py-20 bg-background">
                     <div className="container mx-auto px-4">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">

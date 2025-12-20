@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Filament\Resources\Categories\Pages;
+namespace App\Filament\Resources\NavigationMenuItems\Pages;
 
-use App\Filament\Resources\Categories\CategoryResource;
+use App\Filament\Resources\NavigationMenuItems\NavigationMenuItemResource;
 use Filament\Resources\Pages\CreateRecord;
 
-class CreateCategory extends CreateRecord
+class CreateNavigationMenuItem extends CreateRecord
 {
-    protected static string $resource = CategoryResource::class;
+    protected static string $resource = NavigationMenuItemResource::class;
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
@@ -31,15 +31,12 @@ class CreateCategory extends CreateRecord
     protected function extractTranslations(array $data): array
     {
         $translations = [];
-        $translatableFields = ['name', 'description', 'meta_title', 'meta_description', 'meta_keywords'];
         
-        foreach ($translatableFields as $field) {
-            if (isset($data[$field . ':ar'])) {
-                $translations['ar'][$field] = $data[$field . ':ar'];
-            }
-            if (isset($data[$field . ':en'])) {
-                $translations['en'][$field] = $data[$field . ':en'];
-            }
+        if (isset($data['label:ar'])) {
+            $translations['ar']['label'] = $data['label:ar'];
+        }
+        if (isset($data['label:en'])) {
+            $translations['en']['label'] = $data['label:en'];
         }
 
         return $translations;
@@ -47,12 +44,7 @@ class CreateCategory extends CreateRecord
 
     protected function removeTranslationFields(array $data): array
     {
-        $translatableFields = ['name', 'description', 'meta_title', 'meta_description', 'meta_keywords'];
-        
-        foreach ($translatableFields as $field) {
-            unset($data[$field . ':ar'], $data[$field . ':en']);
-        }
-
+        unset($data['label:ar'], $data['label:en']);
         return $data;
     }
 }
