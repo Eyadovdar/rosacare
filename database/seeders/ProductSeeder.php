@@ -15,8 +15,8 @@ class ProductSeeder extends Seeder
         $foodCategory = Category::where('slug', 'food-products')->first();
         $aromaticCategory = Category::where('slug', 'aromatic-products')->first();
 
-        if (! $skincareCategory || ! $foodCategory) {
-            $this->command->warn('Categories not found. Please run CategorySeeder first.');
+        if (! $skincareCategory || ! $foodCategory || ! $aromaticCategory) {
+            $this->command->error('Categories not found. Please run CategorySeeder first.');
             return;
         }
 
@@ -110,8 +110,20 @@ class ProductSeeder extends Seeder
         ];
 
         foreach ($products as $productData) {
-            $translations = $productData['translations'];
+            // Ensure category_id exists before proceeding
+            if (! isset($productData['category_id']) || ! $productData['category_id']) {
+                $this->command->warn('Skipping product with missing category_id: ' . ($productData['slug'] ?? 'unknown'));
+                continue;
+            }
+
+            $translations = $productData['translations'] ?? [];
             unset($productData['translations']);
+
+            // Validate required fields
+            if (empty($productData['slug']) || empty($productData['category_id'])) {
+                $this->command->warn('Skipping product with missing required fields');
+                continue;
+            }
 
             $product = Product::create($productData);
 

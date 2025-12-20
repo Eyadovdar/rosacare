@@ -12,6 +12,7 @@ class CategorySeeder extends Seeder
     {
         $categories = [
             [
+                'title' => 'Skincare & Body Care',
                 'slug' => 'skincare-body-care',
                 'icon' => null,
                 'sort_order' => 1,
@@ -33,6 +34,7 @@ class CategorySeeder extends Seeder
                 ],
             ],
             [
+                'title' => 'Food Products',
                 'slug' => 'food-products',
                 'icon' => null,
                 'sort_order' => 2,
@@ -54,6 +56,7 @@ class CategorySeeder extends Seeder
                 ],
             ],
             [
+                'title' => 'Aromatic Products',
                 'slug' => 'aromatic-products',
                 'icon' => null,
                 'sort_order' => 3,
