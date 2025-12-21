@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\Products\Pages;
 
 use App\Filament\Resources\Products\ProductResource;
+use App\Models\Media;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\Storage;
 
 class CreateProduct extends CreateRecord
 {
@@ -13,6 +15,19 @@ class CreateProduct extends CreateRecord
     {
         // Extract and store translations separately
         $this->translations = $this->extractTranslations($data);
+        
+        // Store media files to save after creation
+        // Filament FileUpload stores file paths as strings (single) or arrays (multiple)
+        $this->featuredImage = is_array($data['featured_image'] ?? null) 
+            ? ($data['featured_image'][0] ?? null) 
+            : ($data['featured_image'] ?? null);
+        $this->galleryImages = is_array($data['gallery_images'] ?? null) 
+            ? $data['gallery_images'] 
+            : (($data['gallery_images'] ?? null) ? [$data['gallery_images']] : []);
+        
+        // Remove media fields from form data
+        unset($data['featured_image'], $data['gallery_images']);
+        
         return $this->removeTranslationFields($data);
     }
 
@@ -23,6 +38,55 @@ class CreateProduct extends CreateRecord
             foreach ($this->translations as $locale => $fields) {
                 $this->record->translateOrNew($locale)->fill($fields)->save();
             }
+        }
+        
+        // Save featured image
+        if ($this->featuredImage && is_string($this->featuredImage)) {
+            $this->saveMediaFile($this->featuredImage, 'featured', 0);
+        }
+        
+        // Save gallery images
+        if (!empty($this->galleryImages)) {
+            foreach ($this->galleryImages as $index => $imagePath) {
+                if (is_string($imagePath)) {
+                    $this->saveMediaFile($imagePath, 'gallery', $index);
+                }
+            }
+        }
+    }
+    
+    protected $featuredImage = null;
+    protected array $galleryImages = [];
+    
+    protected function saveMediaFile(string $filePath, string $collection, int $sortOrder): void
+    {
+        try {
+            // FileUpload stores paths relative to storage/app/public
+            // Check if file exists
+            if (!Storage::disk('public')->exists($filePath)) {
+                \Log::warning("Media file not found: {$filePath}");
+                return;
+            }
+            
+            $fileInfo = pathinfo($filePath);
+            $dirname = $fileInfo['dirname'] !== '.' ? $fileInfo['dirname'] : '';
+            
+            Media::create([
+                'model_type' => get_class($this->record),
+                'model_id' => $this->record->id,
+                'collection_name' => $collection,
+                'file_name' => $fileInfo['basename'],
+                'mime_type' => Storage::disk('public')->mimeType($filePath) ?: 'image/jpeg',
+                'size' => Storage::disk('public')->size($filePath),
+                'disk' => 'public',
+                'path' => $dirname,
+                'sort_order' => $sortOrder,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error("Failed to save media file: {$filePath}", [
+                'error' => $e->getMessage(),
+                'collection' => $collection,
+            ]);
         }
     }
 

@@ -63,6 +63,7 @@ class ProductResource extends Resource
         return parent::getRecordRouteBindingEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
-            ]);
+            ])
+            ->with(['featuredImage', 'galleryImages']);
     }
 }

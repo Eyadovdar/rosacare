@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Products\Schemas;
 
 use App\Models\Product;
 use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
@@ -13,9 +14,19 @@ class ProductInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('category.title')
+                ImageEntry::make('featuredImage.file_name')
+                    ->label('Featured Image')
+                    ->getStateUsing(function (Product $record) {
+                        $image = $record->featuredImage;
+                        return $image ? $image->url : null;
+                    })
+                    ->width('100%')
+                    ->height('400px')
+                    ->columnSpanFull(),
+                TextEntry::make('category.name')
                     ->label('Category'),
-                TextEntry::make('title')
+                TextEntry::make('name')
+                    ->label('Name')
                     ->placeholder('-'),
                 TextEntry::make('sku')
                     ->label('SKU')

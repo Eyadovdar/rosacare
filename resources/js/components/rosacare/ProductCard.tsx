@@ -28,7 +28,12 @@ interface ProductCardProps {
 export function ProductCard({ product, locale = 'ar' }: ProductCardProps) {
     const translation = product.translations.find(t => t.locale === locale) || product.translations[0];
     const featuredImage = product.media?.find(m => m.collection_name === 'featured') || product.media?.[0];
-    const currentPrice = product.sale_price ?? product.price;
+    
+    // Convert prices to numbers to handle string values from database
+    const price = product.price ? Number(product.price) : null;
+    const salePrice = product.sale_price ? Number(product.sale_price) : null;
+    const currentPrice = salePrice ?? price;
+    
     const isRTL = locale === 'ar';
 
     return (
@@ -45,7 +50,7 @@ export function ProductCard({ product, locale = 'ar' }: ProductCardProps) {
                         <span className="text-muted-foreground">{translation.name}</span>
                     </div>
                 )}
-                {product.sale_price && product.price && (
+                {salePrice && price && salePrice < price && (
                     <div className="absolute top-2 right-2 bg-accent text-accent-foreground px-2 py-1 rounded-md text-sm font-semibold">
                         {locale === 'ar' ? 'خصم' : 'Sale'}
                     </div>
@@ -60,11 +65,11 @@ export function ProductCard({ product, locale = 'ar' }: ProductCardProps) {
                 )}
             </CardHeader>
             <CardContent className="flex-1">
-                {currentPrice && (
+                {currentPrice !== null && currentPrice !== undefined && (
                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        {product.sale_price && product.price && (
+                        {salePrice && price && salePrice < price && (
                             <span className="text-muted-foreground line-through text-sm">
-                                {product.price.toFixed(2)} {locale === 'ar' ? 'ل.س' : 'USD'}
+                                {price.toFixed(2)} {locale === 'ar' ? 'ل.س' : 'USD'}
                             </span>
                         )}
                         <span className="text-2xl font-bold text-primary">

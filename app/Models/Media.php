@@ -33,6 +33,8 @@ class Media extends Model
 
     public function getUrlAttribute(): string
     {
-        return asset('storage/' . $this->path . '/' . $this->file_name);
+        $path = trim($this->path ?? '', '/');
+        $filePath = $path ? $path . '/' . $this->file_name : $this->file_name;
+        return asset('storage/' . $filePath);
     }
 }

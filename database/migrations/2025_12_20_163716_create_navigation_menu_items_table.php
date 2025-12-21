@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('navigation_menu_items', function (Blueprint $table) {
+        Schema::create('menu_items', function (Blueprint $table) {
             $table->id();
             $table->string('type')->default('link'); // link, category, page
             $table->string('url')->nullable(); // For external links or custom URLs
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('navigation_menu_items');
+        Schema::dropIfExists('menu_items');
     }
 };

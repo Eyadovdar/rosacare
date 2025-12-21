@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
+use App\Models\Category;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tabs\Tab;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -21,7 +23,17 @@ class ProductForm
                 Section::make('General Information')
                     ->schema([
                         Select::make('category_id')
-                            ->relationship('category', 'name')
+                            ->label('Category')
+                            ->options(function () {
+                                return Category::query()
+                                    ->whereNull('deleted_at')
+                                    ->get()
+                                    ->sortBy('name')
+                                    ->mapWithKeys(function ($category) {
+                                        return [$category->id => $category->name];
+                                    })
+                                    ->toArray();
+                            })
                             ->required()
                             ->searchable()
                             ->preload(),
@@ -68,7 +80,43 @@ class ProductForm
                     ])
                     ->columns(2),
 
-                Tabs::make('Translations')
+                Section::make('Images')
+                    ->schema([
+                        FileUpload::make('featured_image')
+                            ->label('Main Image')
+                            ->image()
+                            ->disk('public')
+                            ->directory('products/featured')
+                            ->visibility('public')
+                            ->maxSize(5120)
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([
+                                '16:9',
+                                '4:3',
+                                '1:1',
+                            ])
+                            ->helperText('Upload the main featured image for this product')
+                            ->columnSpanFull(),
+                        FileUpload::make('gallery_images')
+                            ->label('Gallery Images')
+                            ->image()
+                            ->multiple()
+                            ->disk('public')
+                            ->directory('products/gallery')
+                            ->visibility('public')
+                            ->maxSize(5120)
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([
+                                '16:9',
+                                '4:3',
+                                '1:1',
+                            ])
+                            ->helperText('Upload multiple images for the product gallery')
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(1),
+
+                    Tabs::make('Translations')
                     ->tabs([
                         Tab::make('Arabic (ar)')
                             ->schema([

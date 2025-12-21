@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class NavigationMenuItem extends Model
+class MenuItem extends Model
 {
     use Translatable, SoftDeletes;
 
-    public $translationModel = NavigationMenuItemTranslation::class;
+    public $translationModel = MenuItemTranslation::class;
 
     public $translatedAttributes = [
         'label',

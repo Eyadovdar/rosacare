@@ -6,6 +6,7 @@ use Astrotomic\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
@@ -63,14 +64,42 @@ class Product extends Model
         return $this->morphMany(Media::class, 'model')->orderBy('sort_order');
     }
 
-    public function getFeaturedImageAttribute()
+    /**
+     * Main/featured image relationship (single image)
+     */
+    public function featuredImage(): MorphOne
     {
-        return $this->media()->where('collection_name', 'featured')->first();
+        return $this->morphOne(Media::class, 'model')
+            ->where('collection_name', 'featured')
+            ->orderBy('sort_order');
     }
 
+    /**
+     * Gallery images relationship (multiple images)
+     */
+    public function galleryImages(): MorphMany
+    {
+        return $this->morphMany(Media::class, 'model')
+            ->where('collection_name', 'gallery')
+            ->orderBy('sort_order');
+    }
+
+    /**
+     * Accessor for featured image (backward compatibility)
+     * Use $product->featured_image or $product->featuredImage
+     */
+    public function getFeaturedImageAttribute()
+    {
+        return $this->featuredImage()->first();
+    }
+
+    /**
+     * Accessor for gallery images (backward compatibility)
+     * Use $product->gallery_images or $product->galleryImages
+     */
     public function getGalleryImagesAttribute()
     {
-        return $this->media()->where('collection_name', 'gallery')->get();
+        return $this->galleryImages()->get();
     }
 
     public function getCurrentPriceAttribute()

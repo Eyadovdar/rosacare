@@ -11,18 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (! Schema::hasTable('navigation_menu_item_translations')) {
-            Schema::create('navigation_menu_item_translations', function (Blueprint $table) {
+        if (! Schema::hasTable('menu_item_translations')) {
+            Schema::create('menu_item_translations', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedBigInteger('navigation_menu_item_id');
+                $table->unsignedBigInteger('menu_item_id');
                 $table->string('locale')->index();
                 $table->string('label');
                 $table->timestamps();
 
-                $table->unique(['navigation_menu_item_id', 'locale'], 'nav_menu_item_trans_item_locale_unique');
-                $table->foreign('navigation_menu_item_id', 'nav_menu_item_trans_item_fk')
+                $table->unique(['menu_item_id', 'locale'], 'menu_item_trans_item_locale_unique');
+                $table->foreign('menu_item_id', 'menu_item_trans_item_fk')
                     ->references('id')
-                    ->on('navigation_menu_items')
+                    ->on('menu_items')
                     ->onDelete('cascade');
             });
         }
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('navigation_menu_item_translations');
+        Schema::dropIfExists('menu_item_translations');
     }
 };

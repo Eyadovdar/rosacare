@@ -9,6 +9,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -19,9 +20,19 @@ class ProductsTable
     {
         return $table
             ->columns([
-                TextColumn::make('category.title')
+                ImageColumn::make('featuredImage.file_name')
+                    ->label('Image')
+                    ->getStateUsing(function ($record) {
+                        $image = $record->featuredImage;
+                        return $image ? $image->url : null;
+                    })
+                    ->circular()
+                    ->size(50),
+                TextColumn::make('category.name')
+                    ->label('Category')
                     ->searchable(),
-                TextColumn::make('title')
+                TextColumn::make('name')
+                    ->label('Name')
                     ->searchable(),
                 TextColumn::make('sku')
                     ->label('SKU')
@@ -65,6 +76,7 @@ class ProductsTable
             ->filters([
                 TrashedFilter::make(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),

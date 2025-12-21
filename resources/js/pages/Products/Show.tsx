@@ -48,7 +48,11 @@ export default function ProductsShow({ product, relatedProducts, locale = 'ar' }
     const categoryTranslation = product.category.translations.find(t => t.locale === locale) || product.category.translations[0];
     const featuredImage = product.media?.find(m => m.collection_name === 'featured') || product.media?.[0];
     const galleryImages = product.media?.filter(m => m.collection_name === 'gallery') || [];
-    const currentPrice = product.sale_price ?? product.price;
+    
+    // Convert prices to numbers to handle string values from database
+    const price = product.price ? Number(product.price) : null;
+    const salePrice = product.sale_price ? Number(product.sale_price) : null;
+    const currentPrice = salePrice ?? price;
 
     return (
         <>
@@ -93,11 +97,11 @@ export default function ProductsShow({ product, relatedProducts, locale = 'ar' }
                                 </Link>
                                 <h1 className="text-4xl font-bold mb-4">{translation.name}</h1>
                                 
-                                {currentPrice && (
+                                {currentPrice !== null && currentPrice !== undefined && (
                                     <div className={`flex items-center gap-4 mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                        {product.sale_price && product.price && (
+                                        {salePrice && price && salePrice < price && (
                                             <span className="text-muted-foreground line-through text-xl">
-                                                {product.price.toFixed(2)} {locale === 'ar' ? 'ل.س' : 'USD'}
+                                                {price.toFixed(2)} {locale === 'ar' ? 'ل.س' : 'USD'}
                                             </span>
                                         )}
                                         <span className="text-3xl font-bold text-primary">
