@@ -9,9 +9,12 @@
 
 @theme {
     --font-sans:
-        'Tajawal', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Alexandria', 'Tasees', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
+    
+    --font-display:
+        'Tasees', 'Alexandria', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -68,23 +71,24 @@
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    /* Damask Rose Red - Primary */
-    --primary: oklch(0.45 0.15 15);
+    /* Brandbook Colors */
+    /* Primary Rose - PANTONE 213 C */
+    --primary: #e72177;
     --primary-foreground: oklch(0.985 0 0);
-    /* Soft Rose / Blush Pink - Secondary */
-    --secondary: oklch(0.92 0.02 15);
-    --secondary-foreground: oklch(0.45 0.15 15);
-    /* Warm Gray - Muted */
-    --muted: oklch(0.95 0.005 0);
-    --muted-foreground: oklch(0.45 0.005 0);
-    /* Subtle Gold - Accent */
-    --accent: oklch(0.75 0.08 75);
-    --accent-foreground: oklch(0.145 0 0);
+    /* Deep Purple - PANTONE 2602 C */
+    --secondary: #862b90;
+    --secondary-foreground: oklch(0.985 0 0);
+    /* Light Gray - PANTONE 428 C */
+    --muted: #bdc4c8;
+    --muted-foreground: #545759;
+    /* Gold - PANTONE 4525 C */
+    --accent: #c2b582;
+    --accent-foreground: #545759;
     --destructive: oklch(0.577 0.245 27.325);
     --destructive-foreground: oklch(0.577 0.245 27.325);
-    --border: oklch(0.92 0.005 0);
-    --input: oklch(0.92 0.005 0);
-    --ring: oklch(0.45 0.15 15);
+    --border: #bdc4c8;
+    --input: #bdc4c8;
+    --ring: #e72177;
     --chart-1: oklch(0.646 0.222 41.116);
     --chart-2: oklch(0.6 0.118 184.704);
     --chart-3: oklch(0.398 0.07 227.392);
@@ -93,18 +97,20 @@
     --radius: 0.625rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.45 0.15 15);
+    --sidebar-primary: #e72177;
     --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.92 0.02 15);
-    --sidebar-accent-foreground: oklch(0.45 0.15 15);
-    --sidebar-border: oklch(0.92 0.005 0);
-    --sidebar-ring: oklch(0.87 0 0);
+    --sidebar-accent: #bdc4c8;
+    --sidebar-accent-foreground: #545759;
+    --sidebar-border: #bdc4c8;
+    --sidebar-ring: #862b90;
     
-    /* RosaCare Brand Colors */
-    --rosacare-rose: oklch(0.45 0.15 15);
-    --rosacare-rose-light: oklch(0.92 0.02 15);
-    --rosacare-gold: oklch(0.75 0.08 75);
-    --rosacare-warm-gray: oklch(0.85 0.005 0);
+    /* RosaCare Brand Colors from Brandbook */
+    --rosacare-rose: #e72177; /* PANTONE 213 C */
+    --rosacare-purple: #862b90; /* PANTONE 2602 C */
+    --rosacare-green: #798645; /* PANTONE 161-16 U */
+    --rosacare-dark-gray: #545759; /* PANTONE 425 C */
+    --rosacare-light-gray: #bdc4c8; /* PANTONE 428 C */
+    --rosacare-gold: #c2b582; /* PANTONE 4525 C */
 }
 
 .dark {
@@ -151,10 +157,27 @@
         @apply bg-background text-foreground;
     }
 
-    /* Apply Tajawal font for Arabic locale */
+    /* Apply Alexandria font for Arabic locale per brandbook */
     html[dir="rtl"],
     html[lang="ar"],
     [dir="rtl"] {
-        font-family: 'Tajawal', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+        font-family: 'Alexandria', 'Tasees', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    }
+    
+    /* Tasees Bold for headings in Arabic */
+    html[dir="rtl"] h1,
+    html[dir="rtl"] h2,
+    html[dir="rtl"] h3,
+    html[dir="rtl"] h4,
+    html[dir="rtl"] h5,
+    html[dir="rtl"] h6,
+    [dir="rtl"] h1,
+    [dir="rtl"] h2,
+    [dir="rtl"] h3,
+    [dir="rtl"] h4,
+    [dir="rtl"] h5,
+    [dir="rtl"] h6 {
+        font-family: 'Tasees', 'Alexandria', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+        font-weight: bold;
     }
 }

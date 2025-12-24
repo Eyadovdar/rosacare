@@ -25,7 +25,7 @@ createInertiaApp({
         );
     },
     progress: {
-        color: '#4B5563',
+        color: '#e72177', // Brandbook Primary Rose color
     },
 });
 
