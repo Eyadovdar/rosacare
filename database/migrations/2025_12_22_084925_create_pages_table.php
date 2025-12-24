@@ -22,16 +22,6 @@ return new class extends Migration
             $table->index('slug');
             $table->index('published');
         });
-
-        // Add JSON validation check constraints (MySQL 8.0.16+)
-        // Note: CHECK constraints are parsed but ignored in MySQL < 8.0.16
-        try {
-            DB::statement('ALTER TABLE `pages` ADD CONSTRAINT `pages_content_json_check` CHECK (json_valid(`content`))');
-            DB::statement('ALTER TABLE `pages` ADD CONSTRAINT `pages_meta_keywords_json_check` CHECK (`meta_keywords` IS NULL OR json_valid(`meta_keywords`))');
-        } catch (\Exception $e) {
-            // If CHECK constraints are not supported, continue without them
-            // The JSON validation will be handled at the application level
-        }
     }
 
     /**

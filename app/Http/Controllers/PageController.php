@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MenuItem;
 use App\Models\Page;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,17 +23,20 @@ class PageController extends Controller
             ->with('translations')
             ->firstOrFail();
 
-        // Get the locale from the request or default to 'ar'
-        $locale = $request->get('locale') ?? app()->getLocale();
+        // Get the locale from the request or default to app locale
+        $locale = app()->getLocale();
 
         // Get content blocks for the specific locale
-        $contentBlocks = $page->getContentForLocale($locale);
-
-        // Or specifically get Arabic content:
-        // $contentBlocks = $page->getArabicContent();
+        $contentBlocks = $page->getContentForLocale($locale) ?? [];
 
         // Get the translation for the current locale
         $translation = $page->translate($locale);
+
+        // Get menu items for navigation
+        $menuItems = MenuItem::where('is_active', true)
+            ->with(['translations', 'category.translations'])
+            ->orderBy('sort_order')
+            ->get();
 
         return Inertia::render('Pages/Show', [
             'page' => [
@@ -47,6 +51,7 @@ class PageController extends Controller
                 'meta_keywords' => $translation?->meta_keywords,
             ],
             'locale' => $locale,
+            'menuItems' => $menuItems,
         ]);
     }
 
