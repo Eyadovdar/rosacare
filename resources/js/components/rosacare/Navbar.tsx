@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
-interface NavigationMenuItem {
+interface MenuItem {
     id: number;
     type: string;
     url?: string;
@@ -11,6 +11,8 @@ interface NavigationMenuItem {
     page?: string;
     category_id?: number;
     open_in_new_tab: boolean;
+    sort_order: number;
+    is_active: boolean;
     translations: Array<{
         locale: string;
         label: string;
@@ -25,11 +27,11 @@ interface NavigationMenuItem {
 }
 
 interface NavbarProps {
-    menuItems: NavigationMenuItem[];
+    menuItems: MenuItem[];
     locale?: string;
 }
 
-export function Navbar({ menuItems, locale = 'ar' }: NavbarProps) {
+export function Navbar({ menuItems = [], locale = 'ar' }: NavbarProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const isRTL = locale === 'ar';
 
@@ -37,28 +39,74 @@ export function Navbar({ menuItems, locale = 'ar' }: NavbarProps) {
         setMobileMenuOpen(!mobileMenuOpen);
     };
 
-    const getMenuItemUrl = (item: NavigationMenuItem): string => {
+    const getMenuItemUrl = (item: MenuItem): string => {
         if (item.type === 'category' && item.category) {
             return `/categories/${item.category.slug}`;
         }
-        if (item.type === 'page') {
+        if (item.type === 'page' || item.page) {
             const pageMap: Record<string, string> = {
                 'home': '/',
+                'Home': '/',
                 'about': '/about',
                 'contact': '/contact',
                 'products': '/products',
+                'product': '/products',
             };
-            return pageMap[item.page || ''] || '/';
+            const pageKey = item.page || '';
+            return pageMap[pageKey] || item.url || '/';
         }
         return item.url || '/';
     };
 
-    const getMenuItemLabel = (item: NavigationMenuItem): string => {
-        const translation = item.translations.find(t => t.locale === locale) || item.translations[0];
-        return translation?.label || '';
+    const getMenuItemLabel = (item: MenuItem): string => {
+        // First try to get label from translations
+        if (item.translations && Array.isArray(item.translations) && item.translations.length > 0) {
+            const translation = item.translations.find(t => t && t.locale === locale) || item.translations[0];
+            if (translation?.label && translation.label.trim() !== '') {
+                return translation.label;
+            }
+        }
+
+        // Fallback: generate label from page type or URL
+        if (item.page) {
+            const pageLabelMap: Record<string, Record<string, string>> = {
+                'home': { ar: 'الرئيسية', en: 'Home' },
+                'Home': { ar: 'الرئيسية', en: 'Home' },
+                'products': { ar: 'المنتجات', en: 'Products' },
+                'product': { ar: 'المنتجات', en: 'Products' },
+                'about': { ar: 'من نحن', en: 'About' },
+                'contact': { ar: 'اتصل بنا', en: 'Contact' },
+            };
+            const pageKey = item.page;
+            if (pageLabelMap[pageKey]) {
+                return pageLabelMap[pageKey][locale] || pageLabelMap[pageKey]['en'] || pageKey;
+            }
+            return pageKey;
+        }
+
+        // Last fallback: use URL or type
+        if (item.url) {
+            return item.url;
+        }
+
+        return item.type || '';
     };
 
-    const handleNavigation = (item: NavigationMenuItem) => {
+    // Filter and sort menuItems
+    const activeMenuItems = (Array.isArray(menuItems) ? menuItems : [])
+        .filter(item => {
+            // Filter out null/undefined items
+            if (!item) return false;
+            // Filter out inactive items
+            if (item.is_active !== true) return false;
+            // All active items are included - label fallback handles missing translations
+            // Filter out items that don't have a valid label (after fallback logic)
+            const label = getMenuItemLabel(item);
+            return label && label.trim() !== '';
+        })
+        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+
+    const handleNavigation = (item: MenuItem) => {
         if (item.open_in_new_tab) {
             window.open(getMenuItemUrl(item), '_blank');
         } else {
@@ -78,10 +126,7 @@ export function Navbar({ menuItems, locale = 'ar' }: NavbarProps) {
 
                     {/* Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-1">
-                        {menuItems
-                            .filter(item => item.is_active)
-                            .sort((a, b) => a.sort_order - b.sort_order)
-                            .map((item) => (
+                        {activeMenuItems.map((item) => (
                                 <Button
                                     key={item.id}
                                     variant="ghost"
@@ -123,10 +168,7 @@ export function Navbar({ menuItems, locale = 'ar' }: NavbarProps) {
                 {mobileMenuOpen && (
                     <div className={`md:hidden py-4 border-t border-border ${isRTL ? 'rtl' : 'ltr'}`}>
                         <div className="flex flex-col space-y-1">
-                            {menuItems
-                                .filter(item => item.is_active)
-                                .sort((a, b) => a.sort_order - b.sort_order)
-                                .map((item) => (
+                            {activeMenuItems.map((item) => (
                                     <button
                                         key={item.id}
                                         onClick={() => handleNavigation(item)}

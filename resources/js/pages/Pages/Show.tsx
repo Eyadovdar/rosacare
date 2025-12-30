@@ -46,13 +46,13 @@ interface NavigationMenuItem {
 interface PagesShowProps {
     page: Page;
     locale?: string;
-    menuItems?: NavigationMenuItem[];
 }
 
-export default function PagesShow({ page, locale = 'ar', menuItems = [] }: PagesShowProps) {
+export default function PagesShow({ page, locale = 'ar' }: PagesShowProps) {
     const isRTL = locale === 'ar';
     const pageProps = usePage<any>();
-    const finalMenuItems = menuItems.length > 0 ? menuItems : (pageProps.props.menuItems || []);
+    // Get menuItems from shared props (HandleInertiaRequests middleware)
+    const menuItems = (pageProps.props.menuItems || []) as NavigationMenuItem[];
 
     // Generate page title with fallback
     const pageTitle = page.meta_title || page.title || 'RosaCare';
@@ -68,7 +68,7 @@ export default function PagesShow({ page, locale = 'ar', menuItems = [] }: Pages
                 )}
             </Head>
             <div className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                <Navbar menuItems={finalMenuItems} locale={locale} />
+                <Navbar menuItems={menuItems} locale={locale} />
 
                 {/* Page Header */}
                 {(page.header_image_path || page.title) && (

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Astrotomic\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Page extends Model
 {
@@ -136,5 +137,47 @@ class Page extends Model
         }
 
         return array_unique($types);
+    }
+
+    /**
+     * Get the full URL for the header image
+     *
+     * @return string|null
+     */
+    public function getHeaderImageUrlAttribute(): ?string
+    {
+        if (!$this->header_image_path) {
+            return null;
+        }
+
+        // If the path already starts with http:// or https://, return as is
+        if (str_starts_with($this->header_image_path, 'http://') || str_starts_with($this->header_image_path, 'https://')) {
+            return $this->header_image_path;
+        }
+
+        // Check if the file exists in storage
+        // Filament stores files in storage/app/public, and the path might be:
+        // - Just the filename (e.g., "01KD2V1ZK6Q1G47FETYX2E7DA9.png")
+        // - With directory (e.g., "pages/headers/01KD2V1ZK6Q1G47FETYX2E7DA9.png")
+        
+        $path = $this->header_image_path;
+        
+        // If path doesn't include directory, prepend it
+        if (!str_contains($path, 'pages/headers/')) {
+            $path = 'pages/headers/' . $path;
+        }
+
+        // Check if file exists with directory
+        if (Storage::disk('public')->exists($path)) {
+            return Storage::disk('public')->url($path);
+        }
+
+        // Fallback: check if file exists as stored (without directory)
+        if (Storage::disk('public')->exists($this->header_image_path)) {
+            return Storage::disk('public')->url($this->header_image_path);
+        }
+
+        // Last fallback: assume it's in pages/headers directory
+        return Storage::disk('public')->url($path);
     }
 }

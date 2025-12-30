@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MenuItem;
 use App\Models\Page;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -32,17 +31,13 @@ class PageController extends Controller
         // Get the translation for the current locale
         $translation = $page->translate($locale);
 
-        // Get menu items for navigation
-        $menuItems = MenuItem::where('is_active', true)
-            ->with(['translations', 'category.translations'])
-            ->orderBy('sort_order')
-            ->get();
+        // Note: menuItems are shared globally via HandleInertiaRequests middleware
 
         return Inertia::render('Pages/Show', [
             'page' => [
                 'id' => $page->id,
                 'slug' => $page->slug,
-                'header_image_path' => $page->header_image_path,
+                'header_image_path' => $page->header_image_url,
                 'published' => $page->published,
                 'title' => $translation?->title,
                 'content_blocks' => $contentBlocks,
@@ -51,7 +46,6 @@ class PageController extends Controller
                 'meta_keywords' => $translation?->meta_keywords,
             ],
             'locale' => $locale,
-            'menuItems' => $menuItems,
         ]);
     }
 
@@ -76,7 +70,7 @@ class PageController extends Controller
             'page' => [
                 'id' => $page->id,
                 'slug' => $page->slug,
-                'header_image_path' => $page->header_image_path,
+                'header_image_path' => $page->header_image_url,
                 'title' => $translation?->title,
                 'content_blocks' => $arabicContent,
                 'meta_title' => $translation?->meta_title,

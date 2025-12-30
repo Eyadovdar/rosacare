@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use App\Models\MenuItem;
 use App\Models\Product;
+use App\Models\Setting;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -12,6 +12,8 @@ class HomeController extends Controller
 {
     public function index(): Response
     {
+        $settings = Setting::first();
+
         $categories = Category::where('is_active', true)
             ->where('is_featured', true)
             ->orderBy('sort_order')
@@ -26,15 +28,12 @@ class HomeController extends Controller
             ->take(8)
             ->get();
 
-        $menuItems = MenuItem::where('is_active', true)
-            ->with(['translations', 'category.translations'])
-            ->orderBy('sort_order')
-            ->get();
+        // Note: menuItems are shared globally via HandleInertiaRequests middleware
 
         return Inertia::render('Home', [
             'categories' => $categories,
             'featuredProducts' => $featuredProducts,
-            'menuItems' => $menuItems,
+            'settings' => $settings,
         ]);
     }
 }

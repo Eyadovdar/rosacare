@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { HeroSection } from '@/components/rosacare/HeroSection';
 import { AboutSection } from '@/components/rosacare/AboutSection';
 import { CategoryShowcase } from '@/components/rosacare/CategoryShowcase';
@@ -37,7 +37,7 @@ interface Product {
     }>;
 }
 
-interface NavigationMenuItem {
+interface MenuItem {
     id: number;
     type: string;
     url?: string;
@@ -60,6 +60,13 @@ interface NavigationMenuItem {
     };
 }
 
+interface Setting {
+    id: number;
+    logo_header_path: string;
+    logo_footer_path: string;
+    favicon_path: string;
+}
+
 interface CarouselItem {
     id?: number;
     title: string;
@@ -72,13 +79,16 @@ interface CarouselItem {
 interface HomeProps {
     categories: Category[];
     featuredProducts: Product[];
-    menuItems?: NavigationMenuItem[];
     locale?: string;
     carouselItems?: CarouselItem[];
+    settings?: Setting;
 }
 
-export default function Home({ categories, featuredProducts, menuItems = [], locale = 'ar', carouselItems = [] }: HomeProps) {
+export default function Home({ categories, featuredProducts, locale = 'ar', carouselItems = [] }: HomeProps) {
     const isRTL = locale === 'ar';
+    const page = usePage<{ props: { menuItems?: MenuItem[] } }>();
+    // Get menuItems from shared props (HandleInertiaRequests middleware)
+    const menuItems = (page.props.menuItems || []) as MenuItem[];
 
     return (
         <>

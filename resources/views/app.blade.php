@@ -36,21 +36,67 @@
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@100;200;300;400;500;600;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-        {{-- Note: Tasees font may need to be self-hosted if not available on Google Fonts --}}
+        {{-- Local font hosting: Alexandria and Tasees fonts per RosaCare Branding Book --}}
         <style>
+            /* Alexandria font: Primary font for both Arabic and English (weights: 100-700) */
+            @font-face {
+                font-family: 'Alexandria';
+                font-style: normal;
+                font-weight: 100;
+                font-display: swap;
+                src: url('/fonts/alexandria/Alexandria-Thin.ttf') format('truetype');
+            }
+            @font-face {
+                font-family: 'Alexandria';
+                font-style: normal;
+                font-weight: 200;
+                font-display: swap;
+                src: url('/fonts/alexandria/Alexandria-ExtraLight.ttf') format('truetype');
+            }
+            @font-face {
+                font-family: 'Alexandria';
+                font-style: normal;
+                font-weight: 300;
+                font-display: swap;
+                src: url('/fonts/alexandria/Alexandria-Light.ttf') format('truetype');
+            }
+            @font-face {
+                font-family: 'Alexandria';
+                font-style: normal;
+                font-weight: 400;
+                font-display: swap;
+                src: url('/fonts/alexandria/Alexandria-Regular.ttf') format('truetype');
+            }
+            @font-face {
+                font-family: 'Alexandria';
+                font-style: normal;
+                font-weight: 500;
+                font-display: swap;
+                src: url('/fonts/alexandria/Alexandria-Medium.ttf') format('truetype');
+            }
+            @font-face {
+                font-family: 'Alexandria';
+                font-style: normal;
+                font-weight: 600;
+                font-display: swap;
+                src: url('/fonts/alexandria/Alexandria-SemiBold.ttf') format('truetype');
+            }
+            @font-face {
+                font-family: 'Alexandria';
+                font-style: normal;
+                font-weight: 700;
+                font-display: swap;
+                src: url('/fonts/alexandria/Alexandria-Bold.ttf') format('truetype');
+            }
+            
+            /* Tasees Bold: Display font for special headings/logos */
             @font-face {
                 font-family: 'Tasees';
                 font-weight: bold;
-                src: url('/fonts/Tasees-Bold.woff2') format('woff2'),
-                     url('/fonts/Tasees-Bold.woff') format('woff');
                 font-display: swap;
-            }
-            /* Fallback if Tasees is not available */
-            .font-display, h1, h2, h3, h4, h5, h6 {
-                font-family: 'Alexandria', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+                src: url('/fonts/Tasees-Bold.woff2') format('woff2'),
+                     url('/fonts/Tasees-Bold.woff') format('woff'),
+                     url('/fonts/Tasees-Bold.ttf') format('truetype');
             }
         </style>
 

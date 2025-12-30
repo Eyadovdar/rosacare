@@ -7,10 +7,12 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class MenuItemsTable
 {
@@ -23,7 +25,25 @@ class MenuItemsTable
                 TextColumn::make('url')
                     ->searchable(),
                 TextColumn::make('icon')
-                    ->searchable(),
+                    ->label('Icon')
+                    ->searchable()
+                    ->formatStateUsing(function ($state) {
+                        if (!$state) {
+                            return new HtmlString('<span class="text-gray-400">—</span>');
+                        }
+
+                        $icon = Heroicon::tryFrom($state);
+                        if (!$icon) {
+                            return $state;
+                        }
+
+                        // Render the icon SVG directly using the svg() helper
+                        $iconName = 'heroicon-o-' . $state;
+                        $svg = svg($iconName, 'w-5 h-5 text-gray-700 dark:text-gray-300');
+                        
+                        return new HtmlString($svg->toHtml());
+                    })
+                    ->html(),
                 TextColumn::make('category.title')
                     ->searchable(),
                 TextColumn::make('page')
