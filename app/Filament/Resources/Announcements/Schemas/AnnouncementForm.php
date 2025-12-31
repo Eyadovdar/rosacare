@@ -17,9 +17,12 @@ class AnnouncementForm
         return $schema
             ->components([
                 FileUpload::make('image')
-                ->disk('public')
-                ->directory('announcements')
-                ->image(),
+                    ->label('Image')
+                    ->image()
+                    ->disk('public')
+                    ->directory('announcements/images')
+                    ->visibility('public')
+                    ->helperText('Image shared across all locales.'),
                 TextInput::make('button_url')
                     ->url()
                     ->default(null),

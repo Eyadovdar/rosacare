@@ -12,12 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('welcomes_translations', function (Blueprint $table) {
+        Schema::create('welcome_translations', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Welcome::class)->constrained()->onDelete('cascade');
             $table->string('locale')->index();
             $table->string('title')->nullable();
-            $table->string('description')->nullable();
+            $table->text('description')->nullable();
             $table->string('button_text')->nullable();
             $table->timestamps();
 
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('welcomes');
+        Schema::dropIfExists('welcome_translations');
     }
 };

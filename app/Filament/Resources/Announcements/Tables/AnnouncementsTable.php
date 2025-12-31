@@ -15,7 +15,9 @@ class AnnouncementsTable
     {
         return $table
             ->columns([
-                ImageColumn::make('image'),
+                ImageColumn::make('image.url')
+                ->visibility('public')
+                ->label('Image'),
                 TextColumn::make('button_url')
                     ->searchable(),
                 TextColumn::make('button_color')
