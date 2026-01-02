@@ -36,6 +36,13 @@ interface PageProps {
     supportedLocales?: string[];
 }
 
+interface StaticMenuItem {
+    id: string;
+    label: Record<string, string>;
+    url: string;
+    type: 'static';
+}
+
 export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
@@ -76,6 +83,35 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
         };
         return names[loc]?.[locale] || loc.toUpperCase();
     };
+
+    // Static menu items
+    const staticMenuItems: StaticMenuItem[] = [
+        {
+            id: 'home',
+            label: { ar: 'الرئيسية', en: 'Home' },
+            url: '/',
+            type: 'static',
+        },
+        {
+            id: 'products',
+            label: { ar: 'المنتجات', en: 'Products' },
+            url: '/products',
+            type: 'static',
+        },
+        // Dynamic menuItems will be inserted here
+        {
+            id: 'about',
+            label: { ar: 'من نحن', en: 'About' },
+            url: '/about',
+            type: 'static',
+        },
+        {
+            id: 'contact',
+            label: { ar: 'اتصل بنا', en: 'Contact' },
+            url: '/contact',
+            type: 'static',
+        },
+    ];
 
     const getMenuItemUrl = (item: MenuItem): string => {
         if (item.type === 'category' && item.category) {
@@ -130,7 +166,7 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
         return item.type || '';
     };
 
-    // Filter and sort menuItems
+    // Filter and sort dynamic menuItems
     const activeMenuItems = (Array.isArray(menuItems) ? menuItems : [])
         .filter(item => {
             // Filter out null/undefined items
@@ -144,13 +180,68 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
         })
         .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
-    const handleNavigation = (item: MenuItem) => {
-        if (item.open_in_new_tab) {
-            window.open(getMenuItemUrl(item), '_blank');
+    // Combine static and dynamic menu items in the correct order
+    // Order: Home, Products, [dynamic menuItems], About, Contact
+    const allMenuItems = [
+        staticMenuItems[0], // Home
+        staticMenuItems[1], // Products
+        ...activeMenuItems, // Dynamic menu items
+        staticMenuItems[2], // About
+        staticMenuItems[3], // Contact
+    ];
+
+    const handleNavigation = (url: string, openInNewTab: boolean = false) => {
+        if (openInNewTab) {
+            window.open(url, '_blank');
         } else {
-            router.visit(getMenuItemUrl(item));
+            router.visit(url);
         }
         setMobileMenuOpen(false);
+    };
+
+    const renderMenuItem = (item: StaticMenuItem | MenuItem) => {
+        if (item.type === 'static') {
+            const staticItem = item as StaticMenuItem;
+            return (
+                <Button
+                    key={staticItem.id}
+                    variant="ghost"
+                    asChild
+                    className="mx-1"
+                >
+                    <Link href={staticItem.url}>
+                        {staticItem.label[locale] || staticItem.label['en']}
+                    </Link>
+                </Button>
+            );
+        } else {
+            const menuItem = item as MenuItem;
+            const url = getMenuItemUrl(menuItem);
+            const label = getMenuItemLabel(menuItem);
+            
+            return (
+                <Button
+                    key={menuItem.id}
+                    variant="ghost"
+                    asChild
+                    className="mx-1"
+                >
+                    {menuItem.open_in_new_tab ? (
+                        <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            {label}
+                        </a>
+                    ) : (
+                        <Link href={url}>
+                            {label}
+                        </Link>
+                    )}
+                </Button>
+            );
+        }
     };
 
     return (
@@ -164,28 +255,7 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
 
                     {/* Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-1">
-                        {activeMenuItems.map((item) => (
-                            <Button
-                                key={item.id}
-                                variant="ghost"
-                                asChild
-                                className="mx-1"
-                            >
-                                {item.open_in_new_tab ? (
-                                    <a
-                                        href={getMenuItemUrl(item)}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        {getMenuItemLabel(item)}
-                                    </a>
-                                ) : (
-                                    <Link href={getMenuItemUrl(item)}>
-                                        {getMenuItemLabel(item)}
-                                    </Link>
-                                )}
-                            </Button>
-                        ))}
+                        {allMenuItems.map((item) => renderMenuItem(item))}
                         
                         {/* Language Switcher - Desktop */}
                         <div className={`relative ml-2 ${isRTL ? 'mr-2 ml-0' : ''}`}>
@@ -276,15 +346,33 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
                 {mobileMenuOpen && (
                     <div className={`md:hidden py-4 border-t border-border ${isRTL ? 'rtl' : 'ltr'}`}>
                         <div className="flex flex-col space-y-1">
-                            {activeMenuItems.map((item) => (
-                                <button
-                                    key={item.id}
-                                    onClick={() => handleNavigation(item)}
-                                    className="px-4 py-2 text-left hover:bg-secondary rounded-md transition-colors"
-                                >
-                                    {getMenuItemLabel(item)}
-                                </button>
-                            ))}
+                            {allMenuItems.map((item) => {
+                                if (item.type === 'static') {
+                                    const staticItem = item as StaticMenuItem;
+                                    return (
+                                        <button
+                                            key={staticItem.id}
+                                            onClick={() => handleNavigation(staticItem.url)}
+                                            className="px-4 py-2 text-left hover:bg-secondary rounded-md transition-colors"
+                                        >
+                                            {staticItem.label[locale] || staticItem.label['en']}
+                                        </button>
+                                    );
+                                } else {
+                                    const menuItem = item as MenuItem;
+                                    const url = getMenuItemUrl(menuItem);
+                                    const label = getMenuItemLabel(menuItem);
+                                    return (
+                                        <button
+                                            key={menuItem.id}
+                                            onClick={() => handleNavigation(url, menuItem.open_in_new_tab)}
+                                            className="px-4 py-2 text-left hover:bg-secondary rounded-md transition-colors"
+                                        >
+                                            {label}
+                                        </button>
+                                    );
+                                }
+                            })}
                         </div>
                     </div>
                 )}
