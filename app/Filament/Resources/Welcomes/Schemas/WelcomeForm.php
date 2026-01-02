@@ -23,7 +23,8 @@ class WelcomeForm
                         FileUpload::make('image')
                             ->label('Image')
                             ->image()
-                            ->directory('welcomes')
+                            ->disk('public')
+                            ->directory('welcomes/images')
                             ->visibility('public')
                             ->required()
                             ->helperText('Image shared across all locales.'),
@@ -74,12 +75,12 @@ class WelcomeForm
                     ->schema([
                         Repeater::make('welcomeDetails')
                             ->label('Welcome Details')
-                            ->relationship('welcomeDetails')
                             ->schema([
                                 // Non-translatable fields
                                 FileUpload::make('image')
                                     ->label('Image')
                                     ->image()
+                                    ->disk('public')
                                     ->directory('welcomes/details')
                                     ->visibility('public')
                                     ->required(),
@@ -95,7 +96,7 @@ class WelcomeForm
                                     ->label('Button Text Color')
                                     ->helperText('Button text color (e.g., #FFFFFF).')
                                     ->nullable(),
-                                
+
                                 // Arabic translations
                                 TextInput::make('title:ar')
                                     ->label('Title (Arabic)')
@@ -107,7 +108,7 @@ class WelcomeForm
                                 TextInput::make('button_text:ar')
                                     ->label('Button Text (Arabic)')
                                     ->maxLength(255),
-                                
+
                                 // English translations
                                 TextInput::make('title:en')
                                     ->label('Title (English)')

@@ -7,6 +7,10 @@ use App\Models\Product;
 use App\Models\Setting;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\Announcement;
+use App\Models\Welcome;
+use App\Models\WelcomeDetail;
+use App\Models\Hero;
 
 class HomeController extends Controller
 {
@@ -21,6 +25,20 @@ class HomeController extends Controller
             ->take(3)
             ->get();
 
+        // Fix announcements query - properly group conditions
+        $announcements = Announcement::where('is_active', true)
+            ->where(function ($query) {
+                $query->where('start_date', '<=', now())
+                    ->orWhereNull('start_date');
+            })
+            ->where(function ($query) {
+                $query->where('end_date', '>=', now())
+                    ->orWhereNull('end_date');
+            })
+            ->with('translations')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         $featuredProducts = Product::where('is_active', true)
             ->where('is_featured', true)
             ->with(['translations', 'category.translations', 'media'])
@@ -28,12 +46,34 @@ class HomeController extends Controller
             ->take(8)
             ->get();
 
-        // Note: menuItems are shared globally via HandleInertiaRequests middleware
+        // Get welcome with translations
+        $welcome = Welcome::where('is_active', true)
+            ->with('translations')
+            ->first();
+
+        // Get welcome details with translations if welcome exists
+        $welcomeDetails = collect([]);
+        if ($welcome) {
+            $welcomeDetails = WelcomeDetail::where('welcome_id', $welcome->id)
+                ->with('translations')
+                ->orderBy('id')
+                ->get();
+        }
+
+        // Get active heroes with translations
+        $heros = Hero::where('is_active', true)
+            ->with('translations')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return Inertia::render('Home', [
             'categories' => $categories,
             'featuredProducts' => $featuredProducts,
             'settings' => $settings,
+            'announcements' => $announcements,
+            'welcome' => $welcome,
+            'welcomeDetails' => $welcomeDetails,
+            'heros' => $heros,
         ]);
     }
 }

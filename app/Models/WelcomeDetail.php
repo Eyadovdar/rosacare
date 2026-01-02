@@ -5,7 +5,7 @@ namespace App\Models;
 use Astrotomic\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
+
 class WelcomeDetail extends Model
 {
     use Translatable;
@@ -24,15 +24,11 @@ class WelcomeDetail extends Model
         'button_url',
         'button_color',
         'button_text_color',
+        'is_active',
     ];
 
     public function welcome(): BelongsTo
     {
         return $this->belongsTo(Welcome::class);
-    }
-
-    public function image(): MorphOne
-    {
-        return $this->morphOne(Media::class, 'model')->where('collection_name', 'images');
     }
 }

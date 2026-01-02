@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('button_color')->nullable();
             $table->string('button_text_color')->nullable();
             $table->foreignIdFor(Welcome::class)->constrained()->onDelete('cascade');
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

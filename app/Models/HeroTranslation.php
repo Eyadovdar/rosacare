@@ -4,14 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class WelcomeDetailTranslation extends Model
+class HeroTranslation extends Model
 {
-    protected $table = 'welcome_details_translations';
+    protected $table = 'heroes_translations';
 
     public $timestamps = false;
 
     protected $fillable = [
-        'welcome_detail_id',
+        'hero_id',
         'locale',
         'title',
         'description',

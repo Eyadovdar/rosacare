@@ -20,9 +20,13 @@ class Announcement extends Model
     ];
 
     protected $fillable = [
+        'image',
         'button_url',
         'button_color',
         'button_text_color',
+        'is_active',
+        'start_date',
+        'end_date',
     ];
     public function translations(): HasMany
     {

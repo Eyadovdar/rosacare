@@ -5,7 +5,7 @@ namespace App\Models;
 use Astrotomic\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
+
 class Welcome extends Model
 {
     use Translatable;
@@ -21,12 +21,8 @@ class Welcome extends Model
     protected $fillable = [
         'image',
         'button_url',
+        'is_active',
     ];
-
-    public function image(): MorphOne
-    {
-        return $this->morphOne(Media::class, 'model')->where('collection_name', 'images');
-    }
 
     public function welcomeDetails(): HasMany
     {
