@@ -9,7 +9,6 @@ import { WhyRosaCareSection } from '@/components/rosacare/WhyRosaCareSection';
 import { CTABanner } from '@/components/rosacare/CTABanner';
 import { Footer } from '@/components/rosacare/Footer';
 import { Navbar } from '@/components/rosacare/Navbar';
-import { HeroCarousel } from '@/components/rosacare/HeroCarousel';
 
 interface Category {
     id: number;
@@ -146,8 +145,8 @@ export default function Home({
     // Get menuItems from shared props (HandleInertiaRequests middleware)
     const menuItems = (page.props.menuItems || []) as MenuItem[];
 
-    // Convert heroes to carousel items
-    const carouselItems = heros.map((hero) => {
+    // Convert heroes to hero items for HeroSection
+    const heroItems = heros.map((hero) => {
         const translation = hero.translations.find(t => t.locale === locale) || hero.translations[0];
         return {
             id: hero.id,
@@ -156,6 +155,8 @@ export default function Home({
             image: hero.image,
             buttonText: translation?.button_text,
             buttonLink: hero.button_url,
+            buttonColor: hero.button_color,
+            buttonTextColor: hero.button_text_color,
         };
     }).filter(item => item.title); // Only include items with titles
 
@@ -199,12 +200,8 @@ export default function Home({
                     </div>
                 )}
 
-                {/* Hero Section - Carousel if heroes exist, otherwise default */}
-                {carouselItems.length > 0 ? (
-                    <HeroCarousel items={carouselItems} locale={locale} />
-                ) : (
-                    <HeroSection locale={locale} />
-                )}
+                {/* Hero Section with Swiper - works with or without hero items */}
+                <HeroSection locale={locale} items={heroItems} />
 
                 {/* Welcome Section */}
                 {welcome && (

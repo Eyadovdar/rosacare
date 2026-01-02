@@ -1,6 +1,6 @@
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, GlobeAltIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
 interface MenuItem {
@@ -31,12 +31,50 @@ interface NavbarProps {
     locale?: string;
 }
 
-export function Navbar({ menuItems = [], locale = 'ar' }: NavbarProps) {
+interface PageProps {
+    locale?: string;
+    supportedLocales?: string[];
+}
+
+export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+    const page = usePage<{ props: PageProps }>();
+    
+    // Get locale from props or shared Inertia props
+    const locale = propLocale || page.props.locale || 'ar';
+    const supportedLocales = page.props.supportedLocales || ['ar', 'en'];
     const isRTL = locale === 'ar';
 
     const toggleMobileMenu = () => {
         setMobileMenuOpen(!mobileMenuOpen);
+    };
+
+    const toggleLanguageMenu = () => {
+        setLanguageMenuOpen(!languageMenuOpen);
+    };
+
+    const switchLanguage = (newLocale: string) => {
+        if (newLocale === locale) {
+            setLanguageMenuOpen(false);
+            return;
+        }
+        
+        router.visit(`/lang/${newLocale}`, {
+            method: 'get',
+            preserveState: false,
+            preserveScroll: false,
+        });
+        setLanguageMenuOpen(false);
+        setMobileMenuOpen(false);
+    };
+
+    const getLanguageName = (loc: string): string => {
+        const names: Record<string, Record<string, string>> = {
+            'ar': { ar: 'العربية', en: 'Arabic' },
+            'en': { ar: 'English', en: 'English' },
+        };
+        return names[loc]?.[locale] || loc.toUpperCase();
     };
 
     const getMenuItemUrl = (item: MenuItem): string => {
@@ -127,41 +165,111 @@ export function Navbar({ menuItems = [], locale = 'ar' }: NavbarProps) {
                     {/* Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-1">
                         {activeMenuItems.map((item) => (
-                                <Button
-                                    key={item.id}
-                                    variant="ghost"
-                                    asChild
-                                    className="mx-1"
-                                >
-                                    {item.open_in_new_tab ? (
-                                        <a
-                                            href={getMenuItemUrl(item)}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
-                                            {getMenuItemLabel(item)}
-                                        </a>
-                                    ) : (
-                                        <Link href={getMenuItemUrl(item)}>
-                                            {getMenuItemLabel(item)}
-                                        </Link>
-                                    )}
-                                </Button>
-                            ))}
+                            <Button
+                                key={item.id}
+                                variant="ghost"
+                                asChild
+                                className="mx-1"
+                            >
+                                {item.open_in_new_tab ? (
+                                    <a
+                                        href={getMenuItemUrl(item)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {getMenuItemLabel(item)}
+                                    </a>
+                                ) : (
+                                    <Link href={getMenuItemUrl(item)}>
+                                        {getMenuItemLabel(item)}
+                                    </Link>
+                                )}
+                            </Button>
+                        ))}
+                        
+                        {/* Language Switcher - Desktop */}
+                        <div className={`relative ml-2 ${isRTL ? 'mr-2 ml-0' : ''}`}>
+                            <button
+                                onClick={toggleLanguageMenu}
+                                className="flex items-center gap-1 px-3 py-2 rounded-md text-foreground hover:bg-secondary transition-colors"
+                                aria-label="Change language"
+                            >
+                                <GlobeAltIcon className="h-5 w-5" />
+                                <span className="text-sm font-medium">{getLanguageName(locale)}</span>
+                                <ChevronDownIcon className={`h-4 w-4 transition-transform ${languageMenuOpen ? 'rotate-180' : ''}`} />
+                            </button>
+                            
+                            {languageMenuOpen && (
+                                <>
+                                    <div 
+                                        className="fixed inset-0 z-10" 
+                                        onClick={() => setLanguageMenuOpen(false)}
+                                    />
+                                    <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} top-full mt-2 w-40 bg-background border border-border rounded-md shadow-lg z-20 overflow-hidden`}>
+                                        {supportedLocales.map((loc) => (
+                                            <button
+                                                key={loc}
+                                                onClick={() => switchLanguage(loc)}
+                                                className={`w-full px-4 py-2 text-left hover:bg-secondary transition-colors ${
+                                                    loc === locale ? 'bg-secondary font-semibold' : ''
+                                                } ${isRTL ? 'text-right' : 'text-left'}`}
+                                            >
+                                                {getLanguageName(loc)}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Mobile Menu Button */}
-                    <button
-                        onClick={toggleMobileMenu}
-                        className="md:hidden p-2 rounded-md text-foreground hover:bg-secondary"
-                        aria-label="Toggle menu"
-                    >
-                        {mobileMenuOpen ? (
-                            <XMarkIcon className="h-6 w-6" />
-                        ) : (
-                            <Bars3Icon className="h-6 w-6" />
+                    {/* Mobile Menu Button & Language Toggle */}
+                    <div className="md:hidden flex items-center gap-2">
+                        {/* Language Switcher - Mobile */}
+                        <button
+                            onClick={toggleLanguageMenu}
+                            className="p-2 rounded-md text-foreground hover:bg-secondary transition-colors"
+                            aria-label="Change language"
+                        >
+                            <GlobeAltIcon className="h-6 w-6" />
+                        </button>
+                        
+                        {/* Mobile Language Menu */}
+                        {languageMenuOpen && (
+                            <>
+                                <div 
+                                    className="fixed inset-0 z-10 bg-black/20" 
+                                    onClick={() => setLanguageMenuOpen(false)}
+                                />
+                                <div className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-16 w-40 bg-background border border-border rounded-md shadow-lg z-20 overflow-hidden`}>
+                                    {supportedLocales.map((loc) => (
+                                        <button
+                                            key={loc}
+                                            onClick={() => switchLanguage(loc)}
+                                            className={`w-full px-4 py-3 text-left hover:bg-secondary transition-colors ${
+                                                loc === locale ? 'bg-secondary font-semibold' : ''
+                                            } ${isRTL ? 'text-right' : 'text-left'}`}
+                                        >
+                                            {getLanguageName(loc)}
+                                        </button>
+                                    ))}
+                                </div>
+                            </>
                         )}
-                    </button>
+
+                        {/* Mobile Menu Toggle */}
+                        <button
+                            onClick={toggleMobileMenu}
+                            className="p-2 rounded-md text-foreground hover:bg-secondary"
+                            aria-label="Toggle menu"
+                        >
+                            {mobileMenuOpen ? (
+                                <XMarkIcon className="h-6 w-6" />
+                            ) : (
+                                <Bars3Icon className="h-6 w-6" />
+                            )}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Mobile Menu */}
@@ -169,14 +277,14 @@ export function Navbar({ menuItems = [], locale = 'ar' }: NavbarProps) {
                     <div className={`md:hidden py-4 border-t border-border ${isRTL ? 'rtl' : 'ltr'}`}>
                         <div className="flex flex-col space-y-1">
                             {activeMenuItems.map((item) => (
-                                    <button
-                                        key={item.id}
-                                        onClick={() => handleNavigation(item)}
-                                        className="px-4 py-2 text-left hover:bg-secondary rounded-md transition-colors"
-                                    >
-                                        {getMenuItemLabel(item)}
-                                    </button>
-                                ))}
+                                <button
+                                    key={item.id}
+                                    onClick={() => handleNavigation(item)}
+                                    className="px-4 py-2 text-left hover:bg-secondary rounded-md transition-colors"
+                                >
+                                    {getMenuItemLabel(item)}
+                                </button>
+                            ))}
                         </div>
                     </div>
                 )}
