@@ -17,6 +17,7 @@ class HomeController extends Controller
     public function index(): Response
     {
         $settings = Setting::first();
+        // dd($settings);
 
         $categories = Category::where('is_active', true)
             ->where('is_featured', true)

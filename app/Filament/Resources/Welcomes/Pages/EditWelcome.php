@@ -69,28 +69,15 @@ class EditWelcome extends EditRecord
         // Extract and store translations separately
         $this->translations = $this->extractTranslations($data);
 
-        // Store media file path - FileUpload stores file paths as strings (single) or arrays (multiple)
-        $this->welcomeImage = is_array($data['image'] ?? null) 
-            ? ($data['image'][0] ?? null) 
-            : ($data['image'] ?? null);
-
         // Store welcome details with their translations
         $this->welcomeDetails = $data['welcomeDetails'] ?? [];
 
-        // Remove translation fields from form data (image will be saved directly)
+        // Remove welcomeDetails from form data (will be saved manually after save)
         unset($data['welcomeDetails']);
 
-        // Set image path directly in data
-        if ($this->welcomeImage && is_string($this->welcomeImage)) {
-            $data['image'] = $this->welcomeImage;
-            // Ensure file has public visibility
-            if (Storage::disk('public')->exists($this->welcomeImage)) {
-                Storage::disk('public')->setVisibility($this->welcomeImage, 'public');
-            }
-        } elseif (empty($this->welcomeImage)) {
-            // If image was removed, set to null
-            $data['image'] = null;
-        }
+        // DO NOT manipulate the image field - let Filament FileUpload process it automatically
+        // Filament will save the file and store the path in the database column
+        // If image was removed, Filament will handle that too
 
         return $this->removeTranslationFields($data);
     }
@@ -101,6 +88,31 @@ class EditWelcome extends EditRecord
         if (isset($this->translations)) {
             foreach ($this->translations as $locale => $fields) {
                 $this->record->translateOrNew($locale)->fill($fields)->save();
+            }
+        }
+
+        // Refresh the record to get the final image path after Filament processes it
+        $this->record->refresh();
+        
+        // Ensure welcome image file has public visibility
+        // Filament FileUpload should have already saved the file
+        $imagePath = $this->record->image;
+        
+        if ($imagePath && is_string($imagePath)) {
+            try {
+                if (Storage::disk('public')->exists($imagePath)) {
+                    Storage::disk('public')->setVisibility($imagePath, 'public');
+                    \Log::info('Welcome image visibility set to public (edit):', ['path' => $imagePath]);
+                } else {
+                    \Log::warning('Welcome image file not found in storage (edit):', [
+                        'path' => $imagePath,
+                        'record_id' => $this->record->id,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error("Failed to set visibility for welcome image (edit): {$imagePath}", [
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
 
@@ -118,7 +130,6 @@ class EditWelcome extends EditRecord
         }
     }
 
-    protected $welcomeImage = null;
     protected array $welcomeDetails = [];
 
     protected function saveWelcomeDetail(array $detailData): void
@@ -136,7 +147,8 @@ class EditWelcome extends EditRecord
             }
         }
 
-        // Get image path
+        // Get image path - Filament FileUpload automatically uploads files
+        // The path is relative to storage/app/public (e.g., "welcomes/details/filename.jpg")
         $detailImage = is_array($detailData['image'] ?? null) 
             ? ($detailData['image'][0] ?? null) 
             : ($detailData['image'] ?? null);
@@ -149,16 +161,47 @@ class EditWelcome extends EditRecord
         // Set image path directly
         if ($detailImage && is_string($detailImage)) {
             $detailData['image'] = $detailImage;
-            // Ensure file has public visibility
-            if (Storage::disk('public')->exists($detailImage)) {
-                Storage::disk('public')->setVisibility($detailImage, 'public');
-            }
+            \Log::info('Welcome detail image path before save (edit):', ['path' => $detailImage]);
         } else {
             $detailData['image'] = null;
         }
 
         // Create welcome detail
         $welcomeDetail = $this->record->welcomeDetails()->create($detailData);
+        
+        // Refresh to get the final image path after Filament processes it
+        $welcomeDetail->refresh();
+
+        // Ensure detail image file has public visibility
+        // Check both the stored path and the original path from form data
+        $finalImagePath = $welcomeDetail->image ?? $detailImage;
+        
+        if ($finalImagePath && is_string($finalImagePath)) {
+            try {
+                // Try the exact path first
+                if (Storage::disk('public')->exists($finalImagePath)) {
+                    Storage::disk('public')->setVisibility($finalImagePath, 'public');
+                    \Log::info('Welcome detail image visibility set to public (edit):', ['path' => $finalImagePath]);
+                } else {
+                    \Log::warning('Welcome detail image file not found in storage (edit):', [
+                        'path' => $finalImagePath,
+                        'stored_image' => $welcomeDetail->image,
+                        'form_image' => $detailImage,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error("Failed to set visibility for welcome detail image (edit): {$finalImagePath}", [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
+        } else {
+            \Log::warning('Welcome detail image is empty or not a string (edit)', [
+                'value' => $finalImagePath,
+                'stored_image' => $welcomeDetail->image ?? null,
+                'form_image' => $detailImage ?? null,
+            ]);
+        }
 
         // Save translations
         if (!empty($translations)) {
