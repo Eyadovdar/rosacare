@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\NavigationMenuItem;
+use App\Models\MenuItem;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -46,12 +46,42 @@ class HandleInertiaRequests extends Middleware
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'locale' => app()->getLocale(),
             'supportedLocales' => ['ar', 'en'],
-            'menuItems' => \Schema::hasTable('navigation_menu_items')
-                ? NavigationMenuItem::where('is_active', true)
+            'menuItems' => Schema::hasTable('menu_items')
+                ? MenuItem::where('is_active', true)
                     ->with(['translations', 'category.translations'])
                     ->orderBy('sort_order')
                     ->get()
-                : collect(),
+                    ->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'type' => $item->type,
+                            'url' => $item->url,
+                            'icon' => $item->icon,
+                            'category_id' => $item->category_id,
+                            'page' => $item->page,
+                            'open_in_new_tab' => $item->open_in_new_tab,
+                            'sort_order' => $item->sort_order,
+                            'is_active' => $item->is_active,
+                            'translations' => $item->translations->map(function ($translation) {
+                                return [
+                                    'locale' => $translation->locale,
+                                    'label' => $translation->label,
+                                ];
+                            })->toArray(),
+                            'category' => $item->category ? [
+                                'slug' => $item->category->slug,
+                                'translations' => $item->category->translations->map(function ($translation) {
+                                    return [
+                                        'locale' => $translation->locale,
+                                        'name' => $translation->name,
+                                    ];
+                                })->toArray(),
+                            ] : null,
+                        ];
+                    })
+                    ->values()
+                    ->toArray()
+                : [],
             'auth' => [
                 'user' => $request->user(),
             ],

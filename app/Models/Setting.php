@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Models;
+
+use Astrotomic\Translatable\Translatable;
+use Illuminate\Database\Eloquent\Model;
+
+class Setting extends Model
+{
+    use Translatable;
+
+    public $translationModel = SettingTranslation::class;
+
+    public $translatedAttributes = [
+        'site_name',
+        'slogan',
+        'footer_description',
+        'default_meta_title',
+        'default_meta_description',
+        'default_meta_keywords',
+        'contact_page_info_title',
+        'contact_page_form_title',
+        'google_map_title',
+        'footer_copyright',
+    ];
+
+    protected $fillable = [
+        'logo_header_path',
+        'logo_footer_path',
+        'favicon_path',
+        'default_meta_image',
+        'google_verification_code',
+        'phone_number',
+        'email',
+        'address',
+        'google_map_iframe',
+        'facebook',
+        'twitter',
+        'instagram',
+        'linkedin',
+        'youtube',
+        'tiktok',
+    ];
+}
