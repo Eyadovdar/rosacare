@@ -24,7 +24,23 @@ class HomeController extends Controller
             ->orderBy('sort_order')
             ->with('translations')
             ->take(3)
-            ->get();
+            ->get()
+            ->map(function ($category) {
+                return [
+                    'id' => $category->id,
+                    'slug' => $category->slug,
+                    'icon' => $category->icon,
+                    'image' => $category->image,
+                    'image_url' => $category->image_url,
+                    'translations' => $category->translations->map(function ($translation) {
+                        return [
+                            'locale' => $translation->locale,
+                            'name' => $translation->name,
+                            'description' => $translation->description,
+                        ];
+                    })->toArray(),
+                ];
+            });
 
         // Fix announcements query - properly group conditions
         $announcements = Announcement::where('is_active', true)

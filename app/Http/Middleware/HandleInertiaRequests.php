@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\MenuItem;
+use App\Models\Setting;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -40,12 +41,48 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        // Get settings with translations
+        $settings = null;
+        if (Schema::hasTable('settings')) {
+            $settingsModel = Setting::with('translations')->first();
+            if ($settingsModel) {
+                $settings = [
+                    'id' => $settingsModel->id,
+                    'logo_header_path' => $settingsModel->logo_header_path,
+                    'logo_footer_path' => $settingsModel->logo_footer_path,
+                    'favicon_path' => $settingsModel->favicon_path,
+                    'header_logo_url' => $settingsModel->header_logo_url,
+                    'footer_logo_url' => $settingsModel->footer_logo_url,
+                    'favicon_url' => $settingsModel->favicon_url,
+                    'phone_number' => $settingsModel->phone_number,
+                    'email' => $settingsModel->email,
+                    'address' => $settingsModel->address,
+                    'facebook' => $settingsModel->facebook,
+                    'twitter' => $settingsModel->twitter,
+                    'instagram' => $settingsModel->instagram,
+                    'linkedin' => $settingsModel->linkedin,
+                    'youtube' => $settingsModel->youtube,
+                    'tiktok' => $settingsModel->tiktok,
+                    'translations' => $settingsModel->translations->map(function ($translation) {
+                        return [
+                            'locale' => $translation->locale,
+                            'site_name' => $translation->site_name,
+                            'slogan' => $translation->slogan,
+                            'footer_description' => $translation->footer_description,
+                            'footer_copyright' => $translation->footer_copyright,
+                        ];
+                    })->toArray(),
+                ];
+            }
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'locale' => app()->getLocale(),
             'supportedLocales' => ['ar', 'en'],
+            'settings' => $settings,
             'menuItems' => Schema::hasTable('menu_items')
                 ? MenuItem::where('is_active', true)
                     ->with(['translations', 'category.translations'])

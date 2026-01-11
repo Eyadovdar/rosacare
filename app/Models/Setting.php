@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Astrotomic\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Setting extends Model
 {
@@ -41,4 +42,79 @@ class Setting extends Model
         'youtube',
         'tiktok',
     ];
+
+    /**
+     * Get the full URL for the header logo
+     *
+     * @return string|null
+     */
+    public function getHeaderLogoUrlAttribute(): ?string
+    {
+        if (!$this->logo_header_path) {
+            return null;
+        }
+
+        // If the path already starts with http:// or https://, return as is
+        if (str_starts_with($this->logo_header_path, 'http://') || str_starts_with($this->logo_header_path, 'https://')) {
+            return $this->logo_header_path;
+        }
+
+        // Check if file exists
+        if (Storage::disk('public')->exists($this->logo_header_path)) {
+            return Storage::disk('public')->url($this->logo_header_path);
+        }
+
+        // Fallback: return the URL anyway
+        return Storage::disk('public')->url($this->logo_header_path);
+    }
+
+    /**
+     * Get the full URL for the footer logo
+     *
+     * @return string|null
+     */
+    public function getFooterLogoUrlAttribute(): ?string
+    {
+        if (!$this->logo_footer_path) {
+            return null;
+        }
+
+        // If the path already starts with http:// or https://, return as is
+        if (str_starts_with($this->logo_footer_path, 'http://') || str_starts_with($this->logo_footer_path, 'https://')) {
+            return $this->logo_footer_path;
+        }
+
+        // Check if file exists
+        if (Storage::disk('public')->exists($this->logo_footer_path)) {
+            return Storage::disk('public')->url($this->logo_footer_path);
+        }
+
+        // Fallback: return the URL anyway
+        return Storage::disk('public')->url($this->logo_footer_path);
+    }
+
+    /**
+     * Get the full URL for the favicon
+     *
+     * @return string|null
+     */
+    public function getFaviconUrlAttribute(): ?string
+    {
+        if (!$this->favicon_path) {
+            return null;
+        }
+
+        // If the path already starts with http:// or https://, return as is
+        if (str_starts_with($this->favicon_path, 'http://') || str_starts_with($this->favicon_path, 'https://')) {
+            return $this->favicon_path;
+        }
+
+        // Check if file exists
+        if (Storage::disk('public')->exists($this->favicon_path)) {
+            return Storage::disk('public')->url($this->favicon_path);
+        }
+
+        // Fallback: return the URL anyway
+        return Storage::disk('public')->url($this->favicon_path);
+    }
 }

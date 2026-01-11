@@ -22,24 +22,28 @@ class SettingForm
                         FileUpload::make('logo_header_path')
                             ->label('Header Logo')
                             ->image()
+                            ->disk('public')
                             ->directory('settings/logos')
                             ->visibility('public')
                             ->nullable(),
                         FileUpload::make('logo_footer_path')
                             ->label('Footer Logo')
                             ->image()
+                            ->disk('public')
                             ->directory('settings/logos')
                             ->visibility('public')
                             ->nullable(),
                         FileUpload::make('favicon_path')
                             ->label('Favicon')
                             ->image()
+                            ->disk('public')
                             ->directory('settings/favicons')
                             ->visibility('public')
                             ->nullable(),
                         FileUpload::make('default_meta_image')
                             ->label('Default Meta Image (OG Image)')
                             ->image()
+                            ->disk('public')
                             ->directory('settings/meta')
                             ->visibility('public')
                             ->nullable(),

@@ -158,49 +158,76 @@ class EditWelcome extends EditRecord
             unset($detailData[$field . ':ar'], $detailData[$field . ':en']);
         }
 
-        // Set image path directly
+        // Process image file - check if it's in private storage and move to public
+        $processedImagePath = null;
         if ($detailImage && is_string($detailImage)) {
-            $detailData['image'] = $detailImage;
-            \Log::info('Welcome detail image path before save (edit):', ['path' => $detailImage]);
-        } else {
-            $detailData['image'] = null;
+            $privatePath = null;
+            $filename = basename($detailImage);
+            
+            // Check multiple possible locations in private storage
+            $possiblePrivatePaths = [
+                $detailImage, // As-is
+                "welcomes/{$filename}", // In welcomes subdirectory
+                "welcomes/details/{$filename}", // In welcomes/details subdirectory
+            ];
+            
+            foreach ($possiblePrivatePaths as $path) {
+                if (Storage::disk('local')->exists($path)) {
+                    $privatePath = $path;
+                    break;
+                }
+            }
+            
+            if ($privatePath) {
+                // File is in private storage, move it to public storage
+                $publicPath = 'welcomes/details/' . $filename;
+                try {
+                    $fileContents = Storage::disk('local')->get($privatePath);
+                    Storage::disk('public')->put($publicPath, $fileContents);
+                    Storage::disk('public')->setVisibility($publicPath, 'public');
+                    Storage::disk('local')->delete($privatePath);
+                    $processedImagePath = $publicPath;
+                    \Log::info('Welcome detail image moved from private to public storage (edit):', [
+                        'from' => $privatePath,
+                        'to' => $publicPath,
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error("Failed to move welcome detail image from private to public (edit): {$privatePath}", [
+                        'error' => $e->getMessage(),
+                    ]);
+                    $processedImagePath = $detailImage; // Fallback to original path
+                }
+            } elseif (Storage::disk('public')->exists($detailImage)) {
+                // File is already in public storage
+                $processedImagePath = $detailImage;
+                Storage::disk('public')->setVisibility($detailImage, 'public');
+            } else {
+                // Try to use the path as-is (might be relative to public disk)
+                $processedImagePath = $detailImage;
+            }
         }
+        
+        $detailData['image'] = $processedImagePath;
 
         // Create welcome detail
         $welcomeDetail = $this->record->welcomeDetails()->create($detailData);
         
-        // Refresh to get the final image path after Filament processes it
+        // Refresh to get the final image path
         $welcomeDetail->refresh();
 
         // Ensure detail image file has public visibility
-        // Check both the stored path and the original path from form data
-        $finalImagePath = $welcomeDetail->image ?? $detailImage;
-        
+        $finalImagePath = $welcomeDetail->image;
         if ($finalImagePath && is_string($finalImagePath)) {
             try {
-                // Try the exact path first
                 if (Storage::disk('public')->exists($finalImagePath)) {
                     Storage::disk('public')->setVisibility($finalImagePath, 'public');
                     \Log::info('Welcome detail image visibility set to public (edit):', ['path' => $finalImagePath]);
-                } else {
-                    \Log::warning('Welcome detail image file not found in storage (edit):', [
-                        'path' => $finalImagePath,
-                        'stored_image' => $welcomeDetail->image,
-                        'form_image' => $detailImage,
-                    ]);
                 }
             } catch (\Exception $e) {
                 \Log::error("Failed to set visibility for welcome detail image (edit): {$finalImagePath}", [
                     'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
                 ]);
             }
-        } else {
-            \Log::warning('Welcome detail image is empty or not a string (edit)', [
-                'value' => $finalImagePath,
-                'stored_image' => $welcomeDetail->image ?? null,
-                'form_image' => $detailImage ?? null,
-            ]);
         }
 
         // Save translations

@@ -34,6 +34,13 @@ interface NavbarProps {
 interface PageProps {
     locale?: string;
     supportedLocales?: string[];
+    settings?: {
+        header_logo_url?: string;
+        translations?: Array<{
+            locale: string;
+            site_name?: string;
+        }>;
+    };
 }
 
 interface StaticMenuItem {
@@ -250,7 +257,22 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
                 <div className={`flex items-center justify-between h-16 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     {/* Logo */}
                     <Link href="/" className="flex items-center space-x-2">
-                        <span className="text-2xl font-bold text-primary">RosaCare</span>
+                        {(() => {
+                            const settings = page.props.settings;
+                            const logoUrl = settings?.header_logo_url;
+                            const siteNameTranslation = settings?.translations?.find(t => t.locale === locale) || settings?.translations?.[0];
+                            const siteName = siteNameTranslation?.site_name || 'RosaCare';
+                            
+                            return logoUrl ? (
+                                <img 
+                                    src={logoUrl} 
+                                    alt={siteName} 
+                                    className="h-10 w-auto object-contain"
+                                />
+                            ) : (
+                                <span className="text-2xl font-bold text-primary">{siteName}</span>
+                            );
+                        })()}
                     </Link>
 
                     {/* Desktop Menu */}

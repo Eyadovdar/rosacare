@@ -13,6 +13,9 @@ import { Navbar } from '@/components/rosacare/Navbar';
 interface Category {
     id: number;
     slug: string;
+    icon?: string;
+    image?: string;
+    image_url?: string;
     translations: Array<{
         locale: string;
         name: string;

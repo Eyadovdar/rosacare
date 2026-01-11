@@ -29,7 +29,9 @@ class CategoryForm
                         FileUpload::make('image')
                             ->label('Image')
                             ->image()
-                            ->directory('categories')
+                            ->disk('public')
+                            ->directory('categories/images')
+                            ->visibility('public')
                             ->nullable(),
                         TextInput::make('sort_order')
                             ->label('Sort Order')

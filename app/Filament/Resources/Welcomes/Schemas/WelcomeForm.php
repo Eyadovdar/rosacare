@@ -75,7 +75,6 @@ class WelcomeForm
                 Section::make('Welcome Details')
                     ->schema([
                         Repeater::make('welcomeDetails')
-                            ->relationship()
                             ->label('Welcome Details')
                             ->schema([
                                 // Non-translatable fields
