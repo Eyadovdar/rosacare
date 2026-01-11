@@ -11,6 +11,7 @@ use App\Models\Announcement;
 use App\Models\Welcome;
 use App\Models\WelcomeDetail;
 use App\Models\Hero;
+use App\Models\Parallax;
 
 class HomeController extends Controller
 {
@@ -83,6 +84,30 @@ class HomeController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Get active parallax with translations
+        $parallax = Parallax::where('is_active', true)
+            ->with('translations')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        // Map parallax data with image_url
+        $parallaxData = null;
+        if ($parallax) {
+            $parallaxData = [
+                'id' => $parallax->id,
+                'image' => $parallax->image,
+                'image_url' => $parallax->image_url,
+                'link' => $parallax->link,
+                'translations' => $parallax->translations->map(function ($translation) {
+                    return [
+                        'locale' => $translation->locale,
+                        'title' => $translation->title,
+                        'description' => $translation->description,
+                    ];
+                })->toArray(),
+            ];
+        }
+
         return Inertia::render('Home', [
             'categories' => $categories,
             'featuredProducts' => $featuredProducts,
@@ -91,6 +116,7 @@ class HomeController extends Controller
             'welcome' => $welcome,
             'welcomeDetails' => $welcomeDetails,
             'heros' => $heros,
+            'parallax' => $parallaxData,
         ]);
     }
 }

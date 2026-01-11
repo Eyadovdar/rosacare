@@ -6,7 +6,7 @@ import { ProductCard } from '@/components/rosacare/ProductCard';
 import { BenefitsSection } from '@/components/rosacare/BenefitsSection';
 import { HeritageSection } from '@/components/rosacare/HeritageSection';
 import { WhyRosaCareSection } from '@/components/rosacare/WhyRosaCareSection';
-import { CTABanner } from '@/components/rosacare/CTABanner';
+import { Parallax } from '@/components/rosacare/Parallax';
 import { Footer } from '@/components/rosacare/Footer';
 import { Navbar } from '@/components/rosacare/Navbar';
 
@@ -123,6 +123,18 @@ interface WelcomeDetail {
     }>;
 }
 
+interface ParallaxData {
+    id: number;
+    image?: string;
+    image_url?: string;
+    link?: string;
+    translations: Array<{
+        locale: string;
+        title?: string;
+        description?: string;
+    }>;
+}
+
 interface HomeProps {
     categories: Category[];
     featuredProducts: Product[];
@@ -132,16 +144,18 @@ interface HomeProps {
     announcements?: Announcement[];
     welcome?: Welcome;
     welcomeDetails?: WelcomeDetail[];
+    parallax?: ParallaxData;
 }
 
-export default function Home({ 
-    categories, 
-    featuredProducts, 
+export default function Home({
+    categories,
+    featuredProducts,
     locale = 'ar',
     heros = [],
     announcements = [],
     welcome,
     welcomeDetails = [],
+    parallax,
 }: HomeProps) {
     const isRTL = locale === 'ar';
     const page = usePage<{ props: { menuItems?: MenuItem[] } }>();
@@ -168,7 +182,7 @@ export default function Home({
             <Head title="RosaCare - Authentic Damask Rose Products" />
             <div className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <Navbar menuItems={menuItems} locale={locale} />
-                
+
                 {/* Announcements Banner */}
                 {announcements.length > 0 && (
                     <div className="bg-primary text-white">
@@ -185,8 +199,8 @@ export default function Home({
                                                 <span>{translation.description}</span>
                                             )}
                                             {translation?.button_text && announcement.button_url && (
-                                                <a 
-                                                    href={announcement.button_url} 
+                                                <a
+                                                    href={announcement.button_url}
                                                     className="underline hover:opacity-80"
                                                     style={{
                                                         color: announcement.button_text_color || '#FFFFFF',
@@ -244,8 +258,8 @@ export default function Home({
                                 </div>
                                 {welcome.image && (
                                     <div>
-                                        <img 
-                                            src={`/storage/${welcome.image}`} 
+                                        <img
+                                            src={`/storage/${welcome.image}`}
                                             alt={welcome.translations.find(t => t.locale === locale)?.title || 'Welcome'}
                                             className="w-full h-auto rounded-lg shadow-lg"
                                         />
@@ -266,8 +280,8 @@ export default function Home({
                                     return (
                                         <div key={detail.id} className={`bg-background rounded-lg shadow-md overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`}>
                                             {detail.image && (
-                                                <img 
-                                                    src={`/storage/${detail.image}`} 
+                                                <img
+                                                    src={`/storage/${detail.image}`}
                                                     alt={translation?.title || 'Feature'}
                                                     className="w-full h-48 object-cover"
                                                 />
@@ -323,7 +337,7 @@ export default function Home({
                 <BenefitsSection locale={locale} />
                 <HeritageSection locale={locale} />
                 <WhyRosaCareSection locale={locale} />
-                <CTABanner locale={locale} />
+                <Parallax locale={locale} parallax={parallax} />
                 <Footer locale={locale} />
             </div>
         </>
