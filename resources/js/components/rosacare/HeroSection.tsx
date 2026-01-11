@@ -1,13 +1,13 @@
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, Navigation, EffectFade } from 'swiper/modules';
-import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
+import { Link } from '@inertiajs/react';
+import { Autoplay, EffectFade, Pagination } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
 
 // Import Swiper styles
 import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
 import 'swiper/css/effect-fade';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 interface HeroItem {
     id?: number;
@@ -29,43 +29,69 @@ export function HeroSection({ locale = 'ar', items = [] }: HeroSectionProps) {
     const isRTL = locale === 'ar';
 
     // Default fallback content if no items provided
-    const defaultItems: HeroItem[] = items.length > 0 ? items : [
-        {
-            id: 0,
-            title: locale === 'ar' ? 'روزاكير' : 'RosaCare',
-            description: locale === 'ar'
-                ? 'من قلب الشام، أرقى منتجات الوردة الشامية الأصيلة'
-                : 'From the heart of Syria, the finest authentic Damask Rose products',
-            buttonText: locale === 'ar' ? 'استكشف المنتجات' : 'Explore Products',
-            buttonLink: '/products',
-        }
-    ];
+    // Use two static hero images from /assets/images so Laravel serves them directly.
+    const defaultItems: HeroItem[] =
+        items.length > 0
+            ? items
+            : [
+                  {
+                      id: 0,
+                      title: locale === 'ar' ? 'روزاكير' : 'RosaCare',
+                      description:
+                          locale === 'ar'
+                              ? 'من قلب الشام، أرقى منتجات الوردة الشامية الأصيلة'
+                              : 'From the heart of Syria, the finest authentic Damask Rose products',
+                      buttonText:
+                          locale === 'ar'
+                              ? 'استكشف المنتجات'
+                              : 'Explore Products',
+                      buttonLink: '/products',
+                      image: '/assets/images/hero1.jpg',
+                  },
+                  {
+                      id: 1,
+                      title: locale === 'ar' ? 'روزاكير' : 'RosaCare',
+                      description:
+                          locale === 'ar'
+                              ? 'من قلب الشام، أرقى منتجات الوردة الشامية الأصيلة'
+                              : 'From the heart of Syria, the finest authentic Damask Rose products',
+                      buttonText: undefined,
+                      buttonLink: undefined,
+                      image: '/assets/images/hero2.png',
+                  },
+              ];
 
     return (
-        <section className="relative w-full h-[80vh] min-h-[600px]">
+        <section className="relative h-[80vh] min-h-[600px] w-full">
             <Swiper
-                modules={[Autoplay, Pagination, Navigation, EffectFade]}
+                modules={[Autoplay, Pagination, EffectFade]}
                 spaceBetween={0}
                 slidesPerView={1}
                 loop={defaultItems.length > 1}
+                // Autoplay: automatically advance slides.
+                // - `delay`: time between transitions (ms). Set to 4000 for 4 seconds.
+                // - `disableOnInteraction`: when false, user interactions (touch/drag/click) won't disable autoplay.
+                // - `pauseOnMouseEnter`: when false, hovering the mouse won't pause autoplay.
                 autoplay={{
-                    delay: 5000,
+                    delay: 4000,
                     disableOnInteraction: false,
-                    pauseOnMouseEnter: true,
+                    pauseOnMouseEnter: false,
                 }}
                 speed={1000}
                 pagination={{
                     clickable: true,
                     dynamicBullets: true,
-                    bulletClass: 'swiper-pagination-bullet !bg-white/50',
-                    bulletActiveClass: 'swiper-pagination-bullet-active !bg-white',
+                    // Don't include spaces in class tokens (Swiper will add suffixes),
+                    // apply visual styles via Tailwind selectors in `className` instead.
+                    bulletClass: 'swiper-pagination-bullet',
+                    bulletActiveClass: 'swiper-pagination-bullet-active',
                 }}
-                navigation={defaultItems.length > 1}
+                navigation={false}
                 effect="fade"
                 fadeEffect={{
                     crossFade: true,
                 }}
-                className="h-full w-full [&_.swiper-button-next]:text-white [&_.swiper-button-prev]:text-white [&_.swiper-button-next]:hover:text-primary [&_.swiper-button-prev]:hover:text-primary [&_.swiper-button-next]:transition-colors [&_.swiper-button-prev]:transition-colors [&_.swiper-button-next]:w-12 [&_.swiper-button-next]:h-12 [&_.swiper-button-prev]:w-12 [&_.swiper-button-prev]:h-12"
+                className="h-full w-full [&_.swiper-pagination-bullet]:h-3 [&_.swiper-pagination-bullet]:w-3 [&_.swiper-pagination-bullet]:rounded-full [&_.swiper-pagination-bullet]:bg-white/50 [&_.swiper-pagination-bullet-active]:bg-white"
                 dir={isRTL ? 'rtl' : 'ltr'}
             >
                 {defaultItems.map((item, index) => (
@@ -74,28 +100,34 @@ export function HeroSection({ locale = 'ar', items = [] }: HeroSectionProps) {
                             className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000"
                             style={{
                                 backgroundImage: item.image
-                                    ? `url(/storage/${item.image})`
+                                    ? `url(${typeof item.image === 'string' && item.image.startsWith('/') ? item.image : `/storage/${item.image}`})`
                                     : 'linear-gradient(135deg, rgba(233, 30, 99, 0.1) 0%, rgba(156, 39, 176, 0.3) 50%, rgba(233, 30, 99, 0.1) 100%)',
                             }}
                         >
                             {/* Decorative background elements (only if no image) */}
                             {!item.image && (
                                 <div className="absolute inset-0 opacity-10">
-                                    <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl"></div>
-                                    <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary rounded-full blur-3xl"></div>
+                                    <div className="absolute top-20 left-10 h-72 w-72 rounded-full bg-primary blur-3xl"></div>
+                                    <div className="absolute right-10 bottom-20 h-96 w-96 rounded-full bg-secondary blur-3xl"></div>
                                 </div>
                             )}
 
                             {/* Overlay - darker if image exists */}
-                            <div className={`absolute inset-0 ${item.image ? 'bg-black/50' : 'bg-black/20'}`}></div>
+                            <div
+                                className={`absolute inset-0 ${item.image ? 'bg-black/50' : 'bg-black/20'}`}
+                            ></div>
 
                             {/* Content */}
-                            <div className="relative z-10 h-full flex items-center justify-center">
-                                <div className={`container mx-auto px-4 text-center ${isRTL ? 'rtl' : 'ltr'}`}>
-                                    <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 text-white drop-shadow-lg">
+                            <div className="relative z-10 flex h-full items-center justify-center">
+                                {/* Decorative images removed per request */}
+
+                                <div
+                                    className={`container mx-auto px-4 text-center ${isRTL ? 'rtl' : 'ltr'}`}
+                                >
+                                    <h1 className="mb-6 text-4xl font-bold text-white drop-shadow-lg md:text-5xl lg:text-7xl">
                                         {item.title}
                                     </h1>
-                                    <p className="text-xl md:text-2xl text-white/95 mb-8 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+                                    <p className="mx-auto mb-8 max-w-3xl text-xl leading-relaxed text-white/95 drop-shadow-md md:text-2xl">
                                         {item.description}
                                     </p>
                                     {item.buttonText && item.buttonLink && (
@@ -103,10 +135,14 @@ export function HeroSection({ locale = 'ar', items = [] }: HeroSectionProps) {
                                             <Button
                                                 asChild
                                                 size="lg"
-                                                className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all duration-300"
+                                                className="px-8 py-6 text-lg shadow-lg transition-all duration-300 hover:shadow-xl"
                                                 style={{
-                                                    backgroundColor: item.buttonColor || undefined,
-                                                    color: item.buttonTextColor || undefined,
+                                                    backgroundColor:
+                                                        item.buttonColor ||
+                                                        undefined,
+                                                    color:
+                                                        item.buttonTextColor ||
+                                                        undefined,
                                                 }}
                                             >
                                                 <Link href={item.buttonLink}>
@@ -116,17 +152,30 @@ export function HeroSection({ locale = 'ar', items = [] }: HeroSectionProps) {
                                         </div>
                                     )}
                                     {!item.buttonText && !item.buttonLink && (
-                                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                            <Button asChild size="lg" className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all duration-300">
+                                        <div className="flex flex-col justify-center gap-4 sm:flex-row">
+                                            <Button
+                                                asChild
+                                                size="lg"
+                                                className="px-8 py-6 text-lg shadow-lg transition-all duration-300 hover:shadow-xl"
+                                            >
                                                 <Link href="/products">
-                                                    {locale === 'ar' ? 'استكشف المنتجات' : 'Explore Products'}
+                                                    {locale === 'ar'
+                                                        ? 'استكشف المنتجات'
+                                                        : 'Explore Products'}
                                                 </Link>
                                             </Button>
-                                            <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6 bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20">
+                                            {/* <Button
+                                                asChild
+                                                variant="outline"
+                                                size="lg"
+                                                className="border-white/30 bg-white/10 px-8 py-6 text-lg text-white backdrop-blur-sm hover:bg-white/20"
+                                            >
                                                 <Link href="/about">
-                                                    {locale === 'ar' ? 'قصتنا' : 'Our Story'}
+                                                    {locale === 'ar'
+                                                        ? 'قصتنا'
+                                                        : 'Our Story'}
                                                 </Link>
-                                            </Button>
+                                            </Button> */}
                                         </div>
                                     )}
                                 </div>
