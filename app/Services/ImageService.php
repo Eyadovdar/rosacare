@@ -50,7 +50,7 @@ class ImageService
     /**
      * Generic image resize method
      */
-    protected static function resizeImage(
+    public static function resizeImage(
         string $imagePath,
         string $disk,
         int $maxWidth,
