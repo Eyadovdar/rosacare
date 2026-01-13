@@ -16,7 +16,10 @@ return new class extends Migration
             $table->string('locale')->index();
             $table->string('question')->nullable();
             $table->string('answer')->nullable();
+            $table->string('order')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
+
         });
     }
 

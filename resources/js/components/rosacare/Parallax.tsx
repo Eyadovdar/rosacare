@@ -33,21 +33,21 @@ export function Parallax({ locale = 'ar', parallax }: ParallaxProps) {
     const isRTL = locale === 'ar';
 
     // Use parallax data if available, otherwise use defaults
-    const title = parallax?.translations?.find(t => t.locale === locale)?.title 
-        || parallax?.translations?.[0]?.title 
-        || defaultData.title[locale as 'ar' | 'en'] 
+    const title = parallax?.translations?.find(t => t.locale === locale)?.title
+        || parallax?.translations?.[0]?.title
+        || defaultData.title[locale as 'ar' | 'en']
         || defaultData.title.en;
 
-    const description = parallax?.translations?.find(t => t.locale === locale)?.description 
-        || parallax?.translations?.[0]?.description 
-        || defaultData.description[locale as 'ar' | 'en'] 
+    const description = parallax?.translations?.find(t => t.locale === locale)?.description
+        || parallax?.translations?.[0]?.description
+        || defaultData.description[locale as 'ar' | 'en']
         || defaultData.description.en;
 
     const link = parallax?.link || defaultData.link;
     const imageUrl = parallax?.image_url || (parallax?.image ? `/storage/${parallax.image}` : null);
 
     return (
-        <section 
+        <section
             className="py-20 text-primary-foreground relative overflow-hidden"
             style={{
                 backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
@@ -57,8 +57,8 @@ export function Parallax({ locale = 'ar', parallax }: ParallaxProps) {
             }}
         >
             {/* Overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary/80 z-0" />
-            
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-primary10 z-0" />
+
             <div className="container mx-auto px-4 relative z-10">
                 <div className={`max-w-3xl mx-auto text-center ${isRTL ? 'rtl' : 'ltr'}`}>
                     <h2 className="text-4xl md:text-5xl font-bold mb-6">

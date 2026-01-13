@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rosa Care - Coming Soon</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="logo-container">
+                <img src="rosa-care-logo.png" alt="Rosa Care Logo" class="logo">
+            </div>
+            
+            <h1 class="heading">Coming Soon</h1>
+            
+            <p class="tagline">Beauty inspired by the traditional Damascena rose</p>
+            
+            <div class="description">
+                <p>Rosa Care is a Damascus-based brand that focuses on creating beauty products inspired by the traditional Damascena rose, a centuries-old symbol of beauty.</p>
+                <p>Our core ingredients include premium Damascene rose oil and organic Rose Water derived from Rosa Damascena.</p>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p class="coming-soon-text">From Nature, With Care</p>
+            
+            <div class="divider"></div>
+            
+            <section class="contact-section">
+                <h2 class="contact-heading">Contact Us</h2>
+                <p class="contact-subtitle">Get in touch with us for inquiries about our products</p>
+                
+                <form class="contact-form" id="contactForm" action="send_email.php" method="POST">
+                    <div class="form-group">
+                        <input type="text" id="name" name="name" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="email" name="email" placeholder="Your Email" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="message" name="message" rows="5" placeholder="Your Message" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn" id="submitBtn">Send Message</button>
+                    <div id="form-message" class="form-message"></div>
+                </form>
+            </section>
+        </div>
+        
+        <div class="rose-petals"></div>
+    </div>
+    
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            const submitBtn = document.getElementById('submitBtn');
+            const formMessage = document.getElementById('form-message');
+            const originalBtnText = submitBtn.textContent;
+            
+            // Update button state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+            formMessage.textContent = '';
+            formMessage.className = 'form-message';
+            
+            // Get form data
+            const formData = new FormData(form);
+            
+            // Submit to PHP script using fetch
+            fetch('send_email.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Success
+                    formMessage.textContent = data.message || 'Thank you for your message! We will get back to you soon.';
+                    formMessage.className = 'form-message success';
+                    form.reset();
+                    submitBtn.textContent = originalBtnText;
+                    submitBtn.disabled = false;
+                    
+                    // Scroll to message
+                    formMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    // Error from server
+                    formMessage.textContent = data.message || 'Sorry, there was an error sending your message. Please try again.';
+                    formMessage.className = 'form-message error';
+                    submitBtn.textContent = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                // Network or parsing error
+                console.error('Error:', error);
+                formMessage.textContent = 'Sorry, there was an error sending your message. Please try again.';
+                formMessage.className = 'form-message error';
+                submitBtn.textContent = originalBtnText;
+                submitBtn.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>

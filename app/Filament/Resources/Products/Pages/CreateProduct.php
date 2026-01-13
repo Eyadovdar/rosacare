@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Products\Pages;
 
 use App\Filament\Resources\Products\ProductResource;
 use App\Models\Media;
+use App\Services\ImageService;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Storage;
 
@@ -42,14 +43,30 @@ class CreateProduct extends CreateRecord
         
         // Save featured image
         if ($this->featuredImage && is_string($this->featuredImage)) {
-            $this->saveMediaFile($this->featuredImage, 'featured', 0);
+            // Resize and optimize featured image
+            $resizedImagePath = ImageService::resizeProductImage(
+                $this->featuredImage,
+                'public',
+                1200, // Max width for product images
+                1200, // Max height for product images (square)
+                85    // High quality JPEG
+            );
+            $this->saveMediaFile($resizedImagePath, 'featured', 0);
         }
         
         // Save gallery images
         if (!empty($this->galleryImages)) {
             foreach ($this->galleryImages as $index => $imagePath) {
                 if (is_string($imagePath)) {
-                    $this->saveMediaFile($imagePath, 'gallery', $index);
+                    // Resize and optimize gallery image
+                    $resizedImagePath = ImageService::resizeProductImage(
+                        $imagePath,
+                        'public',
+                        1200, // Max width for product images
+                        1200, // Max height for product images
+                        85    // High quality JPEG
+                    );
+                    $this->saveMediaFile($resizedImagePath, 'gallery', $index);
                 }
             }
         }

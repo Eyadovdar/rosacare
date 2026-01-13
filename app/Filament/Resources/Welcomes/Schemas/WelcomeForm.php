@@ -28,7 +28,13 @@ class WelcomeForm
                             ->directory('welcomes/images')
                             ->visibility('public')
                             ->required()
-                            ->helperText('Image shared across all locales.'),
+                            ->maxSize(10240) // 10MB max file size
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([
+                                '16:9',
+                                '21:9',
+                            ])
+                            ->helperText('Image shared across all locales. Recommended size: 1920x1080px (16:9 aspect ratio). Images will be automatically resized and optimized for best quality.'),
                         TextInput::make('button_url')
                             ->label('Button URL')
                             ->url()
@@ -84,7 +90,15 @@ class WelcomeForm
                                     ->disk('public')
                                     ->directory('welcomes/details')
                                     ->visibility('public')
-                                    ->required(),
+                                    ->required()
+                                    ->maxSize(10240) // 10MB max file size
+                                    ->imageEditor()
+                                    ->imageEditorAspectRatios([
+                                        '1:1',
+                                        '4:3',
+                                        '16:9',
+                                    ])
+                                    ->helperText('Recommended size: 1200x1200px (1:1) or 1200x800px (3:2). Images will be automatically resized and optimized for best performance.'),
                                 TextInput::make('button_url')
                                     ->label('Button URL')
                                     ->nullable(),

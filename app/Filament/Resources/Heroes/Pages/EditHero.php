@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Heroes\Pages;
 
 use App\Filament\Resources\Heroes\HeroResource;
+use App\Services\ImageService;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Storage;
@@ -52,10 +53,28 @@ class EditHero extends EditRecord
 
         // Set image path directly in data
         if ($this->heroImage && is_string($this->heroImage)) {
-            $data['image'] = $this->heroImage;
+            // Check if this is a new image upload (different from existing)
+            $isNewImage = !$this->record->image || $this->heroImage !== $this->record->image;
+            
+            if ($isNewImage) {
+                // Resize and optimize the new hero image
+                $resizedImagePath = ImageService::resizeHeroImage(
+                    $this->heroImage,
+                    'public',
+                    1920, // Max width for hero images (Full HD)
+                    1080, // Max height for hero images (Full HD)
+                    90    // High quality JPEG
+                );
+                
+                $data['image'] = $resizedImagePath;
+            } else {
+                // Keep existing image
+                $data['image'] = $this->heroImage;
+            }
+            
             // Ensure file has public visibility
-            if (Storage::disk('public')->exists($this->heroImage)) {
-                Storage::disk('public')->setVisibility($this->heroImage, 'public');
+            if (Storage::disk('public')->exists($data['image'])) {
+                Storage::disk('public')->setVisibility($data['image'], 'public');
             }
         } elseif (empty($this->heroImage)) {
             // If image was removed, set to null

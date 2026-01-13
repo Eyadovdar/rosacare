@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Setting;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Session;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Announcement;
@@ -108,10 +110,52 @@ class HomeController extends Controller
             ];
         }
 
+        // Prepare settings data with translations and image URLs
+        // Note: Settings are already shared globally via HandleInertiaRequests middleware
+        // We just need to add the meta-specific fields for the Home page
+        $settingsData = null;
+        if ($settings) {
+            $locale = app()->getLocale() ?: Session::get('locale', 'ar');
+            
+            // Get default meta image URL
+            $defaultMetaImageUrl = null;
+            if ($settings->default_meta_image) {
+                if (Storage::disk('public')->exists($settings->default_meta_image)) {
+                    $defaultMetaImageUrl = Storage::disk('public')->url($settings->default_meta_image);
+                }
+            }
+            
+            // Use the same structure as HandleInertiaRequests but add meta fields
+            $settingsData = [
+                'id' => $settings->id,
+                'logo_header_path' => $settings->logo_header_path,
+                'header_logo_url' => $settings->header_logo_url,
+                'logo_footer_path' => $settings->logo_footer_path,
+                'footer_logo_url' => $settings->footer_logo_url,
+                'favicon_path' => $settings->favicon_path,
+                'favicon_url' => $settings->favicon_url,
+                'default_meta_image' => $settings->default_meta_image,
+                'default_meta_image_url' => $defaultMetaImageUrl,
+                // Keep translations as array to match HandleInertiaRequests structure
+                'translations' => $settings->translations->map(function ($translation) {
+                    return [
+                        'locale' => $translation->locale,
+                        'site_name' => $translation->site_name,
+                        'slogan' => $translation->slogan,
+                        'footer_description' => $translation->footer_description,
+                        'footer_copyright' => $translation->footer_copyright,
+                        'default_meta_title' => $translation->default_meta_title,
+                        'default_meta_description' => $translation->default_meta_description,
+                        'default_meta_keywords' => $translation->default_meta_keywords,
+                    ];
+                })->toArray(),
+            ];
+        }
+
         return Inertia::render('Home', [
             'categories' => $categories,
             'featuredProducts' => $featuredProducts,
-            'settings' => $settings,
+            'settings' => $settingsData,
             'announcements' => $announcements,
             'welcome' => $welcome,
             'welcomeDetails' => $welcomeDetails,

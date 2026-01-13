@@ -1,5 +1,11 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Bars3Icon, XMarkIcon, GlobeAltIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
@@ -31,6 +37,19 @@ interface NavbarProps {
     locale?: string;
 }
 
+interface Category {
+    id: number;
+    slug: string;
+    icon?: string;
+    image?: string;
+    image_url?: string;
+    translations: Array<{
+        locale: string;
+        name: string;
+        description?: string;
+    }>;
+}
+
 interface PageProps {
     locale?: string;
     supportedLocales?: string[];
@@ -41,6 +60,7 @@ interface PageProps {
             site_name?: string;
         }>;
     };
+    categories?: Category[];
 }
 
 interface StaticMenuItem {
@@ -53,11 +73,13 @@ interface StaticMenuItem {
 export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+    const [openMobileDropdowns, setOpenMobileDropdowns] = useState<Record<string, boolean>>({});
     const page = usePage<{ props: PageProps }>();
     
     // Get locale from props or shared Inertia props
     const locale = propLocale || page.props.locale || 'ar';
     const supportedLocales = page.props.supportedLocales || ['ar', 'en'];
+    const categories = page.props.categories || [];
     const isRTL = locale === 'ar';
 
     const toggleMobileMenu = () => {
@@ -206,9 +228,50 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
         setMobileMenuOpen(false);
     };
 
+    const getCategoryName = (category: Category): string => {
+        const translation = category.translations?.find(t => t.locale === locale) || category.translations?.[0];
+        return translation?.name || category.slug;
+    };
+
     const renderMenuItem = (item: StaticMenuItem | MenuItem) => {
         if (item.type === 'static') {
             const staticItem = item as StaticMenuItem;
+            // Check if this is the "Products" static item to show categories dropdown
+            if (staticItem.id === 'products' && categories.length > 0) {
+                return (
+                    <DropdownMenu key={staticItem.id}>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="mx-1">
+                                {staticItem.label[locale] || staticItem.label['en']}
+                                <ChevronDownIcon className="ml-1 h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align={isRTL ? 'end' : 'start'} className="min-w-[200px]">
+                            <Link href={staticItem.url}>
+                                <DropdownMenuItem className="cursor-pointer">
+                                    {locale === 'ar' ? 'جميع المنتجات' : 'All Products'}
+                                </DropdownMenuItem>
+                            </Link>
+                            {categories.length > 0 && (
+                                <>
+                                    <div className="h-px bg-border my-1" />
+                                    {categories.map((category) => {
+                                        const categoryName = getCategoryName(category);
+                                        return (
+                                            <Link key={category.id} href={`/categories/${category.slug}`}>
+                                                <DropdownMenuItem className="cursor-pointer">
+                                                    {categoryName}
+                                                </DropdownMenuItem>
+                                            </Link>
+                                        );
+                                    })}
+                                </>
+                            )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                );
+            }
+            
             return (
                 <Button
                     key={staticItem.id}
@@ -225,6 +288,42 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
             const menuItem = item as MenuItem;
             const url = getMenuItemUrl(menuItem);
             const label = getMenuItemLabel(menuItem);
+            
+            // If menu item is of type "category" and we have categories, show dropdown
+            if (menuItem.type === 'category' && categories.length > 0) {
+                return (
+                    <DropdownMenu key={menuItem.id}>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="mx-1">
+                                {label}
+                                <ChevronDownIcon className="ml-1 h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align={isRTL ? 'end' : 'start'} className="min-w-[200px]">
+                            {menuItem.category && (
+                                <>
+                                    <Link href={url}>
+                                        <DropdownMenuItem className="cursor-pointer">
+                                            {getCategoryName(menuItem.category as any)}
+                                        </DropdownMenuItem>
+                                    </Link>
+                                    <div className="h-px bg-border my-1" />
+                                </>
+                            )}
+                            {categories.map((category) => {
+                                const categoryName = getCategoryName(category);
+                                return (
+                                    <Link key={category.id} href={`/categories/${category.slug}`}>
+                                        <DropdownMenuItem className="cursor-pointer">
+                                            {categoryName}
+                                        </DropdownMenuItem>
+                                    </Link>
+                                );
+                            })}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                );
+            }
             
             return (
                 <Button
@@ -371,6 +470,45 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
                             {allMenuItems.map((item) => {
                                 if (item.type === 'static') {
                                     const staticItem = item as StaticMenuItem;
+                                    // Show categories dropdown for Products in mobile
+                                    if (staticItem.id === 'products' && categories.length > 0) {
+                                        const dropdownKey = `products`;
+                                        const isOpen = openMobileDropdowns[dropdownKey] || false;
+                                        return (
+                                            <div key={staticItem.id}>
+                                                <button
+                                                    onClick={() => setOpenMobileDropdowns(prev => ({ ...prev, [dropdownKey]: !prev[dropdownKey] }))}
+                                                    className="w-full px-4 py-2 text-left hover:bg-secondary rounded-md transition-colors flex items-center justify-between"
+                                                >
+                                                    <span>{staticItem.label[locale] || staticItem.label['en']}</span>
+                                                    <ChevronDownIcon className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                                                </button>
+                                                {isOpen && (
+                                                    <div className="pl-4 mt-1 space-y-1">
+                                                        <button
+                                                            onClick={() => handleNavigation(staticItem.url)}
+                                                            className="w-full px-4 py-2 text-left hover:bg-secondary rounded-md transition-colors text-sm"
+                                                        >
+                                                            {locale === 'ar' ? 'جميع المنتجات' : 'All Products'}
+                                                        </button>
+                                                        {categories.map((category) => {
+                                                            const categoryName = getCategoryName(category);
+                                                            return (
+                                                                <button
+                                                                    key={category.id}
+                                                                    onClick={() => handleNavigation(`/categories/${category.slug}`)}
+                                                                    className="w-full px-4 py-2 text-left hover:bg-secondary rounded-md transition-colors text-sm"
+                                                                >
+                                                                    {categoryName}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    }
+                                    
                                     return (
                                         <button
                                             key={staticItem.id}
@@ -384,6 +522,48 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
                                     const menuItem = item as MenuItem;
                                     const url = getMenuItemUrl(menuItem);
                                     const label = getMenuItemLabel(menuItem);
+                                    
+                                    // Show categories dropdown for category menu items in mobile
+                                    if (menuItem.type === 'category' && categories.length > 0) {
+                                        const dropdownKey = `category-${menuItem.id}`;
+                                        const isOpen = openMobileDropdowns[dropdownKey] || false;
+                                        return (
+                                            <div key={menuItem.id}>
+                                                <button
+                                                    onClick={() => setOpenMobileDropdowns(prev => ({ ...prev, [dropdownKey]: !prev[dropdownKey] }))}
+                                                    className="w-full px-4 py-2 text-left hover:bg-secondary rounded-md transition-colors flex items-center justify-between"
+                                                >
+                                                    <span>{label}</span>
+                                                    <ChevronDownIcon className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                                                </button>
+                                                {isOpen && (
+                                                    <div className="pl-4 mt-1 space-y-1">
+                                                        {menuItem.category && (
+                                                            <button
+                                                                onClick={() => handleNavigation(url, menuItem.open_in_new_tab)}
+                                                                className="w-full px-4 py-2 text-left hover:bg-secondary rounded-md transition-colors text-sm"
+                                                            >
+                                                                {getCategoryName(menuItem.category as any)}
+                                                            </button>
+                                                        )}
+                                                        {categories.map((category) => {
+                                                            const categoryName = getCategoryName(category);
+                                                            return (
+                                                                <button
+                                                                    key={category.id}
+                                                                    onClick={() => handleNavigation(`/categories/${category.slug}`)}
+                                                                    className="w-full px-4 py-2 text-left hover:bg-secondary rounded-md transition-colors text-sm"
+                                                                >
+                                                                    {categoryName}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    }
+                                    
                                     return (
                                         <button
                                             key={menuItem.id}

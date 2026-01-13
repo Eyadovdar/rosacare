@@ -23,8 +23,8 @@ class Category extends Model
     ];
 
     protected $fillable = [
+        'title',
         'slug',
-        'icon',
         'image',
         'sort_order',
         'is_active',
@@ -65,7 +65,7 @@ class Category extends Model
 
         // Filament stores files in storage/app/public
         // The path might be: "categories/filename.webp" or just "filename.webp"
-        
+
         // Check if file exists
         if (Storage::disk('public')->exists($this->image)) {
             return Storage::disk('public')->url($this->image);

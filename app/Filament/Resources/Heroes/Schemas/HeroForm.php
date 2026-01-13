@@ -24,7 +24,13 @@ class HeroForm
                     ->directory('heroes/images')
                     ->visibility('public')
                     ->required()
-                    ->helperText('Image shared across all locales.'),
+                    ->maxSize(10240) // 10MB max file size
+                    ->imageEditor()
+                    ->imageEditorAspectRatios([
+                        '16:9',
+                        '21:9',
+                    ])
+                    ->helperText('Image shared across all locales. Recommended size: 1920x1080px (16:9 aspect ratio). Images will be automatically resized and optimized for best quality.'),
                 TextInput::make('button_url')
                     ->label('Button URL')
                     ->url()

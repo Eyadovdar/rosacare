@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Category;
 use App\Models\MenuItem;
 use App\Models\Setting;
 use Illuminate\Foundation\Inspiring;
@@ -76,6 +77,32 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
+        // Get all active categories for submenu
+        $categories = [];
+        if (Schema::hasTable('categories')) {
+            $categories = Category::where('is_active', true)
+                ->with('translations')
+                ->orderBy('sort_order')
+                ->get()
+                ->map(function ($category) {
+                    return [
+                        'id' => $category->id,
+                        'slug' => $category->slug,
+                        'icon' => $category->icon,
+                        'image' => $category->image,
+                        'image_url' => $category->image_url,
+                        'translations' => $category->translations->map(function ($translation) {
+                            return [
+                                'locale' => $translation->locale,
+                                'name' => $translation->name,
+                                'description' => $translation->description,
+                            ];
+                        })->toArray(),
+                    ];
+                })
+                ->toArray();
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -83,6 +110,7 @@ class HandleInertiaRequests extends Middleware
             'locale' => app()->getLocale(),
             'supportedLocales' => ['ar', 'en'],
             'settings' => $settings,
+            'categories' => $categories,
             'menuItems' => Schema::hasTable('menu_items')
                 ? MenuItem::where('is_active', true)
                     ->with(['translations', 'category.translations'])

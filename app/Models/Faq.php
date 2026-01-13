@@ -7,12 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Faq extends Model
 {
     protected $fillable = [
+        'locale',
         'question',
         'answer',
     ];
 
-    public function getAnswerAttribute(): string
+    public function getAnswerAttribute($value): string
     {
-        return htmlspecialchars_decode($this->answer);
+        if ($value === null) {
+            return '';
+        }
+        return htmlspecialchars_decode($value);
     }
 }

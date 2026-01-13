@@ -14,6 +14,8 @@ class FaqsTable
     {
         return $table
             ->columns([
+                TextColumn::make('locale')
+                ->sortable(),
                 TextColumn::make('question')
                     ->searchable(),
                 TextColumn::make('answer')

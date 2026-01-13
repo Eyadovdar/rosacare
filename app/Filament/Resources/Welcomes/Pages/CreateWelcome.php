@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Welcomes\Pages;
 
 use App\Filament\Resources\Welcomes\WelcomeResource;
+use App\Services\ImageService;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Storage;
 
@@ -39,15 +40,30 @@ class CreateWelcome extends CreateRecord
             }
         }
 
-        // Ensure welcome image file has public visibility
+        // Resize and optimize welcome image
         // Filament FileUpload should have already saved the file
         $imagePath = $this->record->image;
 
         if ($imagePath && is_string($imagePath)) {
             try {
                 if (Storage::disk('public')->exists($imagePath)) {
+                    // Resize and optimize the welcome image
+                    $resizedImagePath = ImageService::resizeHeroImage(
+                        $imagePath,
+                        'public',
+                        1920, // Max width for welcome images (Full HD)
+                        1080, // Max height for welcome images (Full HD)
+                        90    // High quality JPEG
+                    );
+                    
+                    // Update the record with the resized image path if it changed
+                    if ($resizedImagePath !== $imagePath) {
+                        $this->record->update(['image' => $resizedImagePath]);
+                        $imagePath = $resizedImagePath;
+                    }
+                    
                     Storage::disk('public')->setVisibility($imagePath, 'public');
-                    \Log::info('Welcome image visibility set to public:', ['path' => $imagePath]);
+                    \Log::info('Welcome image resized and visibility set to public:', ['path' => $imagePath]);
                 } else {
                     \Log::warning('Welcome image file not found in storage:', [
                         'path' => $imagePath,
@@ -55,7 +71,7 @@ class CreateWelcome extends CreateRecord
                     ]);
                 }
             } catch (\Exception $e) {
-                \Log::error("Failed to set visibility for welcome image: {$imagePath}", [
+                \Log::error("Failed to resize welcome image: {$imagePath}", [
                     'error' => $e->getMessage(),
                 ]);
             }
@@ -125,10 +141,19 @@ class CreateWelcome extends CreateRecord
                     Storage::disk('public')->put($publicPath, $fileContents);
                     Storage::disk('public')->setVisibility($publicPath, 'public');
                     Storage::disk('local')->delete($privatePath);
-                    $processedImagePath = $publicPath;
-                    \Log::info('Welcome detail image moved from private to public storage:', [
+                    
+                    // Resize and optimize the image after moving to public storage
+                    $processedImagePath = ImageService::resizeProductImage(
+                        $publicPath,
+                        'public',
+                        1200, // Max width for welcome detail images
+                        1200, // Max height for welcome detail images
+                        85    // High quality JPEG
+                    );
+                    
+                    \Log::info('Welcome detail image moved from private to public storage and resized:', [
                         'from' => $privatePath,
-                        'to' => $publicPath,
+                        'to' => $processedImagePath,
                     ]);
                 } catch (\Exception $e) {
                     \Log::error("Failed to move welcome detail image from private to public: {$privatePath}", [
@@ -137,9 +162,15 @@ class CreateWelcome extends CreateRecord
                     $processedImagePath = $detailImage; // Fallback to original path
                 }
             } elseif (Storage::disk('public')->exists($detailImage)) {
-                // File is already in public storage
-                $processedImagePath = $detailImage;
-                Storage::disk('public')->setVisibility($detailImage, 'public');
+                // File is already in public storage - resize and optimize it
+                $processedImagePath = ImageService::resizeProductImage(
+                    $detailImage,
+                    'public',
+                    1200, // Max width for welcome detail images
+                    1200, // Max height for welcome detail images
+                    85    // High quality JPEG
+                );
+                Storage::disk('public')->setVisibility($processedImagePath, 'public');
             } else {
                 // Try to use the path as-is (might be relative to public disk)
                 $processedImagePath = $detailImage;

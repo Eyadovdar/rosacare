@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Faqs\Schemas;
 
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -11,12 +13,23 @@ class FaqForm
     {
         return $schema
             ->components([
+                Select::make('locale')
+                    ->label('Language')
+                    ->options([
+                        'ar' => 'Arabic (العربية)',
+                        'en' => 'English',
+                    ])
+                    ->required()
+                    ->default('ar'),
                 TextInput::make('question')
-                    ->required(),
-                TextInput::make('answer')
-                    ->required(),
-                TextInput::make('local')
-                    ->required(),
+                    ->label('Question')
+                    ->required()
+                    ->maxLength(255),
+                Textarea::make('answer')
+                    ->label('Answer')
+                    ->required()
+                    ->rows(4)
+                    ->columnSpanFull(),
             ]);
     }
 }

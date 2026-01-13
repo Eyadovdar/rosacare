@@ -2,14 +2,16 @@
 
 namespace App\Filament\Resources\Categories\Schemas;
 
-use Filament\Forms\Components\FileUpload;
-use Filament\Schemas\Components\Section;
+use Illuminate\Support\Str;
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\FileUpload;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Set;
 
 class CategoryForm
 {
@@ -19,13 +21,18 @@ class CategoryForm
             ->components([
                 Section::make('General Information')
                     ->schema([
+                        TextInput::make('title')
+                            ->label('Title')
+                            ->required()
+                            ->live(debounce: 3000)
+                            ->afterStateUpdated(function (Set $set, $state) {
+                                $set('slug', Str::slug($state));
+                            })
+                            ->maxLength(255),
                         TextInput::make('slug')
                             ->label('Slug')
                             ->required()
                             ->unique(ignoreRecord: true),
-                        TextInput::make('icon')
-                            ->label('Icon')
-                            ->nullable(),
                         FileUpload::make('image')
                             ->label('Image')
                             ->image()

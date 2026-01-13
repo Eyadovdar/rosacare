@@ -64,9 +64,24 @@ interface MenuItem {
 
 interface Setting {
     id: number;
-    logo_header_path: string;
-    logo_footer_path: string;
-    favicon_path: string;
+    logo_header_path?: string;
+    header_logo_url?: string;
+    logo_footer_path?: string;
+    footer_logo_url?: string;
+    favicon_path?: string;
+    favicon_url?: string;
+    default_meta_image?: string;
+    default_meta_image_url?: string;
+    translations?: Array<{
+        locale: string;
+        site_name?: string;
+        slogan?: string;
+        footer_description?: string;
+        footer_copyright?: string;
+        default_meta_title?: string;
+        default_meta_description?: string;
+        default_meta_keywords?: string;
+    }>;
 }
 
 interface Hero {
@@ -151,6 +166,7 @@ export default function Home({
     categories,
     featuredProducts,
     locale = 'ar',
+    settings,
     heros = [],
     announcements = [],
     welcome,
@@ -161,6 +177,15 @@ export default function Home({
     const page = usePage<{ props: { menuItems?: MenuItem[] } }>();
     // Get menuItems from shared props (HandleInertiaRequests middleware)
     const menuItems = (page.props.menuItems || []) as MenuItem[];
+
+    // Get meta data from settings
+    // Settings translations is an array, not an object
+    const settingsTranslation = settings?.translations?.find((t: any) => t.locale === locale) || settings?.translations?.[0];
+    const metaTitle = settingsTranslation?.default_meta_title || settingsTranslation?.site_name || 'RosaCare - Authentic Damask Rose Products';
+    const metaDescription = settingsTranslation?.default_meta_description || settingsTranslation?.slogan || '';
+    const metaKeywords = settingsTranslation?.default_meta_keywords || '';
+    const metaImage = settings?.default_meta_image_url || '';
+    const siteName = settingsTranslation?.site_name || 'RosaCare';
 
     // Convert heroes to hero items for HeroSection
     const heroItems = heros.map((hero) => {
@@ -179,7 +204,27 @@ export default function Home({
 
     return (
         <>
-            <Head title="RosaCare - Authentic Damask Rose Products" />
+            <Head>
+                <title>{metaTitle}</title>
+                {metaDescription && <meta name="description" content={metaDescription} />}
+                {metaKeywords && <meta name="keywords" content={metaKeywords} />}
+
+                {/* Open Graph / Facebook */}
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content={metaTitle} />
+                {metaDescription && <meta property="og:description" content={metaDescription} />}
+                {metaImage && <meta property="og:image" content={metaImage} />}
+                <meta property="og:site_name" content={siteName} />
+
+                {/* Twitter */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={metaTitle} />
+                {metaDescription && <meta name="twitter:description" content={metaDescription} />}
+                {metaImage && <meta name="twitter:image" content={metaImage} />}
+
+                {/* Favicon */}
+                {settings?.favicon_url && <link rel="icon" href={settings.favicon_url} />}
+            </Head>
             <div className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <Navbar menuItems={menuItems} locale={locale} />
 

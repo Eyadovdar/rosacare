@@ -12,6 +12,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use App\Models\Category;
 
 class CategoriesTable
 {
@@ -21,10 +22,13 @@ class CategoriesTable
             ->columns([
 
                 TextColumn::make('title')
+                    ->label('Title')
+                    ->sortable()
                     ->searchable(),
-                TextColumn::make('icon')
-                    ->searchable(),
-                ImageColumn::make('image'),
+                ImageColumn::make('image')
+                    ->getStateUsing(fn (Category $record): ?string => $record->image_url)
+                    ->url(fn (Category $record): ?string => $record->image_url)
+                    ->circular(),
                 TextColumn::make('sort_order')
                     ->numeric()
                     ->sortable(),

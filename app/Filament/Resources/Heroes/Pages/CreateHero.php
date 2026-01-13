@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Heroes\Pages;
 
 use App\Filament\Resources\Heroes\HeroResource;
+use App\Services\ImageService;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Storage;
 
@@ -16,17 +17,26 @@ class CreateHero extends CreateRecord
         $this->translations = $this->extractTranslations($data);
 
         // Store media file path - FileUpload stores paths as strings (single) or arrays (multiple)
-        $this->heroImage = is_array($data['image'] ?? null) 
-            ? ($data['image'][0] ?? null) 
+        $this->heroImage = is_array($data['image'] ?? null)
+            ? ($data['image'][0] ?? null)
             : ($data['image'] ?? null);
 
         // Remove translation fields from form data (image will be saved directly)
         // Set image path directly in data
         if ($this->heroImage && is_string($this->heroImage)) {
-            $data['image'] = $this->heroImage;
+            // Resize and optimize the hero image
+            $resizedImagePath = ImageService::resizeHeroImage(
+                $this->heroImage,
+                'public',
+                1920, // Max width for hero images (Full HD)
+                1080, // Max height for hero images (Full HD)
+                90    // High quality JPEG
+            );
+
+            $data['image'] = $resizedImagePath;
             // Ensure file has public visibility
-            if (Storage::disk('public')->exists($this->heroImage)) {
-                Storage::disk('public')->setVisibility($this->heroImage, 'public');
+            if (Storage::disk('public')->exists($resizedImagePath)) {
+                Storage::disk('public')->setVisibility($resizedImagePath, 'public');
             }
         }
 
@@ -51,7 +61,7 @@ class CreateHero extends CreateRecord
     {
         $translations = [];
         $translatableFields = ['title', 'description', 'button_text'];
-        
+
         foreach ($translatableFields as $field) {
             if (isset($data[$field . ':ar'])) {
                 $translations['ar'][$field] = $data[$field . ':ar'];
@@ -67,7 +77,7 @@ class CreateHero extends CreateRecord
     protected function removeTranslationFields(array $data): array
     {
         $translatableFields = ['title', 'description', 'button_text'];
-        
+
         foreach ($translatableFields as $field) {
             unset($data[$field . ':ar'], $data[$field . ':en']);
         }

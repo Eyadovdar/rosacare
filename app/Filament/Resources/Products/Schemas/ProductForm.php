@@ -88,14 +88,14 @@ class ProductForm
                             ->disk('public')
                             ->directory('products/featured')
                             ->visibility('public')
-                            ->maxSize(5120)
+                            ->maxSize(10240) // 10MB max file size
                             ->imageEditor()
                             ->imageEditorAspectRatios([
-                                '16:9',
-                                '4:3',
                                 '1:1',
+                                '4:3',
+                                '16:9',
                             ])
-                            ->helperText('Upload the main featured image for this product')
+                            ->helperText('Upload the main featured image for this product. Recommended size: 1200x1200px (1:1) or 1200x800px (3:2). Images will be automatically resized and optimized for best performance.')
                             ->columnSpanFull(),
                         FileUpload::make('gallery_images')
                             ->label('Gallery Images')
@@ -104,14 +104,14 @@ class ProductForm
                             ->disk('public')
                             ->directory('products/gallery')
                             ->visibility('public')
-                            ->maxSize(5120)
+                            ->maxSize(10240) // 10MB max file size
                             ->imageEditor()
                             ->imageEditorAspectRatios([
-                                '16:9',
-                                '4:3',
                                 '1:1',
+                                '4:3',
+                                '16:9',
                             ])
-                            ->helperText('Upload multiple images for the product gallery')
+                            ->helperText('Upload multiple images for the product gallery. Recommended size: 1200x1200px (1:1) or 1200x800px (3:2). Images will be automatically resized and optimized for best performance.')
                             ->columnSpanFull(),
                     ])
                     ->columns(1),
