@@ -206,6 +206,32 @@ export default function Home({
         <>
             <Head>
                 <title>{metaTitle}</title>
+                <style>{`
+                    @keyframes fadeInUp {
+                        from {
+                            opacity: 0;
+                            transform: translateY(30px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                    @keyframes float {
+                        0%, 100% {
+                            transform: translate(0, 0) rotate(0deg);
+                        }
+                        33% {
+                            transform: translate(30px, -30px) rotate(120deg);
+                        }
+                        66% {
+                            transform: translate(-30px, 30px) rotate(240deg);
+                        }
+                    }
+                    .fade-in-up {
+                        animation: fadeInUp 1s ease-out both;
+                    }
+                `}</style>
                 {metaDescription && <meta name="description" content={metaDescription} />}
                 {metaKeywords && <meta name="keywords" content={metaKeywords} />}
 
@@ -267,47 +293,116 @@ export default function Home({
 
                 {/* Welcome Section */}
                 {welcome && (
-                    <section className="py-20 bg-background">
-                        <div className="container mx-auto px-4">
+                    <section className="py-20 relative" style={{
+                        background: 'linear-gradient(135deg, #f5f5f5 0%, #ffffff 50%, #fafafa 100%)'
+                    }}>
+                        {/* Rose Petals Background for Welcome Section */}
+                        <div style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            pointerEvents: 'none',
+                            zIndex: 1,
+                            overflow: 'hidden'
+                        }}>
+                            <div style={{
+                                position: 'absolute',
+                                width: '250px',
+                                height: '250px',
+                                borderRadius: '50% 0 50% 0',
+                                background: 'linear-gradient(135deg, rgba(231, 33, 119, 0.08), rgba(134, 44, 145, 0.08))',
+                                top: '20%',
+                                left: '5%',
+                                animation: 'float 20s infinite ease-in-out'
+                            }} />
+                            <div style={{
+                                position: 'absolute',
+                                width: '250px',
+                                height: '250px',
+                                borderRadius: '50% 0 50% 0',
+                                background: 'linear-gradient(135deg, rgba(231, 33, 119, 0.08), rgba(134, 44, 145, 0.08))',
+                                top: '50%',
+                                right: '5%',
+                                animation: 'float 20s infinite ease-in-out',
+                                animationDelay: '10s'
+                            }} />
+                        </div>
+                        <div className="container mx-auto px-4 relative" style={{ zIndex: 2 }}>
                             <div className="grid md:grid-cols-2 gap-12 items-center">
-                                <div className={`${isRTL ? 'rtl' : 'ltr'}`}>
+                                <div className={`fade-in-up ${isRTL ? 'rtl' : 'ltr'}`} style={{ animationDelay: '0.3s' }}>
                                     {welcome.translations && welcome.translations.length > 0 && (
                                         <>
                                             {(() => {
                                                 const translation = welcome.translations.find(t => t.locale === locale) || welcome.translations[0];
                                                 return (
-                                                    <>
+                                                    <div style={{
+                                                        padding: '2.5rem 2rem',
+                                                        background: 'rgba(255, 255, 255, 0.8)',
+                                                        borderRadius: '20px',
+                                                        boxShadow: '0 10px 40px rgba(231, 33, 119, 0.1)'
+                                                    }}>
                                                         {translation.title && (
-                                                            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+                                                            <h2 className="text-4xl md:text-5xl font-light mb-6" style={{
+                                                                fontFamily: "'Alexandria', sans-serif",
+                                                                color: '#545759',
+                                                                letterSpacing: '0.05em'
+                                                            }}>
                                                                 {translation.title}
                                                             </h2>
                                                         )}
                                                         {translation.description && (
-                                                            <p className="text-lg text-muted-foreground mb-8">
+                                                            <p className="text-lg mb-8" style={{
+                                                                fontFamily: "'Alexandria', sans-serif",
+                                                                fontWeight: 300,
+                                                                color: '#545759',
+                                                                lineHeight: '1.8'
+                                                            }}>
                                                                 {translation.description}
                                                             </p>
                                                         )}
                                                         {translation.button_text && welcome.button_url && (
                                                             <a
                                                                 href={welcome.button_url}
-                                                                className="inline-block px-8 py-3 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity"
+                                                                className="inline-block px-8 py-3 rounded-lg text-white font-medium transition-all hover:-translate-y-0.5"
+                                                                style={{
+                                                                    fontFamily: "'Alexandria', sans-serif",
+                                                                    fontWeight: 500,
+                                                                    letterSpacing: '0.05em',
+                                                                    background: 'linear-gradient(135deg, #e72177, #862b90)',
+                                                                    boxShadow: '0 5px 20px rgba(231, 33, 119, 0.3)'
+                                                                }}
+                                                                onMouseEnter={(e) => {
+                                                                    e.currentTarget.style.boxShadow = '0 8px 30px rgba(231, 33, 119, 0.4)';
+                                                                }}
+                                                                onMouseLeave={(e) => {
+                                                                    e.currentTarget.style.boxShadow = '0 5px 20px rgba(231, 33, 119, 0.3)';
+                                                                }}
                                                             >
                                                                 {translation.button_text}
                                                             </a>
                                                         )}
-                                                    </>
+                                                    </div>
                                                 );
                                             })()}
                                         </>
                                     )}
                                 </div>
                                 {welcome.image && (
-                                    <div>
-                                        <img
-                                            src={`/storage/${welcome.image}`}
-                                            alt={welcome.translations.find(t => t.locale === locale)?.title || 'Welcome'}
-                                            className="w-full h-auto rounded-lg shadow-lg"
-                                        />
+                                    <div className="fade-in-up" style={{ animationDelay: '0.5s' }}>
+                                        <div style={{
+                                            padding: '1rem',
+                                            background: 'rgba(255, 255, 255, 0.8)',
+                                            borderRadius: '20px',
+                                            boxShadow: '0 10px 40px rgba(231, 33, 119, 0.1)'
+                                        }}>
+                                            <img
+                                                src={`/storage/${welcome.image}`}
+                                                alt={welcome.translations.find(t => t.locale === locale)?.title || 'Welcome'}
+                                                className="w-full h-auto rounded-lg"
+                                            />
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -317,38 +412,113 @@ export default function Home({
 
                 {/* Welcome Details */}
                 {welcomeDetails.length > 0 && (
-                    <section className="py-20 bg-muted/30">
-                        <div className="container mx-auto px-4">
-                            <div className="grid md:grid-cols-3 gap-8">
-                                {welcomeDetails.map((detail) => {
+                    <section className="py-20 relative" style={{
+                        background: 'linear-gradient(135deg, #f5f5f5 0%, #ffffff 50%, #fafafa 100%)'
+                    }}>
+                        {/* Rose Petals Background for Welcome Details Section */}
+                        <div style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            pointerEvents: 'none',
+                            zIndex: 1,
+                            overflow: 'hidden'
+                        }}>
+                            <div style={{
+                                position: 'absolute',
+                                width: '200px',
+                                height: '200px',
+                                borderRadius: '50% 0 50% 0',
+                                background: 'linear-gradient(135deg, rgba(231, 33, 119, 0.06), rgba(134, 44, 145, 0.06))',
+                                top: '15%',
+                                left: '8%',
+                                animation: 'float 20s infinite ease-in-out'
+                            }} />
+                            <div style={{
+                                position: 'absolute',
+                                width: '200px',
+                                height: '200px',
+                                borderRadius: '50% 0 50% 0',
+                                background: 'linear-gradient(135deg, rgba(231, 33, 119, 0.06), rgba(134, 44, 145, 0.06))',
+                                bottom: '20%',
+                                right: '8%',
+                                animation: 'float 20s infinite ease-in-out',
+                                animationDelay: '10s'
+                            }} />
+                        </div>
+                        <div className="container mx-auto px-4 relative" style={{ zIndex: 2 }}>
+                            <div className="grid md:grid-cols-3 gap-6">
+                                {welcomeDetails.map((detail, index) => {
                                     const translation = detail.translations.find(t => t.locale === locale) || detail.translations[0];
                                     return (
-                                        <div key={detail.id} className={`bg-background rounded-lg shadow-md overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`}>
+                                        <div
+                                            key={detail.id}
+                                            className={`fade-in-up ${isRTL ? 'rtl' : 'ltr'}`}
+                                            style={{
+                                                animationDelay: `${0.3 + index * 0.1}s`,
+                                                background: 'rgba(255, 255, 255, 0.8)',
+                                                borderRadius: '20px',
+                                                boxShadow: '0 10px 40px rgba(231, 33, 119, 0.1)',
+                                                overflow: 'hidden',
+                                                transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(-5px)';
+                                                e.currentTarget.style.boxShadow = '0 15px 50px rgba(231, 33, 119, 0.15)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = '0 10px 40px rgba(231, 33, 119, 0.1)';
+                                            }}
+                                        >
                                             {detail.image && (
-                                                <img
-                                                    src={`/storage/${detail.image}`}
-                                                    alt={translation?.title || 'Feature'}
-                                                    className="w-full h-48 object-cover"
-                                                />
+                                                <div className="overflow-hidden">
+                                                    <img
+                                                        src={`/storage/${detail.image}`}
+                                                        alt={translation?.title || 'Feature'}
+                                                        className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
+                                                    />
+                                                </div>
                                             )}
                                             <div className="p-6">
                                                 {translation?.title && (
-                                                    <h3 className="text-2xl font-bold mb-3">
+                                                    <h3 className="text-2xl font-light mb-3" style={{
+                                                        fontFamily: "'Alexandria', sans-serif",
+                                                        color: '#545759',
+                                                        letterSpacing: '0.05em'
+                                                    }}>
                                                         {translation.title}
                                                     </h3>
                                                 )}
                                                 {translation?.description && (
-                                                    <p className="text-muted-foreground mb-4">
+                                                    <p className="mb-4" style={{
+                                                        fontFamily: "'Alexandria', sans-serif",
+                                                        fontWeight: 300,
+                                                        color: '#545759',
+                                                        lineHeight: '1.8'
+                                                    }}>
                                                         {translation.description}
                                                     </p>
                                                 )}
                                                 {translation?.button_text && detail.button_url && (
                                                     <a
                                                         href={detail.button_url}
-                                                        className="inline-block px-6 py-2 rounded-lg hover:opacity-90 transition-opacity text-white"
+                                                        className="inline-block px-6 py-2 rounded-lg font-medium transition-all hover:-translate-y-0.5"
                                                         style={{
-                                                            backgroundColor: detail.button_color || '#E91E63',
+                                                            fontFamily: "'Alexandria', sans-serif",
+                                                            fontWeight: 500,
+                                                            letterSpacing: '0.05em',
+                                                            backgroundColor: detail.button_color || '#e72177',
                                                             color: detail.button_text_color || '#FFFFFF',
+                                                            boxShadow: '0 5px 15px rgba(231, 33, 119, 0.3)'
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.boxShadow = '0 8px 25px rgba(231, 33, 119, 0.4)';
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.boxShadow = '0 5px 15px rgba(231, 33, 119, 0.3)';
                                                         }}
                                                     >
                                                         {translation.button_text}

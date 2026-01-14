@@ -44,10 +44,15 @@ class ProductController extends Controller
 
         $product->incrementViewCount();
 
+        // Get related products from the same category
+        // Order by: featured first, then sort_order, then created_at
         $relatedProducts = Product::where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->where('is_active', true)
             ->with(['translations', 'media'])
+            ->orderBy('is_featured', 'desc')
+            ->orderBy('sort_order', 'asc')
+            ->orderBy('created_at', 'desc')
             ->take(4)
             ->get();
 
