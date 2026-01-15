@@ -28,6 +28,8 @@ class RosaAdminPanelProvider extends PanelProvider
             ->id('rosa-admin')
             ->path('rosa-admin')
             ->login()
+            ->brandLogo(asset('images/logo.png'))
+            ->profile()
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -38,8 +40,8 @@ class RosaAdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                // AccountWidget::class,
+                // FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

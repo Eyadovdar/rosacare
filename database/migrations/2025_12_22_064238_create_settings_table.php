@@ -27,6 +27,9 @@ return new class extends Migration
             $table->string('linkedin')->nullable()->default(null);
             $table->string('youtube')->nullable()->default(null);
             $table->string('tiktok')->nullable()->default(null);
+            $table->string('whatsapp')->nullable()->default(null);
+            $table->boolean('show_whatsapp_button')->default(true);
+            $table->boolean('show_currency_in_products')->default(true);
             $table->timestamps();
         });
     }
