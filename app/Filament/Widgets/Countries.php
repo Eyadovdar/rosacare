@@ -8,6 +8,7 @@ use Filament\Widgets\ChartWidget;
 class Countries extends ChartWidget
 {
     protected ?string $heading = 'Visitors by Country';
+    protected static ?int $sort = 2;
 
     protected int | string | array $columnSpan = 1;
 

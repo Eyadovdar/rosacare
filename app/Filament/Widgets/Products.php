@@ -9,6 +9,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class Products extends StatsOverviewWidget
 {
+    protected static ?int $sort = 1;
     protected function getStats(): array
     {
         return [
