@@ -5,7 +5,7 @@ namespace App\Models;
 use Astrotomic\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Support\Facades\Storage;
 
 class Announcement extends Model
 {
@@ -28,17 +28,37 @@ class Announcement extends Model
         'start_date',
         'end_date',
     ];
+
     public function translations(): HasMany
     {
         return $this->hasMany(AnnouncementTranslation::class);
-    }
-    public function image(): MorphOne
-    {
-        return $this->morphOne(Media::class, 'model')->where('collection_name', 'images');
     }
 
     public function getUrlAttribute(): string
     {
         return url($this->button_url);
+    }
+
+    /**
+     * Get the full URL for the image
+     *
+     * @return string|null
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        // If the path already starts with http:// or https://, return as is
+        if (str_starts_with($this->image, 'http://') || str_starts_with($this->image, 'https://')) {
+            return $this->image;
+        }
+
+        // Filament stores files in storage/app/public, and the path is relative to that
+        // The path might be: "announcements/images/filename.webp"
+
+        // Use asset() helper to generate the URL
+        return asset('storage/' . $this->image);
     }
 }

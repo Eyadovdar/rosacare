@@ -15,9 +15,9 @@ class AnnouncementsTable
     {
         return $table
             ->columns([
-                ImageColumn::make('image.url')
-                ->visibility('public')
-                ->label('Image'),
+                ImageColumn::make('image_url')
+                    ->label('Image')
+                    ->getStateUsing(fn ($record) => $record->image_url),
                 TextColumn::make('button_url')
                     ->searchable(),
                 TextColumn::make('button_color')

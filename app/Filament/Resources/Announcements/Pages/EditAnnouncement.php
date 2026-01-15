@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Announcements\Pages;
 
 use App\Filament\Resources\Announcements\AnnouncementResource;
-use App\Models\Media;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Storage;
@@ -33,10 +32,9 @@ class EditAnnouncement extends EditRecord
             }
         }
 
-        // Load announcement image using the image relationship
-        $image = $record->image;
-        if ($image instanceof Media) {
-            $data['image'] = ($image->path ? $image->path . '/' : '') . $image->file_name;
+        // Load announcement image path directly from the image column
+        if ($record->image) {
+            $data['image'] = $record->image;
         }
 
         return $data;
@@ -47,13 +45,17 @@ class EditAnnouncement extends EditRecord
         // Extract and store translations separately
         $this->translations = $this->extractTranslations($data);
 
-        // Store media file to save after update
+        // Store image path to save after update
         // Filament FileUpload stores file paths as strings (single) or arrays (multiple)
         $this->announcementImage = is_array($data['image'] ?? null)
             ? ($data['image'][0] ?? null)
             : ($data['image'] ?? null);
 
-        // Remove media fields from form data
+        // Store old image path for deletion if a new image is uploaded
+        $this->oldImagePath = $this->record->image;
+
+        // Remove image field from form data
+        // The image will be saved directly to the image column in afterSave
         unset($data['image']);
 
         return $this->removeTranslationFields($data);
@@ -68,54 +70,33 @@ class EditAnnouncement extends EditRecord
             }
         }
 
-        // Delete existing image media for this announcement
-        $existingImage = $this->record->image;
-        if ($existingImage instanceof Media) {
-            $existingImage->delete();
-        }
-
-        // Save announcement image
+        // Handle image update
         if ($this->announcementImage && is_string($this->announcementImage)) {
-            $this->saveMediaFile($this->announcementImage, 'announcements', 0);
+            // Delete old image file if it exists and is different from the new one
+            if ($this->oldImagePath && $this->oldImagePath !== $this->announcementImage) {
+                if (Storage::disk('public')->exists($this->oldImagePath)) {
+                    Storage::disk('public')->delete($this->oldImagePath);
+                }
+            }
+
+            // Ensure new file has public visibility
+            if (Storage::disk('public')->exists($this->announcementImage)) {
+                Storage::disk('public')->setVisibility($this->announcementImage, 'public');
+            }
+
+            // Update the record with the new image path
+            $this->record->update(['image' => $this->announcementImage]);
+        } elseif ($this->announcementImage === null && $this->oldImagePath) {
+            // If image was removed, delete the old file and clear the column
+            if (Storage::disk('public')->exists($this->oldImagePath)) {
+                Storage::disk('public')->delete($this->oldImagePath);
+            }
+            $this->record->update(['image' => null]);
         }
     }
 
     protected $announcementImage = null;
-
-    protected function saveMediaFile(string $filePath, string $collection, int $sortOrder): void
-    {
-        try {
-            // FileUpload stores paths relative to storage/app/public
-            // Check if file exists
-            if (!Storage::disk('public')->exists($filePath)) {
-                \Log::warning("Media file not found: {$filePath}");
-                return;
-            }
-
-            // Ensure file has public visibility
-            Storage::disk('public')->setVisibility($filePath, 'public');
-
-            $fileInfo = pathinfo($filePath);
-            $dirname = $fileInfo['dirname'] !== '.' ? $fileInfo['dirname'] : '';
-
-            Media::create([
-                'model_type' => get_class($this->record),
-                'model_id' => $this->record->id,
-                'collection_name' => $collection,
-                'file_name' => $fileInfo['basename'],
-                'mime_type' => Storage::disk('public')->mimeType($filePath) ?: 'image/jpeg',
-                'size' => Storage::disk('public')->size($filePath),
-                'disk' => 'public',
-                'path' => $dirname,
-                'sort_order' => $sortOrder,
-            ]);
-        } catch (\Exception $e) {
-            \Log::error("Failed to save media file: {$filePath}", [
-                'error' => $e->getMessage(),
-                'collection' => $collection,
-            ]);
-        }
-    }
+    protected $oldImagePath = null;
 
     protected array $translations = [];
 

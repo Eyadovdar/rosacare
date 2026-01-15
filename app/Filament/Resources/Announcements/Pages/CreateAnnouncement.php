@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Announcements\Pages;
 
 use App\Filament\Resources\Announcements\AnnouncementResource;
-use App\Models\Media;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Storage;
 
@@ -16,13 +15,14 @@ class CreateAnnouncement extends CreateRecord
         // Extract and store translations separately
         $this->translations = $this->extractTranslations($data);
 
-        // Store media file to save after creation
+        // Store image path to save after creation
         // Filament FileUpload stores file paths as strings (single) or arrays (multiple)
         $this->announcementImage = is_array($data['image'] ?? null)
             ? ($data['image'][0] ?? null)
             : ($data['image'] ?? null);
 
-        // Remove media and translation fields from form data
+        // Remove image and translation fields from form data
+        // The image will be saved directly to the image column in afterCreate
         unset($data['image']);
 
         return $this->removeTranslationFields($data);
@@ -37,48 +37,19 @@ class CreateAnnouncement extends CreateRecord
             }
         }
 
-        // Save announcement image
+        // Save announcement image path directly to the image column
         if ($this->announcementImage && is_string($this->announcementImage)) {
-            $this->saveMediaFile($this->announcementImage, 'announcements', 0);
+            // Ensure file has public visibility
+            if (Storage::disk('public')->exists($this->announcementImage)) {
+                Storage::disk('public')->setVisibility($this->announcementImage, 'public');
+            }
+            
+            // Update the record with the image path
+            $this->record->update(['image' => $this->announcementImage]);
         }
     }
 
     protected $announcementImage = null;
-
-    protected function saveMediaFile(string $filePath, string $collection, int $sortOrder): void
-    {
-        try {
-            // FileUpload stores paths relative to storage/app/public
-            // Check if file exists
-            if (!Storage::disk('public')->exists($filePath)) {
-                \Log::warning("Media file not found: {$filePath}");
-                return;
-            }
-
-            // Ensure file has public visibility
-            Storage::disk('public')->setVisibility($filePath, 'public');
-
-            $fileInfo = pathinfo($filePath);
-            $dirname = $fileInfo['dirname'] !== '.' ? $fileInfo['dirname'] : '';
-
-            Media::create([
-                'model_type' => get_class($this->record),
-                'model_id' => $this->record->id,
-                'collection_name' => $collection,
-                'file_name' => $fileInfo['basename'],
-                'mime_type' => Storage::disk('public')->mimeType($filePath) ?: 'image/jpeg',
-                'size' => Storage::disk('public')->size($filePath),
-                'disk' => 'public',
-                'path' => $dirname,
-                'sort_order' => $sortOrder,
-            ]);
-        } catch (\Exception $e) {
-            \Log::error("Failed to save media file: {$filePath}", [
-                'error' => $e->getMessage(),
-                'collection' => $collection,
-            ]);
-        }
-    }
 
     protected array $translations = [];
 

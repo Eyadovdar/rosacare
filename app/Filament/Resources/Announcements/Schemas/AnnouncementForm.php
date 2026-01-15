@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Announcements\Schemas;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
@@ -26,10 +27,12 @@ class AnnouncementForm
                 TextInput::make('button_url')
                     ->url()
                     ->default(null),
-                ColorPicker::make('button_color')
-                    ->default(null),
-                ColorPicker::make('button_text_color')
-                    ->default(null),
+                DateTimePicker::make("start_date")
+                ->label('Show at')
+                ->default(now()),
+                DateTimePicker::make('end_date')
+                ->label('Show until')
+                ->default(now()->addDays(30)),
                     // Translation Tabs
                 Tabs::make('Translations')
                     ->tabs([
