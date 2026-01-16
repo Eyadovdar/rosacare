@@ -64,6 +64,9 @@ class HandleInertiaRequests extends Middleware
                     'linkedin' => $settingsModel->linkedin,
                     'youtube' => $settingsModel->youtube,
                     'tiktok' => $settingsModel->tiktok,
+                    'whatsapp' => $settingsModel->whatsapp,
+                    'show_whatsapp_button' => $settingsModel->show_whatsapp_button ?? true,
+                    'show_price_in_products' => $settingsModel->show_price_in_products ?? true,
                     'translations' => $settingsModel->translations->map(function ($translation) {
                         return [
                             'locale' => $translation->locale,

@@ -69,7 +69,7 @@ class EditHero extends EditRecord
                 $data['image'] = $resizedImagePath;
             } else {
                 // Keep existing image
-                $data['image'] = $this->heroImage;
+            $data['image'] = $this->heroImage;
             }
             
             // Ensure file has public visibility

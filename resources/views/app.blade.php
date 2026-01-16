@@ -106,5 +106,7 @@
     </head>
     <body class="font-sans antialiased">
         @inertia
-    </body>
+        
+        {{-- Preloader will be rendered by React --}}
+        <div id="preloader-root"></div>
 </html>

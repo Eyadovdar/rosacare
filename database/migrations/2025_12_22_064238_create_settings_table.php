@@ -29,7 +29,9 @@ return new class extends Migration
             $table->string('tiktok')->nullable()->default(null);
             $table->string('whatsapp')->nullable()->default(null);
             $table->boolean('show_whatsapp_button')->default(true);
-            $table->boolean('show_currency_in_products')->default(true);
+            $table->boolean('show_price_in_products')->default(true);
+            $table->string('default_currency_ar')->default("ل.س");
+            $table->string('default_currency_en')->default("SYP");
             $table->timestamps();
         });
     }

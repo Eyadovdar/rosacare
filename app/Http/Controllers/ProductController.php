@@ -49,7 +49,7 @@ class ProductController extends Controller
         $relatedProducts = Product::where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->where('is_active', true)
-            ->with(['translations', 'media'])
+            ->with(['translations', 'category.translations', 'media'])
             ->orderBy('is_featured', 'desc')
             ->orderBy('sort_order', 'asc')
             ->orderBy('created_at', 'desc')

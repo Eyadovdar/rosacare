@@ -1,4 +1,5 @@
 import { Head, usePage } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
 import { HeroSection } from '@/components/rosacare/HeroSection';
 import { AboutSection } from '@/components/rosacare/AboutSection';
 import { CategoryShowcase } from '@/components/rosacare/CategoryShowcase';
@@ -9,6 +10,7 @@ import { WhyRosaCareSection } from '@/components/rosacare/WhyRosaCareSection';
 import { Parallax } from '@/components/rosacare/Parallax';
 import { Footer } from '@/components/rosacare/Footer';
 import { Navbar } from '@/components/rosacare/Navbar';
+import { WhatsAppButton } from '@/components/rosacare/WhatsAppButton';
 
 interface Category {
     id: number;
@@ -72,6 +74,17 @@ interface Setting {
     favicon_url?: string;
     default_meta_image?: string;
     default_meta_image_url?: string;
+    phone_number?: string;
+    email?: string;
+    address?: string;
+    facebook?: string;
+    twitter?: string;
+    instagram?: string;
+    linkedin?: string;
+    youtube?: string;
+    tiktok?: string;
+    whatsapp?: string;
+    show_whatsapp_button?: boolean;
     translations?: Array<{
         locale: string;
         site_name?: string;
@@ -101,6 +114,7 @@ interface Hero {
 interface Announcement {
     id: number;
     image?: string;
+    image_url?: string;
     button_url?: string;
     button_color?: string;
     button_text_color?: string;
@@ -150,6 +164,47 @@ interface ParallaxData {
     }>;
 }
 
+interface AboutData {
+    id?: number;
+    story?: {
+        title?: string;
+        content?: string;
+        paragraphs?: string[];
+    };
+    heritage?: {
+        title?: string;
+        content?: string;
+        subcontent?: string;
+        image_url?: string;
+        features?: Array<{
+            icon_path?: string;
+            icon_url?: string;
+            title?: string;
+            description?: string;
+        }>;
+    };
+    whyRosaCare?: {
+        title?: string;
+        reasons?: Array<{
+            icon_path?: string;
+            icon_url?: string;
+            title?: string;
+            description?: string;
+        }>;
+        image_url?: string;
+    };
+    benefits?: {
+        title?: string;
+        items?: Array<{
+            icon_path?: string;
+            icon_url?: string;
+            title?: string;
+            description?: string;
+        }>;
+        image_url?: string;
+    };
+}
+
 interface HomeProps {
     categories: Category[];
     featuredProducts: Product[];
@@ -160,6 +215,7 @@ interface HomeProps {
     welcome?: Welcome;
     welcomeDetails?: WelcomeDetail[];
     parallax?: ParallaxData;
+    about?: AboutData | null;
 }
 
 export default function Home({
@@ -172,11 +228,55 @@ export default function Home({
     welcome,
     welcomeDetails = [],
     parallax,
+    about = null,
 }: HomeProps) {
     const isRTL = locale === 'ar';
     const page = usePage<{ props: { menuItems?: MenuItem[] } }>();
     // Get menuItems from shared props (HandleInertiaRequests middleware)
     const menuItems = (page.props.menuItems || []) as MenuItem[];
+
+    // State for closed announcements
+    const [closedAnnouncements, setClosedAnnouncements] = useState<Set<number>>(new Set());
+    const [visibleAnnouncements, setVisibleAnnouncements] = useState<Announcement[]>([]);
+    const [closingAnnouncements, setClosingAnnouncements] = useState<Set<number>>(new Set());
+
+    // Load closed announcements from localStorage on mount
+    useEffect(() => {
+        const stored = localStorage.getItem('closedAnnouncements');
+        if (stored) {
+            try {
+                const closedIds = JSON.parse(stored) as number[];
+                setClosedAnnouncements(new Set(closedIds));
+            } catch (e) {
+                console.error('Error parsing closed announcements:', e);
+            }
+        }
+    }, []);
+
+    // Filter visible announcements based on closed state
+    useEffect(() => {
+        const visible = announcements.filter(ann => !closedAnnouncements.has(ann.id));
+        setVisibleAnnouncements(visible);
+    }, [announcements, closedAnnouncements]);
+
+    // Function to close an announcement
+    const closeAnnouncement = (announcementId: number) => {
+        // Start closing animation
+        setClosingAnnouncements(prev => new Set(prev).add(announcementId));
+
+        // After animation, mark as closed
+        setTimeout(() => {
+            const newClosed = new Set(closedAnnouncements);
+            newClosed.add(announcementId);
+            setClosedAnnouncements(newClosed);
+            setClosingAnnouncements(prev => {
+                const next = new Set(prev);
+                next.delete(announcementId);
+                return next;
+            });
+            localStorage.setItem('closedAnnouncements', JSON.stringify(Array.from(newClosed)));
+        }, 300);
+    };
 
     // Get meta data from settings
     // Settings translations is an array, not an object
@@ -228,8 +328,34 @@ export default function Home({
                             transform: translate(-30px, 30px) rotate(240deg);
                         }
                     }
+                    @keyframes slideDown {
+                        from {
+                            opacity: 0;
+                            transform: translateY(-100%);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                    @keyframes fadeOut {
+                        from {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                        to {
+                            opacity: 0;
+                            transform: translateY(-100%);
+                        }
+                    }
                     .fade-in-up {
                         animation: fadeInUp 1s ease-out both;
+                    }
+                    .floating-announcement {
+                        animation: slideDown 0.5s ease-out;
+                    }
+                    .floating-announcement.closing {
+                        animation: fadeOut 0.3s ease-out forwards;
                     }
                 `}</style>
                 {metaDescription && <meta name="description" content={metaDescription} />}
@@ -254,42 +380,207 @@ export default function Home({
             <div className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <Navbar menuItems={menuItems} locale={locale} />
 
-                {/* Announcements Banner */}
-                {announcements.length > 0 && (
-                    <div className="bg-primary text-white">
-                        <div className="container mx-auto px-4 py-3">
-                            <div className="flex items-center justify-center gap-4 flex-wrap">
-                                {announcements.map((announcement) => {
-                                    const translation = announcement.translations.find(t => t.locale === locale) || announcement.translations[0];
-                                    return (
-                                        <div key={announcement.id} className="flex items-center gap-3">
-                                            {translation?.title && (
-                                                <span className="font-semibold">{translation.title}</span>
-                                            )}
-                                            {translation?.description && (
-                                                <span>{translation.description}</span>
-                                            )}
-                                            {translation?.button_text && announcement.button_url && (
-                                                <a
-                                                    href={announcement.button_url}
-                                                    className="underline hover:opacity-80"
-                                                    style={{
-                                                        color: announcement.button_text_color || '#FFFFFF',
-                                                    }}
-                                                >
-                                                    {translation.button_text}
-                                                </a>
-                                            )}
+                {/* Floating Announcements Banner */}
+                {visibleAnnouncements.length > 0 && (
+                    <div className="sticky top-16 left-0 right-0 z-40 floating-announcement">
+                        {visibleAnnouncements.map((announcement) => {
+                            const translation = announcement.translations.find(t => t.locale === locale) || announcement.translations[0];
+                            const hasImage = announcement.image_url && announcement.image;
+                            const isClosing = closingAnnouncements.has(announcement.id);
+
+                            return (
+                                <div
+                                    key={announcement.id}
+                                    className={`relative ${isClosing ? 'closing' : ''}`}
+                                    style={{
+                                        background: hasImage
+                                            ? 'transparent'
+                                            : 'linear-gradient(135deg, rgba(231, 33, 119, 0.95) 0%, rgba(134, 44, 145, 0.95) 100%)',
+                                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                                    }}
+                                >
+                                    {/* Close Button */}
+                                    <button
+                                        onClick={() => closeAnnouncement(announcement.id)}
+                                        className="absolute top-2 right-2 md:top-4 md:right-4 z-10 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all duration-200 flex items-center justify-center"
+                                        style={{
+                                            width: '32px',
+                                            height: '32px',
+                                            backdropFilter: 'blur(10px)',
+                                        }}
+                                        aria-label={locale === 'ar' ? 'إغلاق' : 'Close'}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-5 w-5"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            strokeWidth={2}
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M6 18L18 6M6 6l12 12"
+                                            />
+                                        </svg>
+                                    </button>
+
+                                    {hasImage ? (
+                                        // Announcement with Image Layout
+                                        <div className="relative">
+                                            <img
+                                                src={announcement.image_url}
+                                                alt={translation?.title || 'Announcement'}
+                                                className="w-full h-auto object-cover"
+                                                style={{ maxHeight: '300px' }}
+                                            />
+                                            <div
+                                                className="absolute inset-0 flex items-center justify-center"
+                                                style={{
+                                                    background: 'linear-gradient(135deg, rgba(231, 33, 119, 0.85) 0%, rgba(134, 44, 145, 0.85) 100%)',
+                                                }}
+                                            >
+                                                <div className="container mx-auto px-4 text-center text-white">
+                                                    {translation?.title && (
+                                                        <h3
+                                                            className="text-2xl md:text-3xl font-light mb-3"
+                                                            style={{
+                                                                fontFamily: "'Alexandria', sans-serif",
+                                                                letterSpacing: '0.05em',
+                                                            }}
+                                                        >
+                                                            {translation.title}
+                                                        </h3>
+                                                    )}
+                                                    {translation?.description && (
+                                                        <p
+                                                            className="text-base md:text-lg mb-4 max-w-3xl mx-auto"
+                                                            style={{
+                                                                fontFamily: "'Alexandria', sans-serif",
+                                                                fontWeight: 300,
+                                                                lineHeight: '1.8',
+                                                            }}
+                                                        >
+                                                            {translation.description}
+                                                        </p>
+                                                    )}
+                                                    {translation?.button_text && announcement.button_url && (
+                                                        <a
+                                                            href={announcement.button_url}
+                                                            className="inline-block px-6 py-2 md:px-8 md:py-3 rounded-lg font-medium transition-all hover:-translate-y-0.5"
+                                                            style={{
+                                                                fontFamily: "'Alexandria', sans-serif",
+                                                                fontWeight: 500,
+                                                                letterSpacing: '0.05em',
+                                                                backgroundColor: announcement.button_color || '#FFFFFF',
+                                                                color: announcement.button_text_color || '#e72177',
+                                                                boxShadow: '0 5px 20px rgba(0, 0, 0, 0.2)',
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                e.currentTarget.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.3)';
+                                                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                e.currentTarget.style.boxShadow = '0 5px 20px rgba(0, 0, 0, 0.2)';
+                                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                            }}
+                                                        >
+                                                            {translation.button_text}
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
+                                    ) : (
+                                        // Announcement without Image Layout
+                                        <div className="container mx-auto px-4">
+                                            <div
+                                                className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 py-3 md:py-4"
+                                                style={{
+                                                    background: 'rgba(255, 255, 255, 0.95)',
+                                                    borderRadius: '15px',
+                                                    padding: '1rem 1.5rem',
+                                                    margin: '0.5rem 0',
+                                                }}
+                                            >
+                                                <div className="flex-1 text-center md:text-left pr-8 md:pr-0">
+                                                    {translation?.title && (
+                                                        <h3
+                                                            className="text-lg md:text-xl font-semibold mb-1 md:mb-2"
+                                                            style={{
+                                                                fontFamily: "'Alexandria', sans-serif",
+                                                                color: '#545759',
+                                                                letterSpacing: '0.05em',
+                                                            }}
+                                                        >
+                                                            {translation.title}
+                                                        </h3>
+                                                    )}
+                                                    {translation?.description && (
+                                                        <p
+                                                            className="text-sm md:text-base"
+                                                            style={{
+                                                                fontFamily: "'Alexandria', sans-serif",
+                                                                fontWeight: 300,
+                                                                color: '#545759',
+                                                                lineHeight: '1.6',
+                                                            }}
+                                                        >
+                                                            {translation.description}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                {translation?.button_text && announcement.button_url && (
+                                                    <a
+                                                        href={announcement.button_url}
+                                                        className="inline-block px-5 py-2 md:px-6 md:py-2 rounded-lg font-medium transition-all hover:-translate-y-0.5 whitespace-nowrap"
+                                                        style={{
+                                                            fontFamily: "'Alexandria', sans-serif",
+                                                            fontWeight: 500,
+                                                            letterSpacing: '0.05em',
+                                                            backgroundColor: announcement.button_color || '#e72177',
+                                                            color: announcement.button_text_color || '#FFFFFF',
+                                                            boxShadow: '0 5px 15px rgba(231, 33, 119, 0.3)',
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.boxShadow = '0 8px 25px rgba(231, 33, 119, 0.4)';
+                                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.boxShadow = '0 5px 15px rgba(231, 33, 119, 0.3)';
+                                                            e.currentTarget.style.transform = 'translateY(0)';
+                                                        }}
+                                                    >
+                                                        {translation.button_text}
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
 
+
                 {/* Hero Section with Swiper - works with or without hero items */}
                 <HeroSection locale={locale} items={heroItems} />
+                {featuredProducts.length > 0 && (
+                    <section className="py-20 bg-background">
+                        <div className="container mx-auto px-4">
+                            <h2 className={`text-4xl md:text-5xl font-bold mb-12 text-center ${isRTL ? 'rtl' : 'ltr'}`}>
+                                {locale === 'ar' ? 'منتجات مميزة' : 'Featured Products'}
+                            </h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                {featuredProducts.map((product) => (
+                                    <ProductCard key={product.id} product={product} locale={locale} />
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+                )}
 
                 {/* Welcome Section */}
                 {welcome && (
@@ -533,27 +824,20 @@ export default function Home({
                     </section>
                 )}
 
-                <AboutSection locale={locale} />
+                <AboutSection locale={locale} about={about} />
                 {categories.length > 0 && <CategoryShowcase categories={categories} locale={locale} />}
-                {featuredProducts.length > 0 && (
-                    <section className="py-20 bg-background">
-                        <div className="container mx-auto px-4">
-                            <h2 className={`text-4xl md:text-5xl font-bold mb-12 text-center ${isRTL ? 'rtl' : 'ltr'}`}>
-                                {locale === 'ar' ? 'منتجات مميزة' : 'Featured Products'}
-                            </h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {featuredProducts.map((product) => (
-                                    <ProductCard key={product.id} product={product} locale={locale} />
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-                )}
-                <BenefitsSection locale={locale} />
-                <HeritageSection locale={locale} />
-                <WhyRosaCareSection locale={locale} />
+                <BenefitsSection locale={locale} about={about} />
+                <HeritageSection locale={locale} about={about} />
+                <WhyRosaCareSection locale={locale} about={about} />
                 <Parallax locale={locale} parallax={parallax} />
                 <Footer locale={locale} />
+
+                {/* WhatsApp Floating Button */}
+                <WhatsAppButton
+                    whatsappUrl={settings?.whatsapp}
+                    showButton={!!settings?.show_whatsapp_button}
+                    locale={locale}
+                />
             </div>
         </>
     );

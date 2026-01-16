@@ -41,6 +41,11 @@ class Setting extends Model
         'linkedin',
         'youtube',
         'tiktok',
+        'whatsapp',
+        'show_price_in_products',
+        'show_whatsapp_button',
+        'default_currency_ar',
+        'default_currency_en',
     ];
 
     /**

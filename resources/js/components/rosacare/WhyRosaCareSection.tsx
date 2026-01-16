@@ -1,13 +1,28 @@
 import { CheckCircle2 } from 'lucide-react';
 
-interface WhyRosaCareSectionProps {
-    locale?: string;
+interface AboutData {
+    whyRosaCare?: {
+        title?: string;
+        reasons?: Array<{
+            icon_path?: string;
+            icon_url?: string;
+            title?: string;
+            description?: string;
+        }>;
+        image_url?: string;
+    };
 }
 
-export function WhyRosaCareSection({ locale = 'ar' }: WhyRosaCareSectionProps) {
+interface WhyRosaCareSectionProps {
+    locale?: string;
+    about?: AboutData | null;
+}
+
+export function WhyRosaCareSection({ locale = 'ar', about = null }: WhyRosaCareSectionProps) {
     const isRTL = locale === 'ar';
 
-    const reasons = [
+    // Default reasons if no about data
+    const defaultReasons = [
         {
             title: locale === 'ar' ? 'مكونات طبيعية' : 'Natural Ingredients',
             description: locale === 'ar'
@@ -34,21 +49,33 @@ export function WhyRosaCareSection({ locale = 'ar' }: WhyRosaCareSectionProps) {
         },
     ];
 
+    // Use about data if available, otherwise use default
+    const title = about?.whyRosaCare?.title || (locale === 'ar' ? 'لماذا روزاكير؟' : 'Why RosaCare?');
+    const reasons = about?.whyRosaCare?.reasons && about.whyRosaCare.reasons.length > 0
+        ? about.whyRosaCare.reasons
+        : defaultReasons;
+
     return (
         <section className="py-20 bg-background">
             <div className="container mx-auto px-4">
-                <h2 className={`text-4xl md:text-5xl font-bold mb-12 text-center ${isRTL ? 'rtl' : 'ltr'}`}>
-                    {locale === 'ar' ? 'لماذا روزاكير؟' : 'Why RosaCare?'}
+                <h2 className={`text-4xl md:text-5xl font-bold mb-12 text-center ${isRTL ? 'rtl' : 'ltr'}`} style={{ fontFamily: "'Alexandria', sans-serif" }}>
+                    {title}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                     {reasons.map((reason, index) => (
                         <div key={index} className="flex gap-4 p-6 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors">
                             <div className="flex-shrink-0">
-                                <CheckCircle2 className="w-8 h-8 text-primary" />
+                                {reason.icon_url ? (
+                                    <img src={reason.icon_url} alt={reason.title || ''} className="w-8 h-8 object-contain" />
+                                ) : (
+                                    <CheckCircle2 className="w-8 h-8 text-primary" />
+                                )}
                             </div>
                             <div className={isRTL ? 'rtl' : 'ltr'}>
-                                <h3 className="text-xl font-semibold mb-2">{reason.title}</h3>
-                                <p className="text-muted-foreground">{reason.description}</p>
+                                <h3 className="text-xl font-semibold mb-2" style={{ fontFamily: "'Alexandria', sans-serif" }}>{reason.title}</h3>
+                                {reason.description && (
+                                    <p className="text-muted-foreground" style={{ fontFamily: "'Alexandria', sans-serif" }}>{reason.description}</p>
+                                )}
                             </div>
                         </div>
                     ))}

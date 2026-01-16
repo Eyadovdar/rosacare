@@ -14,6 +14,7 @@ use App\Models\Welcome;
 use App\Models\WelcomeDetail;
 use App\Models\Hero;
 use App\Models\Parallax;
+use App\Models\About;
 
 class HomeController extends Controller
 {
@@ -57,7 +58,25 @@ class HomeController extends Controller
             })
             ->with('translations')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($announcement) {
+                return [
+                    'id' => $announcement->id,
+                    'image' => $announcement->image,
+                    'image_url' => $announcement->image_url,
+                    'button_url' => $announcement->button_url,
+                    'button_color' => $announcement->button_color,
+                    'button_text_color' => $announcement->button_text_color,
+                    'translations' => $announcement->translations->map(function ($translation) {
+                        return [
+                            'locale' => $translation->locale,
+                            'title' => $translation->title,
+                            'description' => $translation->description,
+                            'button_text' => $translation->button_text,
+                        ];
+                    })->toArray(),
+                ];
+            });
 
         $featuredProducts = Product::where('is_active', true)
             ->where('is_featured', true)
@@ -110,21 +129,58 @@ class HomeController extends Controller
             ];
         }
 
+        // Get active about record for AboutSection and other sections
+        $about = About::where('is_active', true)
+            ->with('translations')
+            ->first();
+
+        $aboutData = null;
+        if ($about) {
+            $locale = app()->getLocale() ?: Session::get('locale', 'ar');
+            $translation = $about->translate($locale);
+
+            $aboutData = [
+                'id' => $about->id,
+                'story' => [
+                    'title' => $translation->story_title ?? null,
+                    'content' => $translation->story_content ?? null,
+                    'paragraphs' => $translation->story_paragraphs ?? [],
+                ],
+                'heritage' => [
+                    'title' => $translation->heritage_title ?? null,
+                    'content' => $translation->heritage_content ?? null,
+                    'subcontent' => $translation->heritage_subcontent ?? null,
+                    'image_url' => $about->heritage_image_url,
+                    'features' => $about->heritage_features_with_urls ?? [],
+                ],
+                'whyRosaCare' => [
+                    'title' => $translation->why_rosacare_title ?? null,
+                    'reasons' => $about->reasons_with_urls ?? [],
+                    'image_url' => $about->why_rosacare_image_url,
+                ],
+                'benefits' => [
+                    'title' => $translation->benefits_title ?? null,
+                    'items' => $about->benefits_with_urls ?? [],
+                    'image_url' => $about->benefits_image_url,
+                ],
+            ];
+        }
+
         // Prepare settings data with translations and image URLs
         // Note: Settings are already shared globally via HandleInertiaRequests middleware
         // We just need to add the meta-specific fields for the Home page
         $settingsData = null;
         if ($settings) {
             $locale = app()->getLocale() ?: Session::get('locale', 'ar');
-            
+
             // Get default meta image URL
             $defaultMetaImageUrl = null;
             if ($settings->default_meta_image) {
                 if (Storage::disk('public')->exists($settings->default_meta_image)) {
-                    $defaultMetaImageUrl = Storage::disk('public')->url($settings->default_meta_image);
+                    $defaultMetaImageUrl = asset('storage/' . $settings->default_meta_image);
                 }
             }
-            
+
             // Use the same structure as HandleInertiaRequests but add meta fields
             $settingsData = [
                 'id' => $settings->id,
@@ -136,6 +192,18 @@ class HomeController extends Controller
                 'favicon_url' => $settings->favicon_url,
                 'default_meta_image' => $settings->default_meta_image,
                 'default_meta_image_url' => $defaultMetaImageUrl,
+                'phone_number' => $settings->phone_number,
+                'email' => $settings->email,
+                'address' => $settings->address,
+                'facebook' => $settings->facebook,
+                'twitter' => $settings->twitter,
+                'instagram' => $settings->instagram,
+                'linkedin' => $settings->linkedin,
+                'youtube' => $settings->youtube,
+                'tiktok' => $settings->tiktok,
+                'whatsapp' => $settings->whatsapp,
+                'show_whatsapp_button' => $settings->show_whatsapp_button ?? true,
+                'show_price_in_products' => $settings->show_price_in_products ?? true,
                 // Keep translations as array to match HandleInertiaRequests structure
                 'translations' => $settings->translations->map(function ($translation) {
                     return [
@@ -161,6 +229,7 @@ class HomeController extends Controller
             'welcomeDetails' => $welcomeDetails,
             'heros' => $heros,
             'parallax' => $parallaxData,
+            'about' => $aboutData,
         ]);
     }
 }

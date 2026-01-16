@@ -245,7 +245,7 @@ class EditWelcome extends EditRecord
                     );
                 } else {
                     // Keep existing image
-                    $processedImagePath = $detailImage;
+                $processedImagePath = $detailImage;
                 }
                 Storage::disk('public')->setVisibility($processedImagePath, 'public');
             } else {

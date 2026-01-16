@@ -45,6 +45,7 @@ export default function ProductsShow({ product, relatedProducts, locale = 'ar' }
     const isRTL = locale === 'ar';
     const page = usePage<any>();
     const menuItems = page.props.menuItems || [];
+    const settings = page.props.settings;
     const translation = product.translations.find(t => t.locale === locale) || product.translations[0];
     const categoryTranslation = product.category.translations.find(t => t.locale === locale) || product.category.translations[0];
 
@@ -83,6 +84,9 @@ export default function ProductsShow({ product, relatedProducts, locale = 'ar' }
     const price = product.price ? Number(product.price) : null;
     const salePrice = product.sale_price ? Number(product.sale_price) : null;
     const currentPrice = salePrice ?? price;
+
+    // Check if prices should be shown (truthy: 1 or true)
+    const showPrice = !!settings?.show_price_in_products;
 
     return (
         <>
@@ -292,7 +296,7 @@ export default function ProductsShow({ product, relatedProducts, locale = 'ar' }
                                         {translation.name}
                                     </h1>
 
-                                    {currentPrice !== null && currentPrice !== undefined && (
+                                    {showPrice && currentPrice !== null && currentPrice !== undefined && (
                                         <div className={`flex items-center gap-4 mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                             {salePrice && price && salePrice < price && (
                                                 <span className="text-muted-foreground line-through text-xl" style={{
@@ -347,14 +351,14 @@ export default function ProductsShow({ product, relatedProducts, locale = 'ar' }
                                             boxShadow: '0 5px 20px rgba(231, 33, 119, 0.3)'
                                         }}
                                     >
-                                        {locale === 'ar' ? 'إضافة إلى السلة' : 'Add to Cart'}
+                                        {locale === 'ar' ? 'اطلب الآن' : 'Order Now'}
                                     </Button>
                                 </div>
                             </div>
                         </div>
 
                         {/* Ingredients, Benefits, and Usage Instructions - Three Columns */}
-                        {(translation.ingredients?.length > 0 || translation.benefits?.length > 0 || translation.usage_instructions?.length > 0) && (
+                        {((translation.ingredients?.length ?? 0) > 0 || (translation.benefits?.length ?? 0) > 0 || (translation.usage_instructions?.length ?? 0) > 0) && (
                             <div className={`mb-16 fade-in-up ${isVisible ? 'opacity-100' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     {/* Ingredients */}

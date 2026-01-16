@@ -18,7 +18,7 @@ class CategoryController extends Controller
 
         $products = Product::where('category_id', $category->id)
             ->where('is_active', true)
-            ->with(['translations', 'media'])
+            ->with(['translations', 'category.translations', 'media'])
             ->orderBy('sort_order')
             ->paginate(12);
 

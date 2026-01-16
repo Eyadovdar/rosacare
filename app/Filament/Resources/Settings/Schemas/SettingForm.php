@@ -2,13 +2,14 @@
 
 namespace App\Filament\Resources\Settings\Schemas;
 
-use Filament\Forms\Components\FileUpload;
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Tabs;
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Schema;
 
 class SettingForm
 {
@@ -68,6 +69,18 @@ class SettingForm
                             ->rows(3)
                             ->nullable()
                             ->columnSpanFull(),
+                        TextInput::make('default_currency_ar')
+                            ->label('Default Currency (Arabic)')
+                            ->default("ل.س"),
+                        TextInput::make('default_currency_en')
+                            ->label('Default Currency (English)')
+                            ->default("SYP"),
+                        Toggle::make('show_price_in_products')
+                            ->label('Show Price in Products')
+                            ->default(true),
+                        Toggle::make('show_whatsapp_button')
+                            ->label('Show WhatsApp Button')
+                            ->default(true),
                     ])
                     ->columns(2),
 
@@ -76,6 +89,10 @@ class SettingForm
                     ->schema([
                         TextInput::make('facebook')
                             ->label('Facebook URL')
+                            ->url()
+                            ->nullable(),
+                        TextInput::make('whatsapp')
+                            ->label('WhatsApp URL')
                             ->url()
                             ->nullable(),
                         TextInput::make('twitter')

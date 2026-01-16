@@ -123,7 +123,7 @@ class EditProduct extends EditRecord
                 $this->saveMediaFile($resizedImagePath, 'featured', 0);
             } else {
                 // Keep existing image
-                $this->saveMediaFile($this->featuredImage, 'featured', 0);
+            $this->saveMediaFile($this->featuredImage, 'featured', 0);
             }
         }
         
@@ -150,7 +150,7 @@ class EditProduct extends EditRecord
                         $this->saveMediaFile($resizedImagePath, 'gallery', $index);
                     } else {
                         // Keep existing image
-                        $this->saveMediaFile($imagePath, 'gallery', $index);
+                    $this->saveMediaFile($imagePath, 'gallery', $index);
                     }
                 }
             }
