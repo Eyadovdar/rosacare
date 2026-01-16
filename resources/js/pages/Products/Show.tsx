@@ -340,19 +340,82 @@ export default function ProductsShow({ product, relatedProducts, locale = 'ar' }
                                     )}
 
 
-                                    <Button
-                                        size="lg"
-                                        className="w-full md:w-auto"
-                                        style={{
-                                            fontFamily: "'Alexandria', sans-serif",
-                                            fontWeight: 500,
-                                            background: 'linear-gradient(135deg, #e72177, #862b90)',
-                                            border: 'none',
-                                            boxShadow: '0 5px 20px rgba(231, 33, 119, 0.3)'
-                                        }}
-                                    >
-                                        {locale === 'ar' ? 'اطلب الآن' : 'Order Now'}
-                                    </Button>
+                                    {(() => {
+                                        const whatsappUrl = settings?.whatsapp;
+                                        if (!whatsappUrl) return null;
+
+                                        // Build WhatsApp message with product information
+                                        const productName = translation.name;
+                                        const productPrice = showPrice && currentPrice !== null && currentPrice !== undefined
+                                            ? `${currentPrice.toFixed(2)} ${locale === 'ar' ? 'ل.س' : 'USD'}`
+                                            : '';
+                                        const productCategory = categoryTranslation.name;
+                                        const productUrl = typeof window !== 'undefined' ? window.location.href : '';
+
+                                        // Create message based on locale
+                                        let message = '';
+                                        if (locale === 'ar') {
+                                            message = `مرحباً، أريد طلب المنتج التالي:\n\n`;
+                                            message += `📦 المنتج: ${productName}\n`;
+                                            if (productCategory) {
+                                                message += `🏷️ الفئة: ${productCategory}\n`;
+                                            }
+                                            if (productPrice) {
+                                                message += `💰 السعر: ${productPrice}\n`;
+                                            }
+                                            message += `🔗 الرابط: ${productUrl}\n\n`;
+                                            message += `شكراً لك`;
+                                        } else {
+                                            message = `Hello, I would like to order the following product:\n\n`;
+                                            message += `📦 Product: ${productName}\n`;
+                                            if (productCategory) {
+                                                message += `🏷️ Category: ${productCategory}\n`;
+                                            }
+                                            if (productPrice) {
+                                                message += `💰 Price: ${productPrice}\n`;
+                                            }
+                                            message += `🔗 Link: ${productUrl}\n\n`;
+                                            message += `Thank you`;
+                                        }
+
+                                        // Format WhatsApp URL with message
+                                        const encodedMessage = encodeURIComponent(message);
+                                        const whatsappLink = whatsappUrl.includes('?')
+                                            ? `${whatsappUrl}&text=${encodedMessage}`
+                                            : `${whatsappUrl}?text=${encodedMessage}`;
+
+                                        return (
+                                            <Button
+                                                asChild
+                                                size="lg"
+                                                className="w-full md:w-auto"
+                                                style={{
+                                                    fontFamily: "'Alexandria', sans-serif",
+                                                    fontWeight: 500,
+                                                    background: 'linear-gradient(135deg, #e72177, #862b90)',
+                                                    border: 'none',
+                                                    boxShadow: '0 5px 20px rgba(231, 33, 119, 0.3)',
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.boxShadow = '0 8px 30px rgba(231, 33, 119, 0.4)';
+                                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.boxShadow = '0 5px 20px rgba(231, 33, 119, 0.3)';
+                                                    e.currentTarget.style.transform = 'translateY(0)';
+                                                }}
+                                            >
+                                                <a
+                                                    href={whatsappLink}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    {locale === 'ar' ? 'اطلب الآن' : 'Order Now'}
+                                                </a>
+                                            </Button>
+                                        );
+                                    })()}
                                 </div>
                             </div>
                         </div>

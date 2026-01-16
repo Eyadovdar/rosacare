@@ -29,7 +29,7 @@ export function Footer({ locale = 'ar' }: FooterProps) {
     const currentYear = new Date().getFullYear();
     const page = usePage<{ props: PageProps }>();
     const settings = page.props.settings;
-    
+
     const settingsTranslation = settings?.translations?.find(t => t.locale === locale) || settings?.translations?.[0];
     const siteName = settingsTranslation?.site_name || 'RosaCare';
     const slogan = settingsTranslation?.slogan || (locale === 'ar'
@@ -44,9 +44,9 @@ export function Footer({ locale = 'ar' }: FooterProps) {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div className={isRTL ? 'rtl' : 'ltr'}>
                         {settings?.footer_logo_url ? (
-                            <img 
-                                src={settings.footer_logo_url} 
-                                alt={siteName} 
+                            <img
+                                src={settings.footer_logo_url}
+                                alt={siteName}
                                 className="h-12 w-auto object-contain mb-4"
                             />
                         ) : (
@@ -87,9 +87,17 @@ export function Footer({ locale = 'ar' }: FooterProps) {
                         <h4 className="font-semibold mb-4">
                             {locale === 'ar' ? 'المعلومات' : 'Information'}
                         </h4>
-                        <ul className="space-y-2 text-muted-foreground">
-                            <li>{locale === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}</li>
-                            <li>{locale === 'ar' ? 'شروط الاستخدام' : 'Terms of Service'}</li>
+                        <ul className="space-y-2">
+                            <li>
+                                <Link href="/privacy-policy" className="text-muted-foreground hover:text-foreground transition-colors">
+                                    {locale === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/terms-of-use" className="text-muted-foreground hover:text-foreground transition-colors">
+                                    {locale === 'ar' ? 'شروط الاستخدام' : 'Terms of Use'}
+                                </Link>
+                            </li>
                         </ul>
                     </div>
                     <div className={isRTL ? 'rtl' : 'ltr'}>
@@ -98,9 +106,9 @@ export function Footer({ locale = 'ar' }: FooterProps) {
                         </h4>
                         <div className="flex gap-4">
                             {settings?.facebook && (
-                                <a 
-                                    href={settings.facebook} 
-                                    target="_blank" 
+                                <a
+                                    href={settings.facebook}
+                                    target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-primary transition-colors"
                                     aria-label="Facebook"
@@ -111,9 +119,9 @@ export function Footer({ locale = 'ar' }: FooterProps) {
                                 </a>
                             )}
                             {settings?.instagram && (
-                                <a 
-                                    href={settings.instagram} 
-                                    target="_blank" 
+                                <a
+                                    href={settings.instagram}
+                                    target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-primary transition-colors"
                                     aria-label="Instagram"
@@ -124,9 +132,9 @@ export function Footer({ locale = 'ar' }: FooterProps) {
                                 </a>
                             )}
                             {settings?.twitter && (
-                                <a 
-                                    href={settings.twitter} 
-                                    target="_blank" 
+                                <a
+                                    href={settings.twitter}
+                                    target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-primary transition-colors"
                                     aria-label="Twitter"
@@ -137,9 +145,9 @@ export function Footer({ locale = 'ar' }: FooterProps) {
                                 </a>
                             )}
                             {settings?.linkedin && (
-                                <a 
-                                    href={settings.linkedin} 
-                                    target="_blank" 
+                                <a
+                                    href={settings.linkedin}
+                                    target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-primary transition-colors"
                                     aria-label="LinkedIn"
@@ -150,9 +158,9 @@ export function Footer({ locale = 'ar' }: FooterProps) {
                                 </a>
                             )}
                             {settings?.youtube && (
-                                <a 
-                                    href={settings.youtube} 
-                                    target="_blank" 
+                                <a
+                                    href={settings.youtube}
+                                    target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-primary transition-colors"
                                     aria-label="YouTube"
@@ -163,9 +171,9 @@ export function Footer({ locale = 'ar' }: FooterProps) {
                                 </a>
                             )}
                             {settings?.tiktok && (
-                                <a 
-                                    href={settings.tiktok} 
-                                    target="_blank" 
+                                <a
+                                    href={settings.tiktok}
+                                    target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-primary transition-colors"
                                     aria-label="TikTok"

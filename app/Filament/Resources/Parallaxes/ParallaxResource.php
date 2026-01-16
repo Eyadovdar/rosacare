@@ -10,6 +10,7 @@ use App\Filament\Resources\Parallaxes\Tables\ParallaxesTable;
 use App\Models\Parallax;
 use BackedEnum;
 use Filament\Resources\Resource;
+use UnitEnum;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -18,7 +19,11 @@ class ParallaxResource extends Resource
 {
     protected static ?string $model = Parallax::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPhoto;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Content Management';
+
+    protected static ?int $navigationSort = 5;
 
     protected static ?string $recordTitleAttribute = 'Parallax';
 

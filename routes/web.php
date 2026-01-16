@@ -20,6 +20,16 @@ Route::get('/categories/{slug}', [CategoryController::class, 'show'])->name('cat
 Route::get('/about', [AboutController::class, 'index'])->name('about');
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::get('/privacy-policy', function () {
+    return Inertia::render('PrivacyPolicy', [
+        'locale' => app()->getLocale() ?: session('locale', 'ar'),
+    ]);
+})->name('privacy-policy');
+Route::get('/terms-of-use', function () {
+    return Inertia::render('TermsOfUse', [
+        'locale' => app()->getLocale() ?: session('locale', 'ar'),
+    ]);
+})->name('terms-of-use');
 Route::get('/pages/{slug}', [PageController::class, 'show'])->name('pages.show');
 
 // Auth routes

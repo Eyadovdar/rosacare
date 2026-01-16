@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             WelcomeSeeder::class,
             WelcomeDetailSeeder::class,
             AboutSeeder::class,
+            PolicySeeder::class,
         ]);
     }
 }

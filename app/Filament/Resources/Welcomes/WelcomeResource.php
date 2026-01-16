@@ -10,6 +10,7 @@ use App\Filament\Resources\Welcomes\Tables\WelcomesTable;
 use App\Models\Welcome;
 use BackedEnum;
 use Filament\Resources\Resource;
+use UnitEnum;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -18,7 +19,11 @@ class WelcomeResource extends Resource
 {
     protected static ?string $model = Welcome::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedHandRaised;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Content Management';
+
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'Welcome';
 

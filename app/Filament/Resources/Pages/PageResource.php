@@ -10,6 +10,7 @@ use App\Filament\Resources\Pages\Tables\PagesTable;
 use App\Models\Page;
 use BackedEnum;
 use Filament\Resources\Resource;
+use UnitEnum;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -18,7 +19,11 @@ class PageResource extends Resource
 {
     protected static ?string $model = Page::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocument;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Content Management';
+
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'Pages';
 
