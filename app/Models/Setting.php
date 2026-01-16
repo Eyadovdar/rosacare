@@ -122,4 +122,21 @@ class Setting extends Model
         // Fallback: return the URL anyway
         return Storage::disk('public')->url($this->favicon_path);
     }
+
+    /**
+     * Get the default currency based on locale
+     *
+     * @param string|null $locale
+     * @return string
+     */
+    public function getDefaultCurrency(?string $locale = null): string
+    {
+        $locale = $locale ?: app()->getLocale() ?: 'ar';
+        
+        if ($locale === 'ar') {
+            return $this->default_currency_ar ?? 'ل.س';
+        }
+        
+        return $this->default_currency_en ?? 'SYP';
+    }
 }

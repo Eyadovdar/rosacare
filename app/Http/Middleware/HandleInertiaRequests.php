@@ -45,39 +45,43 @@ class HandleInertiaRequests extends Middleware
         // Get settings with translations
         $settings = null;
         if (Schema::hasTable('settings')) {
-            $settingsModel = Setting::with('translations')->first();
-            if ($settingsModel) {
-                $settings = [
-                    'id' => $settingsModel->id,
-                    'logo_header_path' => $settingsModel->logo_header_path,
-                    'logo_footer_path' => $settingsModel->logo_footer_path,
-                    'favicon_path' => $settingsModel->favicon_path,
-                    'header_logo_url' => $settingsModel->header_logo_url,
-                    'footer_logo_url' => $settingsModel->footer_logo_url,
-                    'favicon_url' => $settingsModel->favicon_url,
-                    'phone_number' => $settingsModel->phone_number,
-                    'email' => $settingsModel->email,
-                    'address' => $settingsModel->address,
-                    'facebook' => $settingsModel->facebook,
-                    'twitter' => $settingsModel->twitter,
-                    'instagram' => $settingsModel->instagram,
-                    'linkedin' => $settingsModel->linkedin,
-                    'youtube' => $settingsModel->youtube,
-                    'tiktok' => $settingsModel->tiktok,
-                    'whatsapp' => $settingsModel->whatsapp,
-                    'show_whatsapp_button' => $settingsModel->show_whatsapp_button ?? true,
-                    'show_price_in_products' => $settingsModel->show_price_in_products ?? true,
-                    'translations' => $settingsModel->translations->map(function ($translation) {
-                        return [
-                            'locale' => $translation->locale,
-                            'site_name' => $translation->site_name,
-                            'slogan' => $translation->slogan,
-                            'footer_description' => $translation->footer_description,
-                            'footer_copyright' => $translation->footer_copyright,
-                        ];
-                    })->toArray(),
-                ];
-            }
+                $settingsModel = Setting::with('translations')->first();
+                if ($settingsModel) {
+                    $currentLocale = app()->getLocale() ?: 'ar';
+                    $settings = [
+                        'id' => $settingsModel->id,
+                        'logo_header_path' => $settingsModel->logo_header_path,
+                        'logo_footer_path' => $settingsModel->logo_footer_path,
+                        'favicon_path' => $settingsModel->favicon_path,
+                        'header_logo_url' => $settingsModel->header_logo_url,
+                        'footer_logo_url' => $settingsModel->footer_logo_url,
+                        'favicon_url' => $settingsModel->favicon_url,
+                        'phone_number' => $settingsModel->phone_number,
+                        'email' => $settingsModel->email,
+                        'address' => $settingsModel->address,
+                        'facebook' => $settingsModel->facebook,
+                        'twitter' => $settingsModel->twitter,
+                        'instagram' => $settingsModel->instagram,
+                        'linkedin' => $settingsModel->linkedin,
+                        'youtube' => $settingsModel->youtube,
+                        'tiktok' => $settingsModel->tiktok,
+                        'whatsapp' => $settingsModel->whatsapp,
+                        'show_whatsapp_button' => $settingsModel->show_whatsapp_button ?? true,
+                        'show_price_in_products' => $settingsModel->show_price_in_products ?? true,
+                        'default_currency' => $settingsModel->getDefaultCurrency($currentLocale),
+                        'default_currency_ar' => $settingsModel->default_currency_ar ?? 'ل.س',
+                        'default_currency_en' => $settingsModel->default_currency_en ?? 'SYP',
+                        'translations' => $settingsModel->translations->map(function ($translation) {
+                            return [
+                                'locale' => $translation->locale,
+                                'site_name' => $translation->site_name,
+                                'slogan' => $translation->slogan,
+                                'footer_description' => $translation->footer_description,
+                                'footer_copyright' => $translation->footer_copyright,
+                            ];
+                        })->toArray(),
+                    ];
+                }
         }
 
         // Get all active categories for submenu

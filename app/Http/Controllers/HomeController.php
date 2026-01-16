@@ -204,6 +204,9 @@ class HomeController extends Controller
                 'whatsapp' => $settings->whatsapp,
                 'show_whatsapp_button' => $settings->show_whatsapp_button ?? true,
                 'show_price_in_products' => $settings->show_price_in_products ?? true,
+                'default_currency' => $settings->getDefaultCurrency($locale),
+                'default_currency_ar' => $settings->default_currency_ar ?? 'ل.س',
+                'default_currency_en' => $settings->default_currency_en ?? 'SYP',
                 // Keep translations as array to match HandleInertiaRequests structure
                 'translations' => $settings->translations->map(function ($translation) {
                     return [

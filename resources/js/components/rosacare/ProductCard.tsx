@@ -109,11 +109,11 @@ export function ProductCard({ product, locale = 'ar' }: ProductCardProps) {
                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         {salePrice && price && salePrice < price && (
                             <span className="text-muted-foreground line-through text-sm">
-                                {price.toFixed(2)} {locale === 'ar' ? 'ل.س' : 'USD'}
+                                {price.toFixed(2)} {settings?.default_currency || (locale === 'ar' ? 'ل.س' : 'SYP')}
                             </span>
                         )}
                         <span className="text-2xl font-bold text-primary">
-                            {currentPrice.toFixed(2)} {locale === 'ar' ? 'ل.س' : 'USD'}
+                            {currentPrice.toFixed(2)} {settings?.default_currency || (locale === 'ar' ? 'ل.س' : 'SYP')}
                         </span>
                     </div>
                 )}

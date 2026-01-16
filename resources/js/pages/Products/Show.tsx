@@ -303,14 +303,14 @@ export default function ProductsShow({ product, relatedProducts, locale = 'ar' }
                                                     fontFamily: "'Alexandria', sans-serif",
                                                     color: '#bdc4c8'
                                                 }}>
-                                                    {price.toFixed(2)} {locale === 'ar' ? 'ل.س' : 'USD'}
+                                                    {price.toFixed(2)} {settings?.default_currency || (locale === 'ar' ? 'ل.س' : 'SYP')}
                                                 </span>
                                             )}
                                             <span className="text-3xl font-medium" style={{
                                                 fontFamily: "'Alexandria', sans-serif",
                                                 color: '#e72177'
                                             }}>
-                                                {currentPrice.toFixed(2)} {locale === 'ar' ? 'ل.س' : 'USD'}
+                                                {currentPrice.toFixed(2)} {settings?.default_currency || (locale === 'ar' ? 'ل.س' : 'SYP')}
                                             </span>
                                         </div>
                                     )}
@@ -347,7 +347,7 @@ export default function ProductsShow({ product, relatedProducts, locale = 'ar' }
                                         // Build WhatsApp message with product information
                                         const productName = translation.name;
                                         const productPrice = showPrice && currentPrice !== null && currentPrice !== undefined
-                                            ? `${currentPrice.toFixed(2)} ${locale === 'ar' ? 'ل.س' : 'USD'}`
+                                            ? `${currentPrice.toFixed(2)} ${settings?.default_currency || (locale === 'ar' ? 'ل.س' : 'SYP')}`
                                             : '';
                                         const productCategory = categoryTranslation.name;
                                         const productUrl = typeof window !== 'undefined' ? window.location.href : '';

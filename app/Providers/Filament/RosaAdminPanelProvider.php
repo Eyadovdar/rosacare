@@ -45,9 +45,9 @@ class RosaAdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 'Products',
+                'Support',
                 'Content Management',
                 'Site Sections',
-                'Support',
                 'Settings',
             ])
             ->databaseNotifications()

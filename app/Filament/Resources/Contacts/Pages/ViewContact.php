@@ -16,4 +16,17 @@ class ViewContact extends ViewRecord
             //EditAction::make(),
         ];
     }
+
+    /**
+     * Mark the contact as read when viewing
+     */
+    public function mount(int | string $record): void
+    {
+        parent::mount($record);
+
+        // Mark the contact as read when viewed
+        if ($this->record && !$this->record->is_read) {
+            $this->record->markAsRead();
+        }
+    }
 }

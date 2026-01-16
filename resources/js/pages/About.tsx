@@ -311,7 +311,7 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                                     letterSpacing: '0.1em'
                                 }}>
                                     {story.title || defaultStory.title}
-                                </h1>
+                            </h1>
                                 {story.image_url && (
                                     <div className="mb-8 rounded-lg overflow-hidden">
                                         <img 
