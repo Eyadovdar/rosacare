@@ -6,6 +6,8 @@ use App\Mail\ContactNotification;
 use App\Models\Contact;
 use App\Models\Faq;
 use App\Models\Setting;
+use App\Models\User;
+use App\Notifications\NewContactNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
@@ -76,6 +78,33 @@ class ContactController extends Controller
                     'contact_id' => $contact->id,
                 ]);
             }
+        }
+
+        // Send Filament database notification to all admin users
+        try {
+            $users = User::all();
+            
+            if ($users->isEmpty()) {
+                \Log::warning('No users found to send Filament notification to', [
+                    'contact_id' => $contact->id,
+                ]);
+            } else {
+                foreach ($users as $user) {
+                    $user->notify(new NewContactNotification($contact));
+                }
+                
+                \Log::info('Filament notification sent successfully', [
+                    'contact_id' => $contact->id,
+                    'users_count' => $users->count(),
+                ]);
+            }
+        } catch (\Exception $e) {
+            // Log the error but don't fail the request
+            \Log::error('Failed to send Filament notification', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'contact_id' => $contact->id,
+            ]);
         }
 
         return Redirect::back()->with('success', __('messages.contact_sent'));

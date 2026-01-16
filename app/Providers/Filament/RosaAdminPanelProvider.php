@@ -43,6 +43,15 @@ class RosaAdminPanelProvider extends PanelProvider
                 // AccountWidget::class,
                 // FilamentInfoWidget::class,
             ])
+            ->navigationGroups([
+                'Products',
+                'Content Management',
+                'Site Sections',
+                'Support',
+                'Settings',
+            ])
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
