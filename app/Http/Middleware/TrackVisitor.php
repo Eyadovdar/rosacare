@@ -18,8 +18,14 @@ class TrackVisitor
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Skip tracking for admin panel and API routes
-        if ($request->is('admin/*') || $request->is('api/*') || $request->is('filament/*')) {
+        // Skip tracking for admin panel, dashboard, and API routes
+        if ($request->is('admin/*') 
+            || $request->is('api/*') 
+            || $request->is('filament/*')
+            || $request->is('rosa-admin/*')
+            || $request->is('rosa-admin')
+            || $request->routeIs('filament.*')
+            || $request->is('dashboard*')) {
             return $next($request);
         }
 

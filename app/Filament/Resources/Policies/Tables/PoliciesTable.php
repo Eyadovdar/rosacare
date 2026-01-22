@@ -1,30 +1,28 @@
 <?php
 
-namespace App\Filament\Resources\Welcomes\Tables;
+namespace App\Filament\Resources\Policies\Tables;
 
-use Filament\Tables\Table;
-use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Table;
 
-class WelcomesTable
+class PoliciesTable
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                ImageColumn::make('image'),
                 TextColumn::make('title')
                     ->searchable(),
-                    IconColumn::make('is_active')
-                    ->boolean()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('button_url')
+                TextColumn::make('locale')
                     ->searchable(),
+                TextColumn::make('slug')
+                    ->searchable(),
+                IconColumn::make('is_active')
+                    ->boolean(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

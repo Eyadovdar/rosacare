@@ -15,6 +15,7 @@ use App\Models\WelcomeDetail;
 use App\Models\Hero;
 use App\Models\Parallax;
 use App\Models\About;
+use App\Models\Partner;
 
 class HomeController extends Controller
 {
@@ -84,6 +85,23 @@ class HomeController extends Controller
             ->orderBy('sort_order')
             ->take(8)
             ->get();
+
+        // Get active partners
+        $locale = app()->getLocale() ?: Session::get('locale', 'ar');
+        $partners = Partner::where('is_active', true)
+            ->orderBy('sort_order')
+            ->get()
+            ->map(function ($partner) use ($locale) {
+                return [
+                    'id' => $partner->id,
+                    'title' => $locale === 'ar' ? $partner->title_ar : $partner->title_en,
+                    'title_ar' => $partner->title_ar,
+                    'title_en' => $partner->title_en,
+                    'image' => $partner->image,
+                    'image_url' => $partner->image_url,
+                    'url' => $partner->url,
+                ];
+            });
 
         // Get welcome with translations
         $welcome = Welcome::where('is_active', true)
@@ -233,6 +251,7 @@ class HomeController extends Controller
             'heros' => $heros,
             'parallax' => $parallaxData,
             'about' => $aboutData,
+            'partners' => $partners,
         ]);
     }
 }

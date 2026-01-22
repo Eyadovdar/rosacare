@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Welcomes\Schemas;
 
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Tabs;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
@@ -40,6 +41,10 @@ class WelcomeForm
                             ->url()
                             ->required()
                             ->helperText('Button URL shared across all locales.'),
+                        Toggle::make('is_active')
+                            ->label('Is Active')
+                            ->default(true)
+                            ->required(),
                     ])
                     ->columns(2),
 
@@ -132,6 +137,10 @@ class WelcomeForm
                                 TextInput::make('button_text:en')
                                     ->label('Button Text (English)')
                                     ->maxLength(255),
+                                Toggle::make('is_active:en')
+                                    ->label('Active')
+                                    ->default(true)
+                                    ->required(),
                             ])
                             ->columns(2)
                             ->collapsible()

@@ -11,6 +11,7 @@ import { Parallax } from '@/components/rosacare/Parallax';
 import { Footer } from '@/components/rosacare/Footer';
 import { Navbar } from '@/components/rosacare/Navbar';
 import { WhatsAppButton } from '@/components/rosacare/WhatsAppButton';
+import { PartnerSection } from '@/components/rosacare/PartnerSection';
 
 interface Category {
     id: number;
@@ -205,6 +206,14 @@ interface AboutData {
     };
 }
 
+interface Partner {
+    id: number;
+    title: string;
+    image?: string;
+    image_url?: string;
+    url?: string;
+}
+
 interface HomeProps {
     categories: Category[];
     featuredProducts: Product[];
@@ -216,6 +225,7 @@ interface HomeProps {
     welcomeDetails?: WelcomeDetail[];
     parallax?: ParallaxData;
     about?: AboutData | null;
+    partners?: Partner[];
 }
 
 export default function Home({
@@ -229,6 +239,7 @@ export default function Home({
     welcomeDetails = [],
     parallax,
     about = null,
+    partners = [],
 }: HomeProps) {
     const isRTL = locale === 'ar';
     const page = usePage<{ props: { menuItems?: MenuItem[] } }>();
@@ -581,6 +592,9 @@ export default function Home({
                         </div>
                     </section>
                 )}
+
+                {/* Partner Section */}
+                <PartnerSection locale={locale} partners={partners} />
 
                 {/* Welcome Section */}
                 {welcome && (

@@ -22,6 +22,7 @@ class MenuItemForm
                     ->options([
                         'home' => 'Home',
                         'page' => 'Page',
+                        'page_section' => 'Page Section',
                     ])
                     ->default('home')
                     ->native(false)
@@ -36,7 +37,7 @@ class MenuItemForm
                             'contact' => '📧 Contact',
                             'products' => '🛍️ Products',
                         ];
-                        
+
                         // Dynamic pages from database
                         $dynamicPages = Page::where('published', true)
                             ->with('translations')
@@ -46,7 +47,7 @@ class MenuItemForm
                                 return ["page:{$page->slug}" => "📑 {$title} ({$page->slug})"];
                             })
                             ->toArray();
-                        
+
                         // Combine static and dynamic pages
                         return array_merge($staticPages, $dynamicPages);
                     })
@@ -78,8 +79,8 @@ class MenuItemForm
                     ->afterStateUpdated(function ($state, $set, $get) {
                         // Auto-generate URL when page is selected
                         if ($get('type') === 'page' && $state) {
-                            $pageValue = str_starts_with($state, 'page:') 
-                                ? str_replace('page:', '', $state) 
+                            $pageValue = str_starts_with($state, 'page:')
+                                ? str_replace('page:', '', $state)
                                 : $state;
                             $url = self::generateUrlForPage($pageValue);
                             $set('url', $url);
@@ -87,7 +88,7 @@ class MenuItemForm
                     }),
                 TextInput::make('url')
                     ->label('URL')
-                    ->helperText(fn ($get) => $get('type') === 'page' 
+                    ->helperText(fn ($get) => $get('type') === 'page'
                         ? 'URL is automatically generated based on the selected page. You can override it manually if needed.'
                         : 'Custom URL (optional, used as fallback)')
                     ->dehydrated()
@@ -148,7 +149,7 @@ class MenuItemForm
 
     /**
      * Generate the URL for a given page selection.
-     * 
+     *
      * @param string $page The page identifier (home, about, contact, products, or a page slug)
      * @return string The generated URL
      */
