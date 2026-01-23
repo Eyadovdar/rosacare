@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('button_color');
             $table->string('button_text_color');
             $table->boolean('is_active')->default(true);
+            $table->integer('sort_order')->default(0);
             $table->timestamps();
         });
     }

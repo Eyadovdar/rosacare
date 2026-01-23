@@ -120,7 +120,7 @@ class HomeController extends Controller
         // Get active heroes with translations
         $heros = Hero::where('is_active', true)
             ->with('translations')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('sort_order', 'asc')
             ->get();
 
         // Get active parallax with translations

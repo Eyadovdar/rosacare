@@ -15,6 +15,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class MenuItemResource extends Resource
@@ -27,7 +28,41 @@ class MenuItemResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $recordTitleAttribute = 'Menu';
+    protected static ?string $recordTitleAttribute = 'url';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['url'];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        $query = parent::getGlobalSearchEloquentQuery()->with(['translations']);
+
+        $search = request()->query('search');
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('url', 'like', "%{$search}%")
+                    ->orWhereHas('translations', function ($translationQuery) use ($search) {
+                        $translationQuery->where('label', 'like', "%{$search}%")
+                            ->orWhere('title', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        return $query;
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        $translation = $record->translate('en') ?? $record->translate('ar') ?? $record->translations->first();
+        $label = $translation?->label ?? $translation?->title ?? 'Menu Item #' . $record->id;
+
+        return [
+            'label' => $label,
+            'url' => $record->url,
+        ];
+    }
 
     public static function form(Schema $schema): Schema
     {

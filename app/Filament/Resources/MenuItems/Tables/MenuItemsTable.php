@@ -40,11 +40,12 @@ class MenuItemsTable
                         // Render the icon SVG directly using the svg() helper
                         $iconName = 'heroicon-o-' . $state;
                         $svg = svg($iconName, 'w-5 h-5 text-gray-700 dark:text-gray-300');
-                        
+
                         return new HtmlString($svg->toHtml());
                     })
                     ->html(),
                 TextColumn::make('category.title')
+                    ->label('Category')
                     ->searchable(),
                 TextColumn::make('page')
                     ->searchable(),

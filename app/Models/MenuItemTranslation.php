@@ -12,5 +12,6 @@ class MenuItemTranslation extends Model
         'menu_item_id',
         'locale',
         'label',
+        'title',
     ];
 }

@@ -33,6 +33,8 @@ class Setting extends Model
         'google_verification_code',
         'phone_number',
         'email',
+        'hr_email',
+        'sales_email',
         'address',
         'google_map_iframe',
         'facebook',

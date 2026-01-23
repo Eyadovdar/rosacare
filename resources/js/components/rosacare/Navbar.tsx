@@ -22,6 +22,7 @@ interface MenuItem {
     translations: Array<{
         locale: string;
         label: string;
+        title?: string;
     }>;
     category?: {
         slug: string;
@@ -162,9 +163,13 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
     };
 
     const getMenuItemLabel = (item: MenuItem): string => {
-        // First try to get label from translations
+        // First try to get title from translations (preferred for navbar/footer)
         if (item.translations && Array.isArray(item.translations) && item.translations.length > 0) {
             const translation = item.translations.find(t => t && t.locale === locale) || item.translations[0];
+            if (translation?.title && translation.title.trim() !== '') {
+                return translation.title;
+            }
+            // Fallback to label if title is not available
             if (translation?.label && translation.label.trim() !== '') {
                 return translation.label;
             }

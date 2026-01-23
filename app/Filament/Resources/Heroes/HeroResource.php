@@ -25,7 +25,7 @@ class HeroResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $recordTitleAttribute = 'Hero';
+    // protected static ?string $recordTitleAttribute = 'Hero';
 
     public static function form(Schema $schema): Schema
     {

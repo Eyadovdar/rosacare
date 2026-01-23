@@ -25,7 +25,7 @@ class AnnouncementResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
-    protected static ?string $recordTitleAttribute = 'Announcements';
+    // protected static ?string $recordTitleAttribute = 'Announcements';
 
     public static function form(Schema $schema): Schema
     {

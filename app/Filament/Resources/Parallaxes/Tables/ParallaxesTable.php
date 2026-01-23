@@ -17,13 +17,17 @@ class ParallaxesTable
         return $table
             ->columns([
                 TextColumn::make('title')
-                    ->searchable(),
-                TextColumn::make('title_ar')
-                    ->searchable(),
+                    ->searchable(query: function ($query, $search) {
+                        return $query->whereHas('translations', function ($q) use ($search) {
+                            $q->where('title', 'like', "%{$search}%");
+                        });
+                    }),
                 TextColumn::make('description')
-                    ->searchable(),
-                TextColumn::make('description_ar')
-                    ->searchable(),
+                    ->searchable(query: function ($query, $search) {
+                        return $query->whereHas('translations', function ($q) use ($search) {
+                            $q->where('description', 'like', "%{$search}%");
+                        });
+                    }),
                 ImageColumn::make('image'),
                 TextColumn::make('link')
                     ->searchable(),

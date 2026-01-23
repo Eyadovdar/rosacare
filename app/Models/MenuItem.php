@@ -15,6 +15,7 @@ class MenuItem extends Model
 
     public $translatedAttributes = [
         'label',
+        'title',
     ];
 
     protected $fillable = [

@@ -6,6 +6,8 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PositionApplicationController;
+use App\Http\Controllers\PositionController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -20,6 +22,8 @@ Route::get('/categories/{slug}', [CategoryController::class, 'show'])->name('cat
 Route::get('/about', [AboutController::class, 'index'])->name('about');
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::get('/positions', [PositionController::class, 'index'])->name('positions.index');
+Route::post('/position-applications', [PositionApplicationController::class, 'store'])->name('position-applications.store');
 Route::get('/privacy-policy', function () {
     return Inertia::render('PrivacyPolicy', [
         'locale' => app()->getLocale() ?: session('locale', 'ar'),

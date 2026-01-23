@@ -22,6 +22,23 @@ class EditMenuItem extends EditRecord
         ];
     }
 
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        // Load translations into form data
+        $record = $this->record;
+        $translatableFields = ['label', 'title'];
+        
+        foreach ($translatableFields as $field) {
+            foreach (['ar', 'en'] as $locale) {
+                if ($record->hasTranslation($locale)) {
+                    $data[$field . ':' . $locale] = $record->translate($locale)?->{$field};
+                }
+            }
+        }
+
+        return $data;
+    }
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
         // Auto-generate URL when type is "page" and a page is selected
@@ -40,6 +57,50 @@ class EditMenuItem extends EditRecord
             if ($currentPage !== $data['page'] || empty($data['url']) || !isset($data['url'])) {
                 $data['url'] = $this->generateUrlForPage($data['page']);
             }
+        }
+
+        // Extract translations
+        $this->translations = $this->extractTranslations($data);
+        
+        // Remove translation fields from main data
+        return $this->removeTranslationFields($data);
+    }
+
+    protected function afterSave(): void
+    {
+        // Save translations after record is updated
+        if (isset($this->translations)) {
+            foreach ($this->translations as $locale => $fields) {
+                $this->record->translateOrNew($locale)->fill($fields)->save();
+            }
+        }
+    }
+
+    protected array $translations = [];
+
+    protected function extractTranslations(array $data): array
+    {
+        $translations = [];
+        $translatableFields = ['label', 'title'];
+        
+        foreach ($translatableFields as $field) {
+            if (isset($data[$field . ':ar'])) {
+                $translations['ar'][$field] = $data[$field . ':ar'];
+            }
+            if (isset($data[$field . ':en'])) {
+                $translations['en'][$field] = $data[$field . ':en'];
+            }
+        }
+
+        return $translations;
+    }
+
+    protected function removeTranslationFields(array $data): array
+    {
+        $translatableFields = ['label', 'title'];
+        
+        foreach ($translatableFields as $field) {
+            unset($data[$field . ':ar'], $data[$field . ':en']);
         }
 
         return $data;

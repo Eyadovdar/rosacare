@@ -25,7 +25,7 @@ class PolicyResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $recordTitleAttribute = 'Policies';
+    // protected static ?string $recordTitleAttribute = 'Policies';
 
     public static function form(Schema $schema): Schema
     {

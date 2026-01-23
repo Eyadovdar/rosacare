@@ -30,10 +30,18 @@ class ProductsTable
                     ->size(50),
                 TextColumn::make('category.name')
                     ->label('Category')
-                    ->searchable(),
+                    ->searchable(query: function ($query, $search) {
+                        return $query->whereHas('category.translations', function ($q) use ($search) {
+                            $q->where('name', 'like', "%{$search}%");
+                        });
+                    }),
                 TextColumn::make('name')
                     ->label('Name')
-                    ->searchable(),
+                    ->searchable(query: function ($query, $search) {
+                        return $query->whereHas('translations', function ($q) use ($search) {
+                            $q->where('name', 'like', "%{$search}%");
+                        });
+                    }),
                 TextColumn::make('sku')
                     ->label('SKU')
                     ->searchable(),

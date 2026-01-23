@@ -14,6 +14,8 @@ use UnitEnum;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class WelcomeResource extends Resource
 {
@@ -21,11 +23,40 @@ class WelcomeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedHandRaised;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Content Management';
+    protected static string|UnitEnum|null $navigationGroup = 'Site Sections';
 
     protected static ?int $navigationSort = 3;
 
-    protected static ?string $recordTitleAttribute = 'Welcome';
+    protected static ?string $recordTitleAttribute = 'id';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        $query = parent::getGlobalSearchEloquentQuery()->with(['translations']);
+
+        $search = request()->query('search');
+        if ($search) {
+            $query->whereHas('translations', function ($translationQuery) use ($search) {
+                $translationQuery->where('title', 'like', "%{$search}%");
+            });
+        }
+
+        return $query;
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        $translation = $record->translate('en') ?? $record->translate('ar') ?? $record->translations->first();
+        $title = $translation?->title ?? 'Welcome #' . $record->id;
+
+        return [
+            'title' => $title,
+        ];
+    }
 
     public static function form(Schema $schema): Schema
     {

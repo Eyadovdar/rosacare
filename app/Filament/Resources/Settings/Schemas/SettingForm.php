@@ -59,6 +59,16 @@ class SettingForm
                             ->label('Email Address')
                             ->email()
                             ->nullable(),
+                        TextInput::make('hr_email')
+                            ->label('HR Email Address')
+                            ->email()
+                            ->default('hr@rosacare.sy')
+                            ->nullable(),
+                        TextInput::make('sales_email')
+                            ->label('Sales Email Address')
+                            ->email()
+                            ->default('sales@rosacare.sy')
+                            ->nullable(),
                         Textarea::make('address')
                             ->label('Address')
                             ->rows(2)

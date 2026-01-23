@@ -6,6 +6,8 @@ use App\Models\Page;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Route;
@@ -114,6 +116,36 @@ class MenuItemForm
                     ->required(),
                 Toggle::make('open_in_new_tab')
                     ->required(),
+
+                // Translation Tabs for Label and Title
+                Tabs::make('Translations')
+                    ->tabs([
+                        Tab::make('Arabic (ar)')
+                            ->schema([
+                                TextInput::make('label:ar')
+                                    ->label('Label (Arabic)')
+                                    ->required()
+                                    ->maxLength(255),
+                                TextInput::make('title:ar')
+                                    ->label('Title (Arabic)')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->helperText('This title will be shown in the navbar and footer'),
+                            ]),
+                        Tab::make('English (en)')
+                            ->schema([
+                                TextInput::make('label:en')
+                                    ->label('Label (English)')
+                                    ->required()
+                                    ->maxLength(255),
+                                TextInput::make('title:en')
+                                    ->label('Title (English)')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->helperText('This title will be shown in the navbar and footer'),
+                            ]),
+                    ])
+                    ->columnSpanFull(),
             ]);
     }
 

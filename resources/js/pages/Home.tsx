@@ -250,6 +250,10 @@ export default function Home({
     const [closedAnnouncements, setClosedAnnouncements] = useState<Set<number>>(new Set());
     const [visibleAnnouncements, setVisibleAnnouncements] = useState<Announcement[]>([]);
     const [closingAnnouncements, setClosingAnnouncements] = useState<Set<number>>(new Set());
+    
+    // Carousel state
+    const [currentAnnouncementIndex, setCurrentAnnouncementIndex] = useState(0);
+    const [isPaused, setIsPaused] = useState(false);
 
     // Load closed announcements from localStorage on mount
     useEffect(() => {
@@ -268,7 +272,43 @@ export default function Home({
     useEffect(() => {
         const visible = announcements.filter(ann => !closedAnnouncements.has(ann.id));
         setVisibleAnnouncements(visible);
+        // Reset to first announcement when list changes
+        if (visible.length > 0) {
+            setCurrentAnnouncementIndex(0);
+        }
     }, [announcements, closedAnnouncements]);
+
+    // Auto-rotate announcements every 5 seconds
+    useEffect(() => {
+        if (visibleAnnouncements.length <= 1 || isPaused) {
+            return;
+        }
+
+        const interval = setInterval(() => {
+            setCurrentAnnouncementIndex((prevIndex) => 
+                (prevIndex + 1) % visibleAnnouncements.length
+            );
+        }, 5000); // Rotate every 5 seconds
+
+        return () => clearInterval(interval);
+    }, [visibleAnnouncements.length, isPaused]);
+
+    // Navigation functions
+    const goToNext = () => {
+        setCurrentAnnouncementIndex((prevIndex) => 
+            (prevIndex + 1) % visibleAnnouncements.length
+        );
+    };
+
+    const goToPrevious = () => {
+        setCurrentAnnouncementIndex((prevIndex) => 
+            prevIndex === 0 ? visibleAnnouncements.length - 1 : prevIndex - 1
+        );
+    };
+
+    const goToIndex = (index: number) => {
+        setCurrentAnnouncementIndex(index);
+    };
 
     // Function to close an announcement
     const closeAnnouncement = (announcementId: number) => {
@@ -359,6 +399,34 @@ export default function Home({
                             transform: translateY(-100%);
                         }
                     }
+                    @keyframes fadeIn {
+                        from {
+                            opacity: 0;
+                        }
+                        to {
+                            opacity: 1;
+                        }
+                    }
+                    @keyframes slideIn {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                    @keyframes slideOut {
+                        from {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                        to {
+                            transform: translateX(-100%);
+                            opacity: 0;
+                        }
+                    }
                     .fade-in-up {
                         animation: fadeInUp 1s ease-out both;
                     }
@@ -367,6 +435,9 @@ export default function Home({
                     }
                     .floating-announcement.closing {
                         animation: fadeOut 0.3s ease-out forwards;
+                    }
+                    .announcement-carousel-item {
+                        transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
                     }
                 `}</style>
                 {metaDescription && <meta name="description" content={metaDescription} />}
@@ -391,57 +462,128 @@ export default function Home({
             <div className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <Navbar menuItems={menuItems} locale={locale} />
 
-                {/* Floating Announcements Banner */}
+                {/* Floating Announcements Carousel */}
                 {visibleAnnouncements.length > 0 && (
-                    <div className="sticky top-16 left-0 right-0 z-40 floating-announcement">
-                        {visibleAnnouncements.map((announcement) => {
-                            const translation = announcement.translations.find(t => t.locale === locale) || announcement.translations[0];
-                            const hasImage = announcement.image_url && announcement.image;
-                            const isClosing = closingAnnouncements.has(announcement.id);
+                    <div 
+                        className="sticky top-16 left-0 right-0 z-40 floating-announcement"
+                        onMouseEnter={() => setIsPaused(true)}
+                        onMouseLeave={() => setIsPaused(false)}
+                    >
+                        <div className="relative">
+                            {visibleAnnouncements.length > 0 && (() => {
+                                const currentAnnouncement = visibleAnnouncements[currentAnnouncementIndex];
+                                if (!currentAnnouncement) return null;
+                                
+                                const translation = currentAnnouncement.translations.find(t => t.locale === locale) || currentAnnouncement.translations[0];
+                                const hasImage = currentAnnouncement.image_url && currentAnnouncement.image;
+                                const isClosing = closingAnnouncements.has(currentAnnouncement.id);
 
-                            return (
-                                <div
-                                    key={announcement.id}
-                                    className={`relative ${isClosing ? 'closing' : ''}`}
-                                    style={{
-                                        background: hasImage
-                                            ? 'transparent'
-                                            : 'linear-gradient(135deg, rgba(231, 33, 119, 0.95) 0%, rgba(134, 44, 145, 0.95) 100%)',
-                                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-                                    }}
-                                >
-                                    {/* Close Button */}
-                                    <button
-                                        onClick={() => closeAnnouncement(announcement.id)}
-                                        className="absolute top-2 right-2 md:top-4 md:right-4 z-10 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all duration-200 flex items-center justify-center"
+                                if (isClosing) {
+                                    return null;
+                                }
+
+                                return (
+
+                                    <div
+                                        key={currentAnnouncement.id}
+                                        className="announcement-carousel-item w-full"
                                         style={{
-                                            width: '32px',
-                                            height: '32px',
-                                            backdropFilter: 'blur(10px)',
+                                            transition: 'opacity 0.5s ease-in-out',
+                                            background: hasImage
+                                                ? 'transparent'
+                                                : 'linear-gradient(135deg, rgba(231, 33, 119, 0.95) 0%, rgba(134, 44, 145, 0.95) 100%)',
+                                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                                            position: 'relative',
                                         }}
-                                        aria-label={locale === 'ar' ? 'إغلاق' : 'Close'}
                                     >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            className="h-5 w-5"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                            strokeWidth={2}
+                                        {/* Close Button */}
+                                        <button
+                                            onClick={() => closeAnnouncement(currentAnnouncement.id)}
+                                            className="absolute top-2 right-2 md:top-4 md:right-4 z-10 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all duration-200 flex items-center justify-center"
+                                            style={{
+                                                width: '32px',
+                                                height: '32px',
+                                                backdropFilter: 'blur(10px)',
+                                            }}
+                                            aria-label={locale === 'ar' ? 'إغلاق' : 'Close'}
                                         >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                d="M6 18L18 6M6 6l12 12"
-                                            />
-                                        </svg>
-                                    </button>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="h-5 w-5"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                                strokeWidth={2}
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    d="M6 18L18 6M6 6l12 12"
+                                                />
+                                            </svg>
+                                        </button>
+
+                                        {/* Navigation Buttons - Only show if more than one announcement */}
+                                        {visibleAnnouncements.length > 1 && (
+                                            <>
+                                                <button
+                                                    onClick={goToPrevious}
+                                                    className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all duration-200 flex items-center justify-center"
+                                                    style={{
+                                                        width: '40px',
+                                                        height: '40px',
+                                                        backdropFilter: 'blur(10px)',
+                                                    }}
+                                                    aria-label={locale === 'ar' ? 'السابق' : 'Previous'}
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        className="h-6 w-6"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                        strokeWidth={2}
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            d={isRTL ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"}
+                                                        />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    onClick={goToNext}
+                                                    className="absolute right-12 md:right-16 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all duration-200 flex items-center justify-center"
+                                                    style={{
+                                                        width: '40px',
+                                                        height: '40px',
+                                                        backdropFilter: 'blur(10px)',
+                                                    }}
+                                                    aria-label={locale === 'ar' ? 'التالي' : 'Next'}
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        className="h-6 w-6"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                        strokeWidth={2}
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            d={isRTL ? "M15 19l-7-7 7-7" : "M9 5l7 7-7 7"}
+                                                        />
+                                                    </svg>
+                                                </button>
+                                            </>
+                                        )}
 
                                     {hasImage ? (
                                         // Announcement with Image Layout
                                         <div className="relative">
                                             <img
-                                                src={announcement.image_url}
+                                                src={currentAnnouncement.image_url}
                                                 alt={translation?.title || 'Announcement'}
                                                 className="w-full h-auto object-cover"
                                                 style={{ maxHeight: '300px' }}
@@ -476,16 +618,16 @@ export default function Home({
                                                             {translation.description}
                                                         </p>
                                                     )}
-                                                    {translation?.button_text && announcement.button_url && (
+                                                    {translation?.button_text && currentAnnouncement.button_url && (
                                                         <a
-                                                            href={announcement.button_url}
+                                                            href={currentAnnouncement.button_url}
                                                             className="inline-block px-6 py-2 md:px-8 md:py-3 rounded-lg font-medium transition-all hover:-translate-y-0.5"
                                                             style={{
                                                                 fontFamily: "'Alexandria', sans-serif",
                                                                 fontWeight: 500,
                                                                 letterSpacing: '0.05em',
-                                                                backgroundColor: announcement.button_color || '#FFFFFF',
-                                                                color: announcement.button_text_color || '#e72177',
+                                                                backgroundColor: currentAnnouncement.button_color || '#FFFFFF',
+                                                                color: currentAnnouncement.button_text_color || '#e72177',
                                                                 boxShadow: '0 5px 20px rgba(0, 0, 0, 0.2)',
                                                             }}
                                                             onMouseEnter={(e) => {
@@ -542,16 +684,16 @@ export default function Home({
                                                         </p>
                                                     )}
                                                 </div>
-                                                {translation?.button_text && announcement.button_url && (
+                                                {translation?.button_text && currentAnnouncement.button_url && (
                                                     <a
-                                                        href={announcement.button_url}
+                                                        href={currentAnnouncement.button_url}
                                                         className="inline-block px-5 py-2 md:px-6 md:py-2 rounded-lg font-medium transition-all hover:-translate-y-0.5 whitespace-nowrap"
                                                         style={{
                                                             fontFamily: "'Alexandria', sans-serif",
                                                             fontWeight: 500,
                                                             letterSpacing: '0.05em',
-                                                            backgroundColor: announcement.button_color || '#e72177',
-                                                            color: announcement.button_text_color || '#FFFFFF',
+                                                            backgroundColor: currentAnnouncement.button_color || '#e72177',
+                                                            color: currentAnnouncement.button_text_color || '#FFFFFF',
                                                             boxShadow: '0 5px 15px rgba(231, 33, 119, 0.3)',
                                                         }}
                                                         onMouseEnter={(e) => {
@@ -569,9 +711,28 @@ export default function Home({
                                             </div>
                                         </div>
                                     )}
+                                    </div>
+                                );
+                            })()}
+
+                            {/* Carousel Indicators - Only show if more than one announcement */}
+                            {visibleAnnouncements.length > 1 && (
+                                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+                                    {visibleAnnouncements.map((_, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => goToIndex(index)}
+                                            className={`transition-all duration-300 rounded-full ${
+                                                index === currentAnnouncementIndex
+                                                    ? 'bg-white w-8 h-2'
+                                                    : 'bg-white/50 w-2 h-2 hover:bg-white/75'
+                                            }`}
+                                            aria-label={`${locale === 'ar' ? 'انتقل إلى الإعلان' : 'Go to announcement'} ${index + 1}`}
+                                        />
+                                    ))}
                                 </div>
-                            );
-                        })}
+                            )}
+                        </div>
                     </div>
                 )}
 

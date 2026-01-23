@@ -19,7 +19,11 @@ class WelcomesTable
             ->columns([
                 ImageColumn::make('image'),
                 TextColumn::make('title')
-                    ->searchable(),
+                    ->searchable(query: function ($query, $search) {
+                        return $query->whereHas('translations', function ($q) use ($search) {
+                            $q->where('title', 'like', "%{$search}%");
+                        });
+                    }),
                     IconColumn::make('is_active')
                     ->boolean()
                     ->toggleable(isToggledHiddenByDefault: true),

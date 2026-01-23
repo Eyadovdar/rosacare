@@ -14,6 +14,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class AboutResource extends Resource
 {
@@ -25,7 +27,37 @@ class AboutResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $recordTitleAttribute = 'About';
+    protected static ?string $recordTitleAttribute = 'id';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        $query = parent::getGlobalSearchEloquentQuery()->with(['translations']);
+
+        $search = request()->query('search');
+        if ($search) {
+            $query->whereHas('translations', function ($translationQuery) use ($search) {
+                $translationQuery->where('story_title', 'like', "%{$search}%")
+                    ->orWhere('story_content', 'like', "%{$search}%");
+            });
+        }
+
+        return $query;
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        $translation = $record->translate('en') ?? $record->translate('ar') ?? $record->translations->first();
+        $title = $translation?->story_title ?? 'About #' . $record->id;
+
+        return [
+            'title' => $title,
+        ];
+    }
 
     public static function form(Schema $schema): Schema
     {

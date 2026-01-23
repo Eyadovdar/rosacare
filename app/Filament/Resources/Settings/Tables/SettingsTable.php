@@ -17,7 +17,11 @@ class SettingsTable
             ->columns([
                 TextColumn::make('site_name')
                     ->label('Site Name')
-                    ->searchable(),
+                    ->searchable(query: function ($query, $search) {
+                        return $query->whereHas('translations', function ($q) use ($search) {
+                            $q->where('site_name', 'like', "%{$search}%");
+                        });
+                    }),
                 ImageColumn::make('logo_header_path')
                     ->label('Header Logo'),
                 ImageColumn::make('favicon_path')

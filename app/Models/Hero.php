@@ -24,6 +24,7 @@ class Hero extends Model
         'button_color',
         'button_text_color',
         'is_active',
+        'sort_order',
     ];
 
     public function getUrlAttribute(): string

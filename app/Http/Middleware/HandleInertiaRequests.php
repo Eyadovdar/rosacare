@@ -138,6 +138,7 @@ class HandleInertiaRequests extends Middleware
                                 return [
                                     'locale' => $translation->locale,
                                     'label' => $translation->label,
+                                    'title' => $translation->title,
                                 ];
                             })->toArray(),
                             'category' => $item->category ? [

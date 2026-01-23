@@ -16,9 +16,11 @@ class PartnersTable
     {
         return $table
             ->columns([
-                TextColumn::make('title')
+                TextColumn::make('title_en')
                     ->searchable(),
-                ImageColumn::make('image'),
+                ImageColumn::make('image')
+                ->disk('public')
+                    ->circular(),
                 TextColumn::make('url')
                     ->searchable(),
                 IconColumn::make('is_active')

@@ -22,7 +22,11 @@ class AboutsTable
                     ->size(50),
                 TextColumn::make('story_title')
                     ->label('Story Title')
-                    ->searchable()
+                    ->searchable(query: function ($query, $search) {
+                        return $query->whereHas('translations', function ($q) use ($search) {
+                            $q->where('story_title', 'like', "%{$search}%");
+                        });
+                    })
                     ->limit(30),
                 ImageColumn::make('story_image_path')
                     ->label('Story Image')

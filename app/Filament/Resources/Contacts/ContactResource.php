@@ -26,7 +26,7 @@ class ContactResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $recordTitleAttribute = 'Website Messages';
+    // protected static ?string $recordTitleAttribute = 'Website Messages';
 
     public static function form(Schema $schema): Schema
     {

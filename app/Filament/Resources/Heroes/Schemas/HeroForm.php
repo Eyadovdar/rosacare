@@ -36,6 +36,11 @@ class HeroForm
                     ->url()
                     ->required()
                     ->helperText('Button URL shared across all locales.'),
+                TextInput::make('sort_order')
+                    ->label('Sort Order')
+                    ->numeric()
+                    ->required()
+                    ->helperText('Sort order shared across all locales.'),
                 ColorPicker::make('button_color')
                     ->label('Button Color')
                     ->helperText('Button color shared across all locales (e.g., #FF0000).')
