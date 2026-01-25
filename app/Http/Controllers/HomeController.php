@@ -16,6 +16,7 @@ use App\Models\Hero;
 use App\Models\Parallax;
 use App\Models\About;
 use App\Models\Partner;
+use App\Models\Position;
 
 class HomeController extends Controller
 {
@@ -100,6 +101,28 @@ class HomeController extends Controller
                     'image' => $partner->image,
                     'image_url' => $partner->image_url,
                     'url' => $partner->url,
+                ];
+            });
+
+        // Get featured positions
+        $featuredPositions = Position::where('is_active', true)
+            ->where('is_featured', true)
+            ->with('translations')
+            ->orderBy('sort_order', 'asc')
+            ->get()
+            ->map(function ($position) use ($locale) {
+                $translation = $position->translate($locale) ?? $position->translate('en') ?? $position->translations->first();
+
+                return [
+                    'id' => $position->id,
+                    'image' => $position->image,
+                    'image_url' => $position->image_url,
+                    'button_url' => $position->button_url,
+                    'button_color' => $position->button_color,
+                    'button_text_color' => $position->button_text_color,
+                    'name' => $translation?->name ?? '',
+                    'description' => $translation?->description ?? '',
+                    'button_text' => $translation?->button_text ?? '',
                 ];
             });
 
@@ -252,6 +275,7 @@ class HomeController extends Controller
             'parallax' => $parallaxData,
             'about' => $aboutData,
             'partners' => $partners,
+            'featuredPositions' => $featuredPositions,
         ]);
     }
 }

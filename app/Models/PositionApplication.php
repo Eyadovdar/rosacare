@@ -17,11 +17,15 @@ class PositionApplication extends Model
         'qualifications',
         'cv_path',
         'cv_filename',
+        'is_verified',
+        'verified_at',
         'is_read',
         'read_at',
     ];
 
     protected $casts = [
+        'is_verified' => 'boolean',
+        'verified_at' => 'datetime',
         'is_read' => 'boolean',
         'read_at' => 'datetime',
     ];
@@ -42,7 +46,7 @@ class PositionApplication extends Model
     }
 
     /**
-     * Get the full URL for the CV
+     * Get the download URL for the CV (from private storage)
      *
      * @return string|null
      */
@@ -52,6 +56,7 @@ class PositionApplication extends Model
             return null;
         }
 
-        return Storage::disk('public')->url($this->cv_path);
+        // Return route URL for downloading from private storage
+        return route('position-applications.download-cv', $this->id);
     }
 }

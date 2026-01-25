@@ -71,13 +71,30 @@ class ContactController extends Controller
         if ($settings && $settings->email) {
             try {
                 Mail::to($settings->email)->send(new ContactNotification($contact));
+                \Log::info('Contact notification email sent successfully', [
+                    'contact_id' => $contact->id,
+                    'to_email' => $settings->email,
+                ]);
             } catch (\Exception $e) {
                 // Log the error but don't fail the request
                 \Log::error('Failed to send contact notification email', [
                     'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
                     'contact_id' => $contact->id,
+                    'to_email' => $settings->email,
+                    'mail_config' => [
+                        'host' => config('mail.mailers.smtp.host'),
+                        'port' => config('mail.mailers.smtp.port'),
+                        'encryption' => config('mail.mailers.smtp.encryption'),
+                        'username' => config('mail.mailers.smtp.username'),
+                        'from_address' => config('mail.from.address'),
+                    ],
                 ]);
             }
+        } else {
+            \Log::warning('Contact email not configured in settings', [
+                'contact_id' => $contact->id,
+            ]);
         }
 
         // Send Filament database notification to all admin users

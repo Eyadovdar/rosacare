@@ -2,8 +2,8 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import { Footer } from '@/components/rosacare/Footer';
 import { Navbar } from '@/components/rosacare/Navbar';
 import { InputError } from '@/components/input-error';
-import { useState } from 'react';
-import { Briefcase, FileText, User, Mail, Phone, Upload, X, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Briefcase, FileText, User, Mail, Phone, Upload, X, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface Position {
     id: number;
@@ -28,9 +28,20 @@ export default function Positions({ positions = [], locale = 'ar' }: PositionsPr
     const isRTL = locale === 'ar';
     const page = usePage<any>();
     const menuItems = page.props.menuItems || [];
+    const flashSuccess = page.props.flash?.success;
     const [selectedPosition, setSelectedPosition] = useState<Position | null>(null);
     const [showApplicationForm, setShowApplicationForm] = useState(false);
     const [cvFileName, setCvFileName] = useState<string>('');
+    const [emailVerified, setEmailVerified] = useState(false);
+    const [verificationCode, setVerificationCode] = useState('');
+    const [verificationCodeSent, setVerificationCodeSent] = useState(false);
+    const [resendCooldown, setResendCooldown] = useState(0);
+    const [resendCount, setResendCount] = useState(0);
+    const [captchaAnswer, setCaptchaAnswer] = useState('');
+    const [captchaQuestion, setCaptchaQuestion] = useState({ num1: 0, num2: 0, answer: 0 });
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState('');
+    const [popupType, setPopupType] = useState<'success' | 'error' | 'info'>('info');
 
     const { data, setData, post, processing, errors, reset, recentlySuccessful } = useForm({
         position_id: 0,
@@ -42,12 +53,60 @@ export default function Positions({ positions = [], locale = 'ar' }: PositionsPr
         cv: null as File | null,
     });
 
+    const { data: verificationData, setData: setVerificationData, post: postVerification, processing: verifyingCode, errors: verificationErrors, reset: resetVerification } = useForm({
+        email: '',
+        code: '',
+    });
+
+    // Generate captcha question
+    const generateCaptcha = () => {
+        const num1 = Math.floor(Math.random() * 10) + 1;
+        const num2 = Math.floor(Math.random() * 10) + 1;
+        setCaptchaQuestion({ num1, num2, answer: num1 + num2 });
+        setCaptchaAnswer('');
+    };
+
+    // Show popup message
+    const showPopupMessage = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+        setPopupMessage(message);
+        setPopupType(type);
+        setShowPopup(true);
+        setTimeout(() => {
+            setShowPopup(false);
+        }, 5000);
+    };
+
+    // Resend cooldown timer
+    useEffect(() => {
+        if (resendCooldown > 0) {
+            const timer = setTimeout(() => {
+                setResendCooldown(resendCooldown - 1);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [resendCooldown]);
+
+    // Generate captcha on mount and when form opens
+    useEffect(() => {
+        if (showApplicationForm) {
+            generateCaptcha();
+        }
+    }, [showApplicationForm]);
+
     const handlePositionSelect = (position: Position) => {
         setSelectedPosition(position);
-        setData('position_id', position.id);
         setShowApplicationForm(true);
+        setEmailVerified(false);
+        setVerificationCodeSent(false);
+        setVerificationCode('');
+        setResendCooldown(0);
+        setResendCount(0);
         reset();
+        resetVerification();
+        // Set position_id after reset to ensure it's not reset to 0
+        setData('position_id', position.id);
         setCvFileName('');
+        generateCaptcha();
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,17 +117,135 @@ export default function Positions({ positions = [], locale = 'ar' }: PositionsPr
         }
     };
 
-    const submit = (e: React.FormEvent) => {
+    const sendVerificationCode = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/position-applications', {
-            forceFormData: true,
-            onSuccess: () => {
-                reset();
-                setCvFileName('');
-                setShowApplicationForm(false);
-                setSelectedPosition(null);
+
+        // Debug: Log form data before submission
+        console.log('Submitting form data:', {
+            position_id: data.position_id,
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            experience: data.experience,
+            qualifications: data.qualifications,
+            cv: data.cv ? data.cv.name : 'No file',
+        });
+
+        // Validate required fields before submission
+        if (!data.position_id || data.position_id === 0) {
+            console.error('Position ID is missing or invalid');
+            showPopupMessage(locale === 'ar' ? 'يرجى اختيار وظيفة.' : 'Please select a position.', 'error');
+            return;
+        }
+
+        if (!data.cv) {
+            console.error('CV file is missing');
+            showPopupMessage(locale === 'ar' ? 'يرجى رفع ملف السيرة الذاتية.' : 'Please upload your CV.', 'error');
+            return;
+        }
+
+        // Validate captcha
+        if (parseInt(captchaAnswer) !== captchaQuestion.answer) {
+            showPopupMessage(locale === 'ar' ? 'إجابة التحقق غير صحيحة. يرجى المحاولة مرة أخرى.' : 'Invalid captcha answer. Please try again.', 'error');
+            generateCaptcha();
+            return;
+        }
+
+        // Submit form data to send verification code
+        // Inertia automatically uses FormData when it detects File objects
+        post('/position-applications/send-verification', {
+            onSuccess: (page) => {
+                setVerificationCodeSent(true);
+                setResendCooldown(30);
+                const message = page.props.flash?.verification_sent || (locale === 'ar' 
+                    ? 'تم إرسال رمز التحقق إلى بريدك الإلكتروني.'
+                    : 'Verification code has been sent to your email.');
+                showPopupMessage(message, 'success');
+            },
+            onError: (errors) => {
+                console.error('Form submission errors:', errors);
+                // Log detailed error information
+                if (errors) {
+                    Object.keys(errors).forEach((key) => {
+                        console.error(`Error in ${key}:`, errors[key]);
+                        const errorMsg = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
+                        showPopupMessage(errorMsg, 'error');
+                    });
+                }
+            },
+            onFinish: () => {
+                // This runs whether success or error
             },
         });
+    };
+
+    const resendVerificationCode = () => {
+        if (resendCooldown > 0 || resendCount >= 3) {
+            return;
+        }
+
+        const { post: postResend } = useForm({
+            email: data.email,
+            position_id: data.position_id,
+        });
+
+        postResend('/position-applications/resend-verification', {
+            onSuccess: (page) => {
+                setResendCount(resendCount + 1);
+                setResendCooldown(30);
+                const message = page.props.flash?.verification_resent || (locale === 'ar'
+                    ? 'تم إعادة إرسال رمز التحقق.'
+                    : 'Verification code has been resent.');
+                showPopupMessage(message, 'success');
+            },
+            onError: (errors) => {
+                if (errors) {
+                    Object.keys(errors).forEach((key) => {
+                        const errorMsg = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
+                        showPopupMessage(errorMsg, 'error');
+                    });
+                }
+            },
+        });
+    };
+
+    const verifyCode = (e: React.FormEvent) => {
+        e.preventDefault();
+        setVerificationData('email', data.email);
+        setVerificationData('code', verificationCode);
+        postVerification('/position-applications/verify-code', {
+            onSuccess: (page) => {
+                const message = page.props.flash?.success || (locale === 'ar'
+                    ? 'تم التحقق بنجاح! تم إرسال طلبك.'
+                    : 'Verification successful! Your application has been submitted.');
+                showPopupMessage(message, 'success');
+                setTimeout(() => {
+                    reset();
+                    setCvFileName('');
+                    setShowApplicationForm(false);
+                    setSelectedPosition(null);
+                    setEmailVerified(false);
+                    setVerificationCodeSent(false);
+                    setVerificationCode('');
+                    setResendCooldown(0);
+                    setResendCount(0);
+                }, 2000);
+            },
+            onError: (errors) => {
+                if (errors) {
+                    Object.keys(errors).forEach((key) => {
+                        const errorMsg = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
+                        showPopupMessage(errorMsg, 'error');
+                    });
+                }
+            },
+        });
+    };
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Submit form to send verification code
+        sendVerificationCode(e);
     };
 
     const closeForm = () => {
@@ -76,11 +253,49 @@ export default function Positions({ positions = [], locale = 'ar' }: PositionsPr
         setSelectedPosition(null);
         reset();
         setCvFileName('');
+        setEmailVerified(false);
+        setVerificationCodeSent(false);
+        setVerificationCode('');
     };
 
     return (
         <>
             <Head title={locale === 'ar' ? 'الوظائف المتاحة - روزاكير' : 'Career Opportunities - RosaCare'} />
+            
+            {/* Popup Message */}
+            {showPopup && (
+                <div className="fixed top-4 right-4 z-50 max-w-md animate-fade-in">
+                    <div className={`rounded-lg shadow-lg p-4 flex items-start gap-3 ${
+                        popupType === 'success' ? 'bg-green-50 border border-green-200' :
+                        popupType === 'error' ? 'bg-red-50 border border-red-200' :
+                        'bg-blue-50 border border-blue-200'
+                    }`}>
+                        {popupType === 'success' ? (
+                            <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        ) : popupType === 'error' ? (
+                            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                        ) : (
+                            <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                        )}
+                        <div className="flex-1">
+                            <p className={`text-sm ${
+                                popupType === 'success' ? 'text-green-800' :
+                                popupType === 'error' ? 'text-red-800' :
+                                'text-blue-800'
+                            }`}>
+                                {popupMessage}
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setShowPopup(false)}
+                            className="text-gray-400 hover:text-gray-600"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <style>{`
                 @keyframes fadeInUp {
                     from {
@@ -117,7 +332,7 @@ export default function Positions({ positions = [], locale = 'ar' }: PositionsPr
                             fontWeight: 300,
                             color: '#545759',
                         }}>
-                            {locale === 'ar' 
+                            {locale === 'ar'
                                 ? 'انضم إلى فريق روزاكير وكن جزءاً من رحلتنا في تقديم أفضل منتجات الورد الدمشقي الأصيل'
                                 : 'Join the RosaCare team and be part of our journey in delivering the finest authentic Damask Rose products'}
                         </p>
@@ -241,58 +456,74 @@ export default function Positions({ positions = [], locale = 'ar' }: PositionsPr
                                 </div>
                             </div>
 
-                            {/* Application Form */}
-                            <form onSubmit={submit} className="p-6 space-y-6">
-                                {recentlySuccessful && (
-                                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-                                        <CheckCircle className="h-5 w-5 text-green-600" />
-                                        <p className="text-green-800">
-                                            {locale === 'ar' 
-                                                ? 'تم إرسال طلبك بنجاح! سنتواصل معك قريباً.' 
-                                                : 'Your application has been submitted successfully! We will contact you soon.'}
-                                        </p>
-                                    </div>
-                                )}
+                            {/* Application Form - Show first */}
+                            {!verificationCodeSent && (
+                                <form onSubmit={submit} className="p-6 space-y-6">
+                                    {page.props.flash?.verification_sent && (
+                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center gap-3">
+                                            <CheckCircle className="h-5 w-5 text-blue-600" />
+                                            <p className="text-blue-800">{page.props.flash.verification_sent}</p>
+                                        </div>
+                                    )}
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label htmlFor="name" className="block mb-2 font-medium" style={{ color: '#545759' }}>
-                                            <User className="inline h-4 w-4 mr-2" />
-                                            {locale === 'ar' ? 'الاسم الكامل *' : 'Full Name *'}
-                                        </label>
-                                        <input
-                                            id="name"
-                                            type="text"
-                                            value={data.name}
-                                            onChange={(e) => setData('name', e.target.value)}
-                                            required
-                                            className="w-full px-4 py-3 rounded-lg border-2 transition-all focus:border-[#e72177] focus:ring-4 focus:ring-[#e72177]/10 outline-none"
-                                            style={{
-                                                fontFamily: "'Alexandria', sans-serif",
-                                                borderColor: '#bdc4c8',
-                                            }}
-                                        />
-                                        <InputError message={errors.name} className="mt-1" />
-                                    </div>
+                                    {/* Display general errors */}
+                                    {Object.keys(errors).length > 0 && (
+                                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                            <p className="text-red-800 font-semibold mb-2">
+                                                {locale === 'ar' ? 'يرجى تصحيح الأخطاء التالية:' : 'Please correct the following errors:'}
+                                            </p>
+                                            <ul className="list-disc list-inside space-y-1">
+                                                {Object.entries(errors).map(([key, value]) => (
+                                                    <li key={key} className="text-red-700 text-sm">
+                                                        {Array.isArray(value) ? value.join(', ') : value}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
 
-                                    <div>
-                                        <label htmlFor="email" className="block mb-2 font-medium" style={{ color: '#545759' }}>
-                                            <Mail className="inline h-4 w-4 mr-2" />
-                                            {locale === 'ar' ? 'البريد الإلكتروني *' : 'Email Address *'}
-                                        </label>
-                                        <input
-                                            id="email"
-                                            type="email"
-                                            value={data.email}
-                                            onChange={(e) => setData('email', e.target.value)}
-                                            required
-                                            className="w-full px-4 py-3 rounded-lg border-2 transition-all focus:border-[#e72177] focus:ring-4 focus:ring-[#e72177]/10 outline-none"
-                                            style={{
-                                                fontFamily: "'Alexandria', sans-serif",
-                                                borderColor: '#bdc4c8',
-                                            }}
-                                        />
-                                        <InputError message={errors.email} className="mt-1" />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label htmlFor="name" className="block mb-2 font-medium" style={{ color: '#545759' }}>
+                                                <User className="inline h-4 w-4 mr-2" />
+                                                {locale === 'ar' ? 'الاسم الكامل *' : 'Full Name *'}
+                                            </label>
+                                            <input
+                                                id="name"
+                                                type="text"
+                                                value={data.name}
+                                                onChange={(e) => setData('name', e.target.value)}
+                                                required
+                                                disabled={verificationCodeSent}
+                                                className="w-full px-4 py-3 rounded-lg border-2 transition-all focus:border-[#e72177] focus:ring-4 focus:ring-[#e72177]/10 outline-none disabled:bg-gray-50 disabled:cursor-not-allowed"
+                                                style={{
+                                                    fontFamily: "'Alexandria', sans-serif",
+                                                    borderColor: '#bdc4c8',
+                                                }}
+                                            />
+                                            <InputError message={errors.name} className="mt-1" />
+                                        </div>
+
+                                        <div>
+                                            <label htmlFor="email" className="block mb-2 font-medium" style={{ color: '#545759' }}>
+                                                <Mail className="inline h-4 w-4 mr-2" />
+                                                {locale === 'ar' ? 'البريد الإلكتروني *' : 'Email Address *'}
+                                            </label>
+                                            <input
+                                                id="email"
+                                                type="email"
+                                                value={data.email}
+                                                onChange={(e) => setData('email', e.target.value)}
+                                                required
+                                                disabled={verificationCodeSent}
+                                                className="w-full px-4 py-3 rounded-lg border-2 transition-all focus:border-[#e72177] focus:ring-4 focus:ring-[#e72177]/10 outline-none disabled:bg-gray-50 disabled:cursor-not-allowed"
+                                                style={{
+                                                    fontFamily: "'Alexandria', sans-serif",
+                                                    borderColor: '#bdc4c8',
+                                                }}
+                                            />
+                                            <InputError message={errors.email} className="mt-1" />
+                                        </div>
                                     </div>
 
                                     <div>
@@ -305,7 +536,8 @@ export default function Positions({ positions = [], locale = 'ar' }: PositionsPr
                                             type="tel"
                                             value={data.phone}
                                             onChange={(e) => setData('phone', e.target.value)}
-                                            className="w-full px-4 py-3 rounded-lg border-2 transition-all focus:border-[#e72177] focus:ring-4 focus:ring-[#e72177]/10 outline-none"
+                                            disabled={verificationCodeSent}
+                                            className="w-full px-4 py-3 rounded-lg border-2 transition-all focus:border-[#e72177] focus:ring-4 focus:ring-[#e72177]/10 outline-none disabled:bg-gray-50 disabled:cursor-not-allowed"
                                             style={{
                                                 fontFamily: "'Alexandria', sans-serif",
                                                 borderColor: '#bdc4c8',
@@ -326,7 +558,8 @@ export default function Positions({ positions = [], locale = 'ar' }: PositionsPr
                                                 accept=".pdf,.doc,.docx"
                                                 onChange={handleFileChange}
                                                 required
-                                                className="w-full px-4 py-3 rounded-lg border-2 transition-all focus:border-[#e72177] focus:ring-4 focus:ring-[#e72177]/10 outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#e72177] file:text-white file:cursor-pointer hover:file:bg-[#c91e66]"
+                                                disabled={verificationCodeSent}
+                                                className="w-full px-4 py-3 rounded-lg border-2 transition-all focus:border-[#e72177] focus:ring-4 focus:ring-[#e72177]/10 outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#e72177] file:text-white file:cursor-pointer hover:file:bg-[#c91e66] disabled:bg-gray-50 disabled:cursor-not-allowed disabled:file:cursor-not-allowed"
                                                 style={{
                                                     fontFamily: "'Alexandria', sans-serif",
                                                     borderColor: '#bdc4c8',
@@ -344,84 +577,237 @@ export default function Positions({ positions = [], locale = 'ar' }: PositionsPr
                                             {locale === 'ar' ? 'الحد الأقصى لحجم الملف: 10 ميجابايت' : 'Maximum file size: 10MB'}
                                         </p>
                                     </div>
-                                </div>
 
-                                <div>
-                                    <label htmlFor="experience" className="block mb-2 font-medium" style={{ color: '#545759' }}>
-                                        {locale === 'ar' ? 'الخبرة *' : 'Experience *'}
-                                    </label>
+                                    <div>
+                                        <label htmlFor="experience" className="block mb-2 font-medium" style={{ color: '#545759' }}>
+                                            {locale === 'ar' ? 'الخبرة *' : 'Experience *'}
+                                        </label>
                                     <textarea
                                         id="experience"
                                         value={data.experience}
                                         onChange={(e) => setData('experience', e.target.value)}
                                         required
                                         rows={5}
-                                        className="w-full px-4 py-3 rounded-lg border-2 transition-all focus:border-[#e72177] focus:ring-4 focus:ring-[#e72177]/10 outline-none resize-y"
+                                        disabled={verificationCodeSent}
+                                        className="w-full px-4 py-3 rounded-lg border-2 transition-all focus:border-[#e72177] focus:ring-4 focus:ring-[#e72177]/10 outline-none resize-y disabled:bg-gray-50 disabled:cursor-not-allowed"
                                         style={{
                                             fontFamily: "'Alexandria', sans-serif",
                                             borderColor: '#bdc4c8',
                                         }}
                                         placeholder={locale === 'ar' ? 'يرجى وصف خبرتك المهنية...' : 'Please describe your professional experience...'}
                                     />
-                                    <InputError message={errors.experience} className="mt-1" />
-                                </div>
+                                        <InputError message={errors.experience} className="mt-1" />
+                                    </div>
 
-                                <div>
-                                    <label htmlFor="qualifications" className="block mb-2 font-medium" style={{ color: '#545759' }}>
-                                        {locale === 'ar' ? 'المؤهلات *' : 'Qualifications *'}
-                                    </label>
+                                    <div>
+                                        <label htmlFor="qualifications" className="block mb-2 font-medium" style={{ color: '#545759' }}>
+                                            {locale === 'ar' ? 'المؤهلات *' : 'Qualifications *'}
+                                        </label>
                                     <textarea
                                         id="qualifications"
                                         value={data.qualifications}
                                         onChange={(e) => setData('qualifications', e.target.value)}
                                         required
                                         rows={5}
-                                        className="w-full px-4 py-3 rounded-lg border-2 transition-all focus:border-[#e72177] focus:ring-4 focus:ring-[#e72177]/10 outline-none resize-y"
+                                        disabled={verificationCodeSent}
+                                        className="w-full px-4 py-3 rounded-lg border-2 transition-all focus:border-[#e72177] focus:ring-4 focus:ring-[#e72177]/10 outline-none resize-y disabled:bg-gray-50 disabled:cursor-not-allowed"
                                         style={{
                                             fontFamily: "'Alexandria', sans-serif",
                                             borderColor: '#bdc4c8',
                                         }}
                                         placeholder={locale === 'ar' ? 'يرجى ذكر مؤهلاتك التعليمية والشهادات...' : 'Please list your educational qualifications and certifications...'}
                                     />
-                                    <InputError message={errors.qualifications} className="mt-1" />
-                                </div>
+                                        <InputError message={errors.qualifications} className="mt-1" />
+                                    </div>
 
-                                <div className="flex gap-4 pt-4">
-                                    <button
-                                        type="submit"
-                                        disabled={processing}
-                                        className="flex-1 py-3 px-6 rounded-lg text-white font-medium transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
-                                        style={{
-                                            fontFamily: "'Alexandria', sans-serif",
-                                            fontWeight: 500,
-                                            letterSpacing: '0.05em',
-                                            background: 'linear-gradient(135deg, #e72177, #862b90)',
-                                            boxShadow: '0 5px 20px rgba(231, 33, 119, 0.3)',
-                                        }}
-                                    >
-                                        {processing
-                                            ? (locale === 'ar' ? 'جاري الإرسال...' : 'Submitting...')
-                                            : (locale === 'ar' ? 'إرسال الطلب' : 'Submit Application')}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={closeForm}
-                                        className="px-6 py-3 rounded-lg border-2 font-medium transition-all hover:bg-gray-50"
-                                        style={{
-                                            fontFamily: "'Alexandria', sans-serif",
-                                            borderColor: '#bdc4c8',
-                                            color: '#545759',
-                                        }}
-                                    >
-                                        {locale === 'ar' ? 'إلغاء' : 'Cancel'}
-                                    </button>
+                                    {/* Captcha */}
+                                    <div className="bg-gray-50 p-4 rounded-lg border-2" style={{ borderColor: '#bdc4c8' }}>
+                                        <label className="block mb-2 font-medium" style={{ color: '#545759' }}>
+                                            {locale === 'ar' ? 'التحقق من أنك لست روبوت:' : 'Verify you are not a robot:'}
+                                        </label>
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-2 text-lg font-semibold" style={{ color: '#545759' }}>
+                                                <span>{captchaQuestion.num1}</span>
+                                                <span>+</span>
+                                                <span>{captchaQuestion.num2}</span>
+                                                <span>=</span>
+                                            </div>
+                                            <input
+                                                type="number"
+                                                value={captchaAnswer}
+                                                onChange={(e) => setCaptchaAnswer(e.target.value)}
+                                                className="w-20 px-3 py-2 rounded-lg border-2 transition-all focus:border-[#e72177] focus:ring-4 focus:ring-[#e72177]/10 outline-none"
+                                                style={{
+                                                    fontFamily: "'Alexandria', sans-serif",
+                                                    borderColor: '#bdc4c8',
+                                                }}
+                                                placeholder="?"
+                                                required
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={generateCaptcha}
+                                                className="text-sm text-[#e72177] hover:underline"
+                                            >
+                                                {locale === 'ar' ? 'تحديث' : 'Refresh'}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-4 pt-4">
+                                        <button
+                                            type="submit"
+                                            disabled={processing || !data.cv || parseInt(captchaAnswer) !== captchaQuestion.answer}
+                                            className="flex-1 py-3 px-6 rounded-lg text-white font-medium transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+                                            style={{
+                                                fontFamily: "'Alexandria', sans-serif",
+                                                fontWeight: 500,
+                                                letterSpacing: '0.05em',
+                                                background: 'linear-gradient(135deg, #e72177, #862b90)',
+                                                boxShadow: '0 5px 20px rgba(231, 33, 119, 0.3)',
+                                            }}
+                                        >
+                                            {processing
+                                                ? (locale === 'ar' ? 'جاري الإرسال...' : 'Sending...')
+                                                : (locale === 'ar' ? 'إرسال رمز التحقق' : 'Send Verification Code')}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={closeForm}
+                                            className="px-6 py-3 rounded-lg border-2 font-medium transition-all hover:bg-gray-50"
+                                            style={{
+                                                fontFamily: "'Alexandria', sans-serif",
+                                                borderColor: '#bdc4c8',
+                                                color: '#545759',
+                                            }}
+                                        >
+                                            {locale === 'ar' ? 'إلغاء' : 'Cancel'}
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+
+                            {/* Email Verification Step - Show after form submission */}
+                            {verificationCodeSent && (
+                                <div className="p-6 space-y-6">
+                                    {page.props.flash?.verification_sent && (
+                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center gap-3">
+                                            <CheckCircle className="h-5 w-5 text-blue-600" />
+                                            <p className="text-blue-800">{page.props.flash.verification_sent}</p>
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <h3 className="text-xl font-semibold mb-4" style={{ color: '#545759' }}>
+                                            {locale === 'ar' ? 'التحقق من البريد الإلكتروني' : 'Email Verification'}
+                                        </h3>
+                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                            <p className="text-sm" style={{ color: '#6b7280' }}>
+                                                {locale === 'ar'
+                                                    ? `تم إرسال رمز التحقق إلى بريدك الإلكتروني: ${data.email}`
+                                                    : `A verification code has been sent to your email: ${data.email}`}
+                                            </p>
+                                            <p className="text-xs mt-2" style={{ color: '#6b7280' }}>
+                                                {locale === 'ar'
+                                                    ? 'يرجى إدخال الرمز لإكمال تقديم طلبك.'
+                                                    : 'Please enter the code to complete your application.'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Resend Verification Code Button */}
+                                    <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg mb-4">
+                                        <button
+                                            type="button"
+                                            onClick={resendVerificationCode}
+                                            disabled={resendCooldown > 0 || resendCount >= 3}
+                                            className="text-sm text-[#e72177] hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {resendCooldown > 0
+                                                ? (locale === 'ar' ? `إعادة الإرسال بعد ${resendCooldown} ثانية` : `Resend in ${resendCooldown}s`)
+                                                : resendCount >= 3
+                                                ? (locale === 'ar' ? 'تم تجاوز الحد الأقصى للمحاولات' : 'Maximum attempts reached')
+                                                : (locale === 'ar' ? 'إعادة إرسال رمز التحقق' : 'Resend Verification Code')}
+                                        </button>
+                                        {resendCount > 0 && (
+                                            <span className="text-sm text-gray-500">
+                                                {locale === 'ar' ? `محاولات إعادة الإرسال: ${resendCount}/3` : `Resend attempts: ${resendCount}/3`}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <form onSubmit={verifyCode} className="space-y-4">
+                                        <div>
+                                            <label htmlFor="verification-code" className="block mb-2 font-medium" style={{ color: '#545759' }}>
+                                                {locale === 'ar' ? 'رمز التحقق *' : 'Verification Code *'}
+                                            </label>
+                                            <input
+                                                id="verification-code"
+                                                type="text"
+                                                value={verificationCode}
+                                                onChange={(e) => {
+                                                    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                                    setVerificationCode(value);
+                                                    setVerificationData('code', value);
+                                                }}
+                                                required
+                                                maxLength={6}
+                                                placeholder={locale === 'ar' ? 'أدخل الرمز المكون من 6 أرقام' : 'Enter 6-digit code'}
+                                                className="w-full px-4 py-3 rounded-lg border-2 transition-all focus:border-[#e72177] focus:ring-4 focus:ring-[#e72177]/10 outline-none text-center text-2xl tracking-widest"
+                                                style={{
+                                                    fontFamily: "'Courier New', monospace",
+                                                    borderColor: '#bdc4c8',
+                                                    letterSpacing: '0.5em',
+                                                }}
+                                            />
+                                            <InputError message={verificationErrors.code} className="mt-1" />
+                                            <p className="mt-2 text-xs text-gray-500">
+                                                {locale === 'ar'
+                                                    ? 'أدخل الرمز المكون من 6 أرقام الذي تم إرساله إلى بريدك الإلكتروني'
+                                                    : 'Enter the 6-digit code sent to your email'}
+                                            </p>
+                                        </div>
+                                        <div className="flex gap-4">
+                                            <button
+                                                type="submit"
+                                                disabled={verifyingCode || verificationCode.length !== 6}
+                                                className="flex-1 py-3 px-6 rounded-lg text-white font-medium transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+                                                style={{
+                                                    fontFamily: "'Alexandria', sans-serif",
+                                                    fontWeight: 500,
+                                                    letterSpacing: '0.05em',
+                                                    background: 'linear-gradient(135deg, #e72177, #862b90)',
+                                                    boxShadow: '0 5px 20px rgba(231, 33, 119, 0.3)',
+                                                }}
+                                            >
+                                                {verifyingCode
+                                                    ? (locale === 'ar' ? 'جاري التحقق...' : 'Verifying...')
+                                                    : (locale === 'ar' ? 'تحقق وإرسال الطلب' : 'Verify & Submit')}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setVerificationCodeSent(false);
+                                                    setVerificationCode('');
+                                                }}
+                                                className="px-6 py-3 rounded-lg border-2 font-medium transition-all hover:bg-gray-50"
+                                                style={{
+                                                    fontFamily: "'Alexandria', sans-serif",
+                                                    borderColor: '#bdc4c8',
+                                                    color: '#545759',
+                                                }}
+                                            >
+                                                {locale === 'ar' ? 'تعديل البيانات' : 'Edit Information'}
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
-                            </form>
+                            )}
                         </div>
                     </div>
                 )}
 
-                <Footer menuItems={menuItems} locale={locale} />
+                <Footer locale={locale} />
             </div>
         </>
     );

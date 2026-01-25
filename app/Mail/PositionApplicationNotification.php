@@ -59,10 +59,20 @@ class PositionApplicationNotification extends Mailable
             return [];
         }
 
-        return [
-            Attachment::fromStorageDisk('public', $this->application->cv_path)
-                ->as($this->application->cv_filename)
-                ->withMime(Storage::disk('public')->mimeType($this->application->cv_path)),
-        ];
+        try {
+            $mimeType = Storage::disk('local')->mimeType($this->application->cv_path);
+            
+            return [
+                Attachment::fromStorageDisk('local', $this->application->cv_path)
+                    ->as($this->application->cv_filename)
+                    ->withMime($mimeType ?: 'application/octet-stream'),
+            ];
+        } catch (\Exception $e) {
+            // If mime type detection fails, still attach the file
+            return [
+                Attachment::fromStorageDisk('local', $this->application->cv_path)
+                    ->as($this->application->cv_filename),
+            ];
+        }
     }
 }

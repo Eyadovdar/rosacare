@@ -21,6 +21,9 @@ class PositionForm
                 Toggle::make('is_active')
                     ->label('Active')
                     ->default(true),
+                Toggle::make('is_featured')
+                    ->label('Featured (Show on Homepage)')
+                    ->default(false),
                 TextInput::make('sort_order')
                     ->label('Sort Order')
                     ->numeric()
@@ -53,17 +56,14 @@ class PositionForm
                                 Textarea::make('description:ar')
                                     ->label('Description (Arabic)')
                                     ->rows(3)
-                                    ->required()
                                     ->columnSpanFull(),
                                 Textarea::make('qualifications:ar')
                                     ->label('Qualifications (Arabic)')
                                     ->rows(5)
-                                    ->required()
                                     ->columnSpanFull(),
                                 Textarea::make('responsibilities:ar')
                                     ->label('Responsibilities (Arabic)')
                                     ->rows(5)
-                                    ->required()
                                     ->columnSpanFull(),
                                 TextInput::make('button_text:ar')
                                     ->label('Button Text (Arabic)')
@@ -78,17 +78,14 @@ class PositionForm
                                 Textarea::make('description:en')
                                     ->label('Description (English)')
                                     ->rows(3)
-                                    ->required()
                                     ->columnSpanFull(),
                                 Textarea::make('qualifications:en')
                                     ->label('Qualifications (English)')
                                     ->rows(5)
-                                    ->required()
                                     ->columnSpanFull(),
                                 Textarea::make('responsibilities:en')
                                     ->label('Responsibilities (English)')
                                     ->rows(5)
-                                    ->required()
                                     ->columnSpanFull(),
                                 TextInput::make('button_text:en')
                                     ->label('Button Text (English)')

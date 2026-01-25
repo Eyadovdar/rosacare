@@ -37,6 +37,8 @@ class PositionsTable
                     ->sortable(),
                 ToggleColumn::make('is_active')
                     ->label('Active'),
+                ToggleColumn::make('is_featured')
+                    ->label('Featured'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
