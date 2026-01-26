@@ -65,6 +65,10 @@ class RosaAdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->renderHook(
+                'head.end',
+                fn () => view('filament.position-applications.print-styles')
+            );
     }
 }

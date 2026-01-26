@@ -2,12 +2,19 @@
 
 namespace App\Filament\Resources\PositionApplications\Tables;
 
+use App\Models\PositionApplication;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Table;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
 
 class PositionApplicationsTable
 {
@@ -52,17 +59,36 @@ class PositionApplicationsTable
                     ->sortable(),
             ])
             ->filters([
-                //
+                TrashedFilter::make(),
             ])
             ->recordActions([
                 ViewAction::make(),
+                Action::make('download_cv')
+                    ->label('Download CV')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->url(fn (PositionApplication $record): string => route('position-applications.download-cv', $record->id))
+                    ->openUrlInNewTab()
+                    ->visible(fn (PositionApplication $record): bool => !empty($record->cv_path)),
             ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+            ->bulkActions([
+                BulkAction::make('download_cvs')
+                    ->label('Download CVs (ZIP)')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->action(function ($records) {
+                        $ids = $records->pluck('id')->toArray();
+                        $idsParam = implode(',', $ids);
+                        
+                        // Redirect to download route with IDs as query parameter
+                        return redirect()->route('position-applications.download-cvs-zip', ['ids' => $idsParam]);
+                    })
+                    ->deselectRecordsAfterCompletion(),
+                RestoreBulkAction::make(),
+                ForceDeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ])
             ->defaultSort('created_at', 'desc');
     }
 }
-

@@ -464,10 +464,58 @@ class PositionApplicationController extends Controller
             abort(404, 'CV file not found');
         }
 
-        return Storage::disk('local')->download(
-            $application->cv_path,
-            $application->cv_filename
-        );
+        // Get the full path to the file
+        $filePath = Storage::disk('local')->path($application->cv_path);
+
+        return response()->download($filePath, $application->cv_filename);
+    }
+
+    /**
+     * Download multiple CVs as ZIP file
+     */
+    public function downloadCvsZip(Request $request)
+    {
+        $idsParam = $request->input('ids', '');
+        $ids = $idsParam ? explode(',', $idsParam) : [];
+
+        if (empty($ids)) {
+            abort(400, 'No applications selected');
+        }
+
+        $applications = PositionApplication::whereIn('id', $ids)
+            ->whereNotNull('cv_path')
+            ->get();
+
+        if ($applications->isEmpty()) {
+            abort(404, 'No CV files found for selected applications');
+        }
+
+        // Create a temporary ZIP file
+        $zipFileName = 'position-applications-cvs-' . now()->format('Y-m-d-His') . '.zip';
+        $zipPath = storage_path('app/temp/' . $zipFileName);
+
+        // Ensure temp directory exists
+        if (!file_exists(dirname($zipPath))) {
+            mkdir(dirname($zipPath), 0755, true);
+        }
+
+        $zip = new \ZipArchive();
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            abort(500, 'Could not create ZIP file');
+        }
+
+        foreach ($applications as $application) {
+            if (Storage::disk('local')->exists($application->cv_path)) {
+                $filePath = Storage::disk('local')->path($application->cv_path);
+                $safeName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $application->name);
+                $zipFileName = $safeName . '_' . $application->cv_filename;
+                $zip->addFile($filePath, $zipFileName);
+            }
+        }
+
+        $zip->close();
+
+        return response()->download($zipPath, $zipFileName)->deleteFileAfterSend(true);
     }
 
     /**

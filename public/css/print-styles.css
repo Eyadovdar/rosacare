@@ -1,0 +1,49 @@
+@media print {
+    /* Hide header actions and navigation */
+    [data-headlessui-state],
+    .fi-header-actions,
+    .fi-sidebar,
+    .fi-topbar,
+    nav,
+    header,
+    .fi-page-header-actions,
+    button[aria-label="Print Report"],
+    button[aria-label="Restore"],
+    button[aria-label="Force Delete"],
+    button[aria-label="Delete"] {
+        display: none !important;
+    }
+
+    /* Ensure full width for content */
+    .fi-main,
+    .fi-body,
+    .fi-infolist {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Improve print layout */
+    body {
+        background: white !important;
+        color: black !important;
+    }
+
+    /* Ensure sections are visible */
+    .fi-infolist-ctn {
+        page-break-inside: avoid;
+    }
+
+    /* Add page breaks where needed */
+    .fi-section {
+        page-break-inside: avoid;
+    }
+
+    /* Print-friendly colors */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
+

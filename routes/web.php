@@ -28,6 +28,7 @@ Route::post('/position-applications/resend-verification', [PositionApplicationCo
 Route::post('/position-applications/verify-code', [PositionApplicationController::class, 'verifyCode'])->name('position-applications.verify-code');
 Route::post('/position-applications', [PositionApplicationController::class, 'store'])->name('position-applications.store');
 Route::get('/position-applications/{id}/download-cv', [PositionApplicationController::class, 'downloadCv'])->name('position-applications.download-cv')->middleware('auth');
+Route::get('/position-applications/download-cvs-zip', [PositionApplicationController::class, 'downloadCvsZip'])->name('position-applications.download-cvs-zip')->middleware('auth');
 Route::get('/privacy-policy', function () {
     return Inertia::render('PrivacyPolicy', [
         'locale' => app()->getLocale() ?: session('locale', 'ar'),
