@@ -67,15 +67,15 @@ Route::get('/check-mail-config', function () {
 // Test email route (remove after testing)
 Route::get('/test-email', function () {
     try {
-        // Get current mail configuration
+        // Get current mail configuration (from .env first, then config)
         $mailConfig = [
-            'MAIL_MAILER' => config('mail.default'),
-            'MAIL_HOST' => config('mail.mailers.smtp.host'),
-            'MAIL_PORT' => config('mail.mailers.smtp.port'),
-            'MAIL_ENCRYPTION' => config('mail.mailers.smtp.encryption'),
-            'MAIL_USERNAME' => config('mail.mailers.smtp.username'),
-            'MAIL_FROM_ADDRESS' => config('mail.from.address'),
-            'MAIL_FROM_NAME' => config('mail.from.name'),
+            'MAIL_MAILER' => env('MAIL_MAILER') ?: config('mail.default'),
+            'MAIL_HOST' => env('MAIL_HOST') ?: config('mail.mailers.smtp.host'),
+            'MAIL_PORT' => env('MAIL_PORT') ?: config('mail.mailers.smtp.port'),
+            'MAIL_ENCRYPTION' => env('MAIL_ENCRYPTION') ?: config('mail.mailers.smtp.encryption'),
+            'MAIL_USERNAME' => env('MAIL_USERNAME') ?: config('mail.mailers.smtp.username'),
+            'MAIL_FROM_ADDRESS' => env('MAIL_FROM_ADDRESS') ?: config('mail.from.address'),
+            'MAIL_FROM_NAME' => env('MAIL_FROM_NAME') ?: config('mail.from.name'),
         ];
 
         // Use the same email as username for From address to avoid SMTP rejection
@@ -110,7 +110,7 @@ Route::get('/test-email', function () {
                 'MAIL_FROM_ADDRESS' => config('mail.from.address'),
                 'MAIL_FROM_NAME' => config('mail.from.name'),
             ],
-            'fix_suggestion' => 'MAIL_FROM_ADDRESS must match MAIL_USERNAME. Also, port 465 usually requires SSL encryption, not TLS.',
+            'fix_suggestion' => 'Also, port 465 usually requires SSL encryption, not TLS.',
         ], 500);
     }
 })->name('test.email');

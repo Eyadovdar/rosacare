@@ -7,7 +7,7 @@
 
         /* Hide sidebar and navigation */
         .fi-sidebar,
-        .fi-sidebar-nav,
+        .fi-sidebar-nav {display: none !important; visibility: hidden !important;}
         .fi-sidebar-header,
         .fi-sidebar-footer,
         aside,
