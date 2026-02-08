@@ -30,8 +30,15 @@ Route::post('/position-applications', [PositionApplicationController::class, 'st
 Route::get('/position-applications/{id}/download-cv', [PositionApplicationController::class, 'downloadCv'])->name('position-applications.download-cv')->middleware('auth');
 Route::get('/position-applications/download-cvs-zip', [PositionApplicationController::class, 'downloadCvsZip'])->name('position-applications.download-cvs-zip')->middleware('auth');
 Route::get('/privacy-policy', function () {
+    $locale = app()->getLocale() ?: session('locale', 'ar');
+    $policy = \App\Models\Policy::where('slug', 'privacy-policy')
+        ->where('locale', $locale)
+        ->where('is_active', true)
+        ->first();
+
     return Inertia::render('PrivacyPolicy', [
-        'locale' => app()->getLocale() ?: session('locale', 'ar'),
+        'locale' => $locale,
+        'policy' => $policy ? $policy->getSectionsForFrontend() : null,
     ]);
 })->name('privacy-policy');
 Route::get('/terms-of-use', function () {

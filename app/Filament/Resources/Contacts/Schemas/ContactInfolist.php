@@ -54,8 +54,7 @@ class ContactInfolist
                 TextEntry::make('updated_at')
                     ->label('Updated At')
                     ->dateTime()
-                    ->placeholder('-')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->placeholder('-'),
             ]);
     }
 }

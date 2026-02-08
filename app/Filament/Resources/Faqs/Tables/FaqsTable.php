@@ -28,8 +28,6 @@ class FaqsTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('local')
-                    ->searchable(),
             ])
             ->filters([
                 //

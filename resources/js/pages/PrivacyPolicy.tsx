@@ -3,11 +3,32 @@ import { Footer } from '@/components/rosacare/Footer';
 import { Navbar } from '@/components/rosacare/Navbar';
 import { useEffect, useState } from 'react';
 
-interface PrivacyPolicyProps {
-    locale?: string;
+interface PolicySection {
+    title: string;
+    content: string;
 }
 
-export default function PrivacyPolicy({ locale = 'ar' }: PrivacyPolicyProps) {
+interface PolicyContent {
+    title: string;
+    lastUpdated: string;
+    sections: PolicySection[];
+}
+
+interface PrivacyPolicyProps {
+    locale?: string;
+    policy?: PolicyContent | null;
+}
+
+/** Decode HTML entities (e.g. &lt; &gt; &quot;) so rich text from the backend renders as HTML. Only decodes when content looks entity-encoded. */
+function decodeHtmlEntities(html: string): string {
+    if (typeof document === 'undefined') return html;
+    if (!html.includes('&lt;') && !html.includes('&gt;')) return html;
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.innerHTML;
+}
+
+export default function PrivacyPolicy({ locale = 'ar', policy: policyFromDb = null }: PrivacyPolicyProps) {
     const isRTL = locale === 'ar';
     const page = usePage<any>();
     const menuItems = page.props.menuItems || [];
@@ -17,7 +38,7 @@ export default function PrivacyPolicy({ locale = 'ar' }: PrivacyPolicyProps) {
         setIsVisible(true);
     }, []);
 
-    const content = locale === 'ar' ? {
+    const fallbackContent = locale === 'ar' ? {
         title: 'سياسة الخصوصية',
         lastUpdated: 'آخر تحديث: يناير 2025',
         sections: [
@@ -66,7 +87,7 @@ export default function PrivacyPolicy({ locale = 'ar' }: PrivacyPolicyProps) {
                 content: 'إذا كان لديك أي أسئلة أو مخاوف بشأن سياسة الخصوصية هذه، يرجى الاتصال بنا من خلال:\n\n• البريد الإلكتروني: info@rosacare.sy\n• الهاتف: +963-XXX-XXX-XXX\n• العنوان: سوريا'
             }
         ]
-    } : {
+    } as PolicyContent : {
         title: 'Privacy Policy',
         lastUpdated: 'Last Updated: January 2025',
         sections: [
@@ -115,7 +136,9 @@ export default function PrivacyPolicy({ locale = 'ar' }: PrivacyPolicyProps) {
                 content: 'If you have any questions or concerns about this Privacy Policy, please contact us through:\n\n• Email: info@rosacare.sy\n• Phone: +963-XXX-XXX-XXX\n• Address: Syria'
             }
         ]
-    };
+    } as PolicyContent;
+
+    const content: PolicyContent = policyFromDb ?? fallbackContent;
 
     return (
         <>
@@ -167,14 +190,17 @@ export default function PrivacyPolicy({ locale = 'ar' }: PrivacyPolicyProps) {
                                             }}>
                                                 {section.title}
                                             </h2>
-                                            <p className="text-base md:text-lg leading-relaxed whitespace-pre-line" style={{
-                                                color: '#545759',
-                                                fontFamily: "'Alexandria', sans-serif",
-                                                fontWeight: 300,
-                                                lineHeight: '1.8'
-                                            }}>
-                                                {section.content}
-                                            </p>
+
+                                            <div
+                                                className="text-base md:text-lg leading-relaxed prose prose-p:my-2 prose-a:text-primary prose-a:underline"
+                                                style={{
+                                                    color: '#545759',
+                                                    fontFamily: "'Alexandria', sans-serif",
+                                                    fontWeight: 300,
+                                                    lineHeight: '1.8'
+                                                }}
+                                                dangerouslySetInnerHTML={{ __html: decodeHtmlEntities(section.content) }}                                            />
+
                                         </div>
                                     ))}
                                 </div>

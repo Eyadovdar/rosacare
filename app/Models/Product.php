@@ -111,4 +111,52 @@ class Product extends Model
     {
         $this->increment('view_count');
     }
+
+    /**
+     * Create a duplicate of this product with copies of translations and media references.
+     */
+    public function duplicate(): self
+    {
+        $copy = $this->replicate();
+        $copy->view_count = 0;
+        $copy->deleted_at = null;
+        $copy->sku = $this->makeUniqueSku($this->sku ?? 'product');
+        $copy->slug = $this->makeUniqueSlug($this->slug ?? 'product-' . $this->id);
+        $copy->save();
+
+        foreach ($this->translations as $translation) {
+            $copy->translations()->create($translation->only([
+                'locale', 'name', 'description', 'short_description', 'ingredients',
+                'benefits', 'usage_instructions', 'meta_title', 'meta_description', 'meta_keywords',
+            ]));
+        }
+
+        foreach ($this->media()->get() as $media) {
+            $copy->media()->create($media->only([
+                'collection_name', 'file_name', 'mime_type', 'size', 'disk', 'path', 'sort_order', 'custom_properties',
+            ]));
+        }
+
+        return $copy;
+    }
+
+    private function makeUniqueSku(string $base): string
+    {
+        $sku = $base . '-copy';
+        $n = 1;
+        while (static::where('sku', $sku)->exists()) {
+            $sku = $base . '-copy-' . $n++;
+        }
+        return $sku;
+    }
+
+    private function makeUniqueSlug(string $base): string
+    {
+        $slug = $base . '-copy';
+        $n = 1;
+        while (static::where('slug', $slug)->exists()) {
+            $slug = $base . '-copy-' . $n++;
+        }
+        return $slug;
+    }
 }

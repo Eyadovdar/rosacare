@@ -20,18 +20,17 @@ class PositionsTable
                     ->label('Image')
                     ->getStateUsing(fn ($record) => $record->image_url),
                 TextColumn::make('name')
-                    ->label('Name (English)')
+                    ->label('Name')
                     ->getStateUsing(function ($record) {
                         return $record->translate('en')?->name ?? $record->translate('ar')?->name ?? '-';
                     })
                     ->searchable(query: function ($query, $search) {
                         return $query->whereHas('translations', function ($q) use ($search) {
-                            $q->where('locale', 'en')
-                                ->where('name', 'like', "%{$search}%");
+                            $q->where('name', 'like', "%{$search}%")
+                                ->orWhere('description', 'like', "%{$search}%");
                         });
                     })
-                    ->sortable()
-                    ->searchable(),
+                    ->sortable(),
                 TextColumn::make('sort_order')
                     ->numeric()
                     ->sortable(),
