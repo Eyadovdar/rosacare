@@ -118,12 +118,109 @@ export function ProductCard({ product, locale = 'ar' }: ProductCardProps) {
                     </div>
                 )}
             </CardContent>
-            <CardFooter>
-                <Button asChild className="w-full" variant="outline">
-                    <Link href={`/products/${product.slug}`}>
-                        {locale === 'ar' ? 'عرض التفاصيل' : 'View Details'}
-                    </Link>
-                </Button>
+            <CardFooter className={`flex flex-row p-0 -mx-6 -mb-6 mt-auto ${isRTL ? 'flex-row-reverse' : ''}`}>
+                {(() => {
+                    const whatsappUrl = settings?.whatsapp;
+
+                    return (
+                        <>
+                            <Button
+                                asChild
+                                className="flex-1 rounded-none"
+                                variant="outline"
+                                style={{
+                                    borderRight: whatsappUrl && !isRTL ? 'none' : undefined,
+                                    borderLeft: whatsappUrl && isRTL ? 'none' : undefined,
+                                    borderRadius: 0,
+                                    borderBottomLeftRadius: isRTL ? (whatsappUrl ? 0 : '0.75rem') : (whatsappUrl ? '0.75rem' : '0.75rem'),
+                                    borderBottomRightRadius: isRTL ? (whatsappUrl ? '0.75rem' : '0.75rem') : (whatsappUrl ? 0 : '0.75rem'),
+                                    margin: 0
+                                }}
+                            >
+                                <Link href={`/products/${product.slug}`}>
+                                    {locale === 'ar' ? 'عرض التفاصيل' : 'View Details'}
+                                </Link>
+                            </Button>
+                            {whatsappUrl && (() => {
+
+                                // Build WhatsApp message with product information
+                                const productName = translation.name;
+                                const productPrice = showPrice && currentPrice !== null && currentPrice !== undefined
+                                    ? `${currentPrice.toFixed(2)} ${settings?.default_currency || (locale === 'ar' ? 'ل.س' : 'SYP')}`
+                                    : '';
+                                const productCategory = categoryTranslation?.name || '';
+                                const productUrl = typeof window !== 'undefined' ? `${window.location.origin}/products/${product.slug}` : `/products/${product.slug}`;
+
+                                // Create message based on locale
+                                let message = '';
+                                if (locale === 'ar') {
+                                    message = `مرحباً، أريد طلب المنتج التالي:\n\n`;
+                                    message += `📦 المنتج: ${productName}\n`;
+                                    if (productCategory) {
+                                        message += `🏷️ الفئة: ${productCategory}\n`;
+                                    }
+                                    if (productPrice) {
+                                        message += `💰 السعر: ${productPrice}\n`;
+                                    }
+                                    message += `🔗 الرابط: ${productUrl}\n\n`;
+                                    message += `شكراً لك`;
+                                } else {
+                                    message = `Hello, I would like to order the following product:\n\n`;
+                                    message += `📦 Product: ${productName}\n`;
+                                    if (productCategory) {
+                                        message += `🏷️ Category: ${productCategory}\n`;
+                                    }
+                                    if (productPrice) {
+                                        message += `💰 Price: ${productPrice}\n`;
+                                    }
+                                    message += `🔗 Link: ${productUrl}\n\n`;
+                                    message += `Thank you`;
+                                }
+
+                                // Format WhatsApp URL with message
+                                const encodedMessage = encodeURIComponent(message);
+                                const whatsappLink = whatsappUrl.includes('?')
+                                    ? `${whatsappUrl}&text=${encodedMessage}`
+                                    : `${whatsappUrl}?text=${encodedMessage}`;
+
+                                return (
+                                    <Button
+                                        asChild
+                                        className="flex-1 rounded-none"
+                                        style={{
+                                            fontFamily: "'Alexandria', sans-serif",
+                                            fontWeight: 500,
+                                            background: 'linear-gradient(135deg, #e72177, #862b90)',
+                                            border: 'none',
+                                            borderRadius: 0,
+                                            borderBottomLeftRadius: isRTL ? '0.75rem' : 0,
+                                            borderBottomRightRadius: isRTL ? 0 : '0.75rem',
+                                            boxShadow: 'none',
+                                            margin: 0,
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.opacity = '0.9';
+                                            e.currentTarget.style.transform = 'translateY(-1px)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.opacity = '1';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                        }}
+                                    >
+                                        <a
+                                            href={whatsappLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            {locale === 'ar' ? 'اطلب الآن' : 'Order Now'}
+                                        </a>
+                                    </Button>
+                                );
+                            })()}
+                        </>
+                    );
+                })()}
             </CardFooter>
         </Card>
     );

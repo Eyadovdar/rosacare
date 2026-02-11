@@ -55,7 +55,7 @@ export default function ProductsIndex({ products, categories, selectedCategory, 
                         <h1 className={`text-4xl md:text-5xl font-bold mb-8 text-center ${isRTL ? 'rtl' : 'ltr'}`}>
                             {locale === 'ar' ? 'جميع المنتجات' : 'All Products'}
                         </h1>
-                        
+
                         {/* Category Filter */}
                         <div className="flex flex-wrap gap-4 justify-center mb-12">
                             <Button
@@ -107,6 +107,8 @@ export default function ProductsIndex({ products, categories, selectedCategory, 
                                                     <span dangerouslySetInnerHTML={{ __html: link.label }} />
                                                 )}
                                             </Button>
+
+
                                         ))}
                                     </div>
                                 )}
