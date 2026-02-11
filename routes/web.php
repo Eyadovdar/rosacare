@@ -38,7 +38,7 @@ Route::get('/privacy-policy', function () {
 
     return Inertia::render('PrivacyPolicy', [
         'locale' => $locale,
-        'policy' => $policy ? $policy->getSectionsForFrontend() : null,
+        'policy' => $policy ? $policy->getPayloadForFrontend() : null,
     ]);
 })->name('privacy-policy');
 Route::get('/terms-of-use', function () {

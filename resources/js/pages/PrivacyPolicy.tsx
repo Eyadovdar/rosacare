@@ -8,7 +8,14 @@ interface PolicySection {
     content: string;
 }
 
-interface PolicyContent {
+/** Policy from DB: Filament rich editor output (single HTML content). */
+interface PolicyFromDb {
+    title: string;
+    content: string;
+}
+
+/** Fallback when no policy in DB: title, lastUpdated, sections. */
+interface PolicyFallback {
     title: string;
     lastUpdated: string;
     sections: PolicySection[];
@@ -16,7 +23,8 @@ interface PolicyContent {
 
 interface PrivacyPolicyProps {
     locale?: string;
-    policy?: PolicyContent | null;
+    /** From DB (Filament rich editor); when set we render single HTML content. */
+    policy?: PolicyFromDb | null;
 }
 
 /** Decode HTML entities (e.g. &lt; &gt; &quot;) so rich text from the backend renders as HTML. Only decodes when content looks entity-encoded. */
@@ -87,7 +95,7 @@ export default function PrivacyPolicy({ locale = 'ar', policy: policyFromDb = nu
                 content: 'إذا كان لديك أي أسئلة أو مخاوف بشأن سياسة الخصوصية هذه، يرجى الاتصال بنا من خلال:\n\n• البريد الإلكتروني: info@rosacare.sy\n• الهاتف: +963-XXX-XXX-XXX\n• العنوان: سوريا'
             }
         ]
-    } as PolicyContent : {
+    } as PolicyFallback : {
         title: 'Privacy Policy',
         lastUpdated: 'Last Updated: January 2025',
         sections: [
@@ -136,13 +144,13 @@ export default function PrivacyPolicy({ locale = 'ar', policy: policyFromDb = nu
                 content: 'If you have any questions or concerns about this Privacy Policy, please contact us through:\n\n• Email: info@rosacare.sy\n• Phone: +963-XXX-XXX-XXX\n• Address: Syria'
             }
         ]
-    } as PolicyContent;
+    } as PolicyFallback;
 
-    const content: PolicyContent = policyFromDb ?? fallbackContent;
+    const isFromDb = policyFromDb != null;
 
     return (
         <>
-            <Head title={`${content.title} - RosaCare`} />
+            <Head title={`${isFromDb ? policyFromDb!.title : fallbackContent.title} - RosaCare`} />
             <style>{`
                 @keyframes fadeInUp {
                     from {
@@ -171,38 +179,50 @@ export default function PrivacyPolicy({ locale = 'ar', policy: policyFromDb = nu
                                     color: '#862b90',
                                     letterSpacing: '0.05em'
                                 }}>
-                                    {content.title}
+                                    {isFromDb ? policyFromDb!.title : fallbackContent.title}
                                 </h1>
-                                <p className="text-center text-muted-foreground mb-8" style={{
-                                    fontFamily: "'Alexandria', sans-serif"
-                                }}>
-                                    {content.lastUpdated}
-                                </p>
+                                {!isFromDb && (
+                                    <p className="text-center text-muted-foreground mb-8" style={{
+                                        fontFamily: "'Alexandria', sans-serif"
+                                    }}>
+                                        {fallbackContent.lastUpdated}
+                                    </p>
+                                )}
                                 <div className="prose prose-lg max-w-none" style={{
                                     fontFamily: "'Alexandria', sans-serif"
                                 }}>
-                                    {content.sections.map((section, index) => (
-                                        <div key={index} className="mb-8">
-                                            <h2 className="text-2xl font-semibold mb-4" style={{
-                                                color: '#e72177',
+                                    {isFromDb ? (
+                                        <div
+                                            className="text-base md:text-lg leading-relaxed prose prose-p:my-2 prose-a:text-primary prose-a:underline"
+                                            style={{
+                                                color: '#545759',
                                                 fontFamily: "'Alexandria', sans-serif",
-                                                letterSpacing: '0.05em'
-                                            }}>
-                                                {section.title}
-                                            </h2>
-
-                                            <div
-                                                className="text-base md:text-lg leading-relaxed prose prose-p:my-2 prose-a:text-primary prose-a:underline"
-                                                style={{
+                                                fontWeight: 300,
+                                                lineHeight: '1.8'
+                                            }}
+                                            dangerouslySetInnerHTML={{ __html: decodeHtmlEntities(policyFromDb!.content) }}
+                                        />
+                                    ) : (
+                                        fallbackContent.sections.map((section, index) => (
+                                            <div key={index} className="mb-8">
+                                                <h2 className="text-2xl font-semibold mb-4" style={{
+                                                    color: '#e72177',
+                                                    fontFamily: "'Alexandria', sans-serif",
+                                                    letterSpacing: '0.05em'
+                                                }}>
+                                                    {section.title}
+                                                </h2>
+                                                <p className="text-base md:text-lg leading-relaxed whitespace-pre-line" style={{
                                                     color: '#545759',
                                                     fontFamily: "'Alexandria', sans-serif",
                                                     fontWeight: 300,
                                                     lineHeight: '1.8'
-                                                }}
-                                                dangerouslySetInnerHTML={{ __html: decodeHtmlEntities(section.content) }}                                            />
-
-                                        </div>
-                                    ))}
+                                                }}>
+                                                    {section.content}
+                                                </p>
+                                            </div>
+                                        ))
+                                    )}
                                 </div>
                             </div>
                         </div>
