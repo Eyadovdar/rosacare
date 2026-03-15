@@ -159,6 +159,9 @@ interface ParallaxData {
     image?: string;
     image_url?: string;
     link?: string;
+    font_color?: string;
+    button_color?: string;
+    button_text_color?: string;
     translations: Array<{
         locale: string;
         title?: string;

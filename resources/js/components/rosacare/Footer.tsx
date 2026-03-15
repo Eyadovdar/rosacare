@@ -47,7 +47,7 @@ export function Footer({ locale = 'ar' }: FooterProps) {
                             <img
                                 src={settings.footer_logo_url}
                                 alt={siteName}
-                                className="h-12 w-auto object-contain mb-4"
+                                className="h-12 w-auto object-contain mb-4 dark:invert"
                             />
                         ) : (
                             <h3 className="text-2xl font-bold mb-4">{siteName}</h3>

@@ -371,7 +371,7 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
                                 <img 
                                     src={logoUrl} 
                                     alt={siteName} 
-                                    className="h-10 w-auto object-contain"
+                                    className="h-10 w-auto object-contain dark:invert"
                                 />
                             ) : (
                                 <span className="text-2xl font-bold text-primary">{siteName}</span>

@@ -8,6 +8,9 @@ interface ParallaxProps {
         image?: string;
         image_url?: string;
         link?: string;
+        font_color?: string;
+        button_color?: string;
+        button_text_color?: string;
         translations: Array<{
             locale: string;
             title?: string;
@@ -31,6 +34,10 @@ const defaultData = {
 
 export function Parallax({ locale = 'ar', parallax }: ParallaxProps) {
     const isRTL = locale === 'ar';
+
+    const fontColor = parallax?.font_color;
+    const buttonColor = parallax?.button_color;
+    const buttonTextColor = parallax?.button_text_color;
 
     // Use parallax data if available, otherwise use defaults
     const title = parallax?.translations?.find(t => t.locale === locale)?.title
@@ -61,19 +68,52 @@ export function Parallax({ locale = 'ar', parallax }: ParallaxProps) {
 
             <div className="container mx-auto px-4 relative z-10">
                 <div className={`max-w-3xl mx-auto text-center ${isRTL ? 'rtl' : 'ltr'}`}>
-                    <h2 className="text-4xl md:text-5xl font-bold mb-6">
+                    <h2
+                        className="text-4xl md:text-5xl font-bold mb-6"
+                        style={fontColor ? { color: fontColor } : undefined}
+                    >
                         {title}
                     </h2>
-                    <p className="text-xl mb-8 opacity-90">
+                    <p
+                        className="text-xl mb-8 opacity-90"
+                        style={fontColor ? { color: fontColor } : undefined}
+                    >
                         {description}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Button asChild size="lg" variant="secondary" className="text-lg px-8 py-6">
+                        <Button
+                            asChild
+                            size="lg"
+                            variant="secondary"
+                            className="text-lg px-8 py-6"
+                            style={
+                                buttonColor || buttonTextColor
+                                    ? {
+                                        backgroundColor: buttonColor || undefined,
+                                        color: buttonTextColor || undefined,
+                                        borderColor: buttonColor || undefined,
+                                    }
+                                    : undefined
+                            }
+                        >
                             <Link href={link}>
                                 {locale === 'ar' ? 'تصفح المنتجات' : 'Browse Products'}
                             </Link>
                         </Button>
-                        <Button asChild size="lg" variant="outline" className="text-lg px-8 py-6 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+                        <Button
+                            asChild
+                            size="lg"
+                            variant="outline"
+                            className="text-lg px-8 py-6 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+                            style={
+                                buttonColor || buttonTextColor
+                                    ? {
+                                        color: buttonTextColor || buttonColor || undefined,
+                                        borderColor: buttonColor || undefined,
+                                    }
+                                    : undefined
+                            }
+                        >
                             <Link href="/contact">
                                 {locale === 'ar' ? 'تواصل معنا' : 'Contact Us'}
                             </Link>

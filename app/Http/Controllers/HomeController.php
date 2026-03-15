@@ -160,6 +160,9 @@ class HomeController extends Controller
                 'image' => $parallax->image,
                 'image_url' => $parallax->image_url,
                 'link' => $parallax->link,
+                'font_color' => $parallax->font_color,
+                'button_color' => $parallax->button_color,
+                'button_text_color' => $parallax->button_text_color,
                 'translations' => $parallax->translations->map(function ($translation) {
                     return [
                         'locale' => $translation->locale,

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Parallaxes\Schemas;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -32,6 +33,16 @@ class ParallaxForm
                             ->url()
                             ->required()
                             ->default('/products'),
+                        ColorPicker::make('font_color')
+                            ->label('Font Color')
+                            ->default('#ffffff')
+                            ->nullable(),
+                        ColorPicker::make('button_color')
+                            ->label('Button Background Color')
+                            ->nullable(),
+                        ColorPicker::make('button_text_color')
+                            ->label('Button Text Color')
+                            ->nullable(),
                         Toggle::make('is_active')
                             ->label('Is Active')
                             ->default(true)

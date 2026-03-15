@@ -20,6 +20,9 @@ class Parallax extends Model
     protected $fillable = [
         'image',
         'link',
+        'font_color',
+        'button_color',
+        'button_text_color',
         'is_active',
     ];
 
