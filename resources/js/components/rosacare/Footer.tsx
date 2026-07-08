@@ -1,7 +1,32 @@
 import { Link, usePage } from '@inertiajs/react';
 
+interface MenuItem {
+    id: number;
+    type: string;
+    url?: string;
+    icon?: string;
+    page?: string;
+    category_id?: number;
+    open_in_new_tab: boolean;
+    sort_order: number;
+    is_active: boolean;
+    translations: Array<{
+        locale: string;
+        label: string;
+        title?: string;
+    }>;
+    category?: {
+        slug: string;
+        translations: Array<{
+            locale: string;
+            name: string;
+        }>;
+    };
+}
+
 interface FooterProps {
     locale?: string;
+    menuItems?: MenuItem[];
 }
 
 interface PageProps {
@@ -24,7 +49,7 @@ interface PageProps {
     };
 }
 
-export function Footer({ locale = 'ar' }: FooterProps) {
+export function Footer({ locale = 'ar', menuItems = [] }: FooterProps) {
     const isRTL = locale === 'ar';
     const currentYear = new Date().getFullYear();
     const page = usePage<{ props: PageProps }>();
@@ -37,6 +62,71 @@ export function Footer({ locale = 'ar' }: FooterProps) {
         : 'Authentic Damask Rose products from the heart of Syria');
     const footerDescription = settingsTranslation?.footer_description || slogan;
     const footerCopyright = settingsTranslation?.footer_copyright || `© ${currentYear} ${siteName}. ${locale === 'ar' ? 'جميع الحقوق محفوظة' : 'All rights reserved'}.`;
+
+    const getMenuItemUrl = (item: MenuItem): string => {
+        if (item.type === 'category' && item.category) {
+            return `/categories/${item.category.slug}`;
+        }
+        if (item.type === 'page' || item.page) {
+            const pageMap: Record<string, string> = {
+                'home': '/',
+                'Home': '/',
+                'about': '/about',
+                'contact': '/contact',
+                'products': '/products',
+                'product': '/products',
+            };
+            const pageKey = item.page || '';
+            return pageMap[pageKey] || item.url || '/';
+        }
+        return item.url || '/';
+    };
+
+    const getMenuItemLabel = (item: MenuItem): string => {
+        if (item.translations && Array.isArray(item.translations) && item.translations.length > 0) {
+            const translation = item.translations.find(t => t && t.locale === locale) || item.translations[0];
+            if (translation?.title && translation.title.trim() !== '') {
+                return translation.title;
+            }
+            if (translation?.label && translation.label.trim() !== '') {
+                return translation.label;
+            }
+        }
+
+        if (item.page) {
+            const pageLabelMap: Record<string, Record<string, string>> = {
+                'home': { ar: 'الرئيسية', en: 'Home' },
+                'Home': { ar: 'الرئيسية', en: 'Home' },
+                'products': { ar: 'المنتجات', en: 'Products' },
+                'product': { ar: 'المنتجات', en: 'Products' },
+                'about': { ar: 'من نحن', en: 'About' },
+                'contact': { ar: 'اتصل بنا', en: 'Contact' },
+            };
+            const pageKey = item.page;
+            if (pageLabelMap[pageKey]) {
+                return pageLabelMap[pageKey][locale] || pageLabelMap[pageKey]['en'] || pageKey;
+            }
+            return pageKey;
+        }
+
+        if (item.url) {
+            return item.url;
+        }
+
+        return item.type || '';
+    };
+
+    const activeMenuItems = (Array.isArray(menuItems) ? menuItems : [])
+        .filter(item => {
+            if (!item) return false;
+            if (item.is_active !== true) return false;
+            // Exclude home, about, and contact from dynamic menu since they're static
+            const page = item.page?.toLowerCase();
+            if (page === 'home' || page === 'about' || page === 'contact') return false;
+            const label = getMenuItemLabel(item);
+            return label && label.trim() !== '';
+        })
+        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
     return (
         <footer className="bg-muted border-t border-border">
@@ -66,11 +156,28 @@ export function Footer({ locale = 'ar' }: FooterProps) {
                                     {locale === 'ar' ? 'الرئيسية' : 'Home'}
                                 </Link>
                             </li>
-                            <li>
-                                <Link href="/products" className="text-muted-foreground hover:text-foreground">
-                                    {locale === 'ar' ? 'المنتجات' : 'Products'}
-                                </Link>
-                            </li>
+                            {activeMenuItems.map((item) => {
+                                const url = getMenuItemUrl(item);
+                                const label = getMenuItemLabel(item);
+                                return (
+                                    <li key={item.id}>
+                                        {item.open_in_new_tab ? (
+                                            <a
+                                                href={url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-muted-foreground hover:text-foreground transition-colors"
+                                            >
+                                                {label}
+                                            </a>
+                                        ) : (
+                                            <Link href={url} className="text-muted-foreground hover:text-foreground transition-colors">
+                                                {label}
+                                            </Link>
+                                        )}
+                                    </li>
+                                );
+                            })}
                             <li>
                                 <Link href="/about" className="text-muted-foreground hover:text-foreground">
                                     {locale === 'ar' ? 'من نحن' : 'About Us'}

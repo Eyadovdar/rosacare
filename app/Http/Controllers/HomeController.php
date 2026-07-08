@@ -166,6 +166,7 @@ class HomeController extends Controller
                 'translations' => $parallax->translations->map(function ($translation) {
                     return [
                         'locale' => $translation->locale,
+                        'button_text' => $translation->button_text,
                         'title' => $translation->title,
                         'description' => $translation->description,
                     ];

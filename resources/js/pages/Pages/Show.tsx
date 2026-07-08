@@ -72,7 +72,7 @@ export default function PagesShow({ page, locale = 'ar' }: PagesShowProps) {
 
                 {/* Page Header */}
                 {(page.header_image_path || page.title) && (
-                    <section 
+                    <section
                         className="relative py-20 bg-secondary/30"
                         style={
                             page.header_image_path
@@ -120,7 +120,7 @@ export default function PagesShow({ page, locale = 'ar' }: PagesShowProps) {
                     </section>
                 )}
 
-                <Footer locale={locale} />
+                <Footer locale={locale} menuItems={menuItems} />
             </div>
         </>
     );

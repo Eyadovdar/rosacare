@@ -228,7 +228,7 @@ export default function PrivacyPolicy({ locale = 'ar', policy: policyFromDb = nu
                         </div>
                     </div>
                 </section>
-                <Footer locale={locale} />
+                <Footer locale={locale} menuItems={menuItems} />
             </div>
         </>
     );

@@ -268,7 +268,7 @@ export default function Home({
     const [closedAnnouncements, setClosedAnnouncements] = useState<Set<number>>(new Set());
     const [visibleAnnouncements, setVisibleAnnouncements] = useState<Announcement[]>([]);
     const [closingAnnouncements, setClosingAnnouncements] = useState<Set<number>>(new Set());
-    
+
     // Carousel state
     const [currentAnnouncementIndex, setCurrentAnnouncementIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
@@ -303,7 +303,7 @@ export default function Home({
         }
 
         const interval = setInterval(() => {
-            setCurrentAnnouncementIndex((prevIndex) => 
+            setCurrentAnnouncementIndex((prevIndex) =>
                 (prevIndex + 1) % visibleAnnouncements.length
             );
         }, 5000); // Rotate every 5 seconds
@@ -313,13 +313,13 @@ export default function Home({
 
     // Navigation functions
     const goToNext = () => {
-        setCurrentAnnouncementIndex((prevIndex) => 
+        setCurrentAnnouncementIndex((prevIndex) =>
             (prevIndex + 1) % visibleAnnouncements.length
         );
     };
 
     const goToPrevious = () => {
-        setCurrentAnnouncementIndex((prevIndex) => 
+        setCurrentAnnouncementIndex((prevIndex) =>
             prevIndex === 0 ? visibleAnnouncements.length - 1 : prevIndex - 1
         );
     };
@@ -482,7 +482,7 @@ export default function Home({
 
                 {/* Floating Announcements Carousel */}
                 {visibleAnnouncements.length > 0 && (
-                    <div 
+                    <div
                         className="sticky top-16 left-0 right-0 z-40 floating-announcement"
                         onMouseEnter={() => setIsPaused(true)}
                         onMouseLeave={() => setIsPaused(false)}
@@ -491,7 +491,7 @@ export default function Home({
                             {visibleAnnouncements.length > 0 && (() => {
                                 const currentAnnouncement = visibleAnnouncements[currentAnnouncementIndex];
                                 if (!currentAnnouncement) return null;
-                                
+
                                 const translation = currentAnnouncement.translations.find(t => t.locale === locale) || currentAnnouncement.translations[0];
                                 const hasImage = currentAnnouncement.image_url && currentAnnouncement.image;
                                 const isClosing = closingAnnouncements.has(currentAnnouncement.id);
@@ -1026,7 +1026,7 @@ export default function Home({
                 <HeritageSection locale={locale} about={about} />
                 <WhyRosaCareSection locale={locale} about={about} />
                 <Parallax locale={locale} parallax={parallax} />
-                <Footer locale={locale} />
+                <Footer locale={locale} menuItems={menuItems} />
 
                 {/* WhatsApp Floating Button */}
                 <WhatsAppButton

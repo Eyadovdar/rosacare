@@ -157,7 +157,7 @@ export default function Positions({ positions = [], locale = 'ar' }: PositionsPr
             onSuccess: (page) => {
                 setVerificationCodeSent(true);
                 setResendCooldown(30);
-                const message = page.props.flash?.verification_sent || (locale === 'ar' 
+                const message = page.props.flash?.verification_sent || (locale === 'ar'
                     ? 'تم إرسال رمز التحقق إلى بريدك الإلكتروني.'
                     : 'Verification code has been sent to your email.');
                 showPopupMessage(message, 'success');
@@ -261,7 +261,7 @@ export default function Positions({ positions = [], locale = 'ar' }: PositionsPr
     return (
         <>
             <Head title={locale === 'ar' ? 'الوظائف المتاحة - روزاكير' : 'Career Opportunities - RosaCare'} />
-            
+
             {/* Popup Message */}
             {showPopup && (
                 <div className="fixed top-4 right-4 z-50 max-w-md animate-fade-in">
@@ -807,7 +807,7 @@ export default function Positions({ positions = [], locale = 'ar' }: PositionsPr
                     </div>
                 )}
 
-                <Footer locale={locale} />
+                <Footer locale={locale} menuItems={menuItems} />
             </div>
         </>
     );

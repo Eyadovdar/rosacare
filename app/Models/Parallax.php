@@ -13,6 +13,7 @@ class Parallax extends Model
     public $translationModel = ParallaxTranslation::class;
 
     public $translatedAttributes = [
+        'button_text',
         'title',
         'description',
     ];

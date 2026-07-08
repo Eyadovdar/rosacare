@@ -595,7 +595,7 @@ export default function Contact({ locale = 'ar', faqs = [], contactInfo = {} }: 
                             )}
                     </div>
                 </section>
-                <Footer locale={locale} />
+                <Footer locale={locale} menuItems={menuItems} />
             </div>
         </>
     );

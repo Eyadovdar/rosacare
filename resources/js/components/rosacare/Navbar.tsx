@@ -76,7 +76,7 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
     const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
     const [openMobileDropdowns, setOpenMobileDropdowns] = useState<Record<string, boolean>>({});
     const page = usePage<{ props: PageProps }>();
-    
+
     // Get locale from props or shared Inertia props
     const locale = propLocale || page.props.locale || 'ar';
     const supportedLocales = page.props.supportedLocales || ['ar', 'en'];
@@ -96,7 +96,7 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
             setLanguageMenuOpen(false);
             return;
         }
-        
+
         router.visit(`/lang/${newLocale}`, {
             method: 'get',
             preserveState: false,
@@ -137,7 +137,7 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
         },
         {
             id: 'contact',
-            label: { ar: 'اتصل بنا', en: 'Contact' },
+            label: { ar: 'تواصلي معنا', en: 'Contact' },
             url: '/contact',
             type: 'static',
         },
@@ -276,7 +276,7 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
                     </DropdownMenu>
                 );
             }
-            
+
             return (
                 <Button
                     key={staticItem.id}
@@ -293,7 +293,7 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
             const menuItem = item as MenuItem;
             const url = getMenuItemUrl(menuItem);
             const label = getMenuItemLabel(menuItem);
-            
+
             // If menu item is of type "category" and we have categories, show dropdown
             if (menuItem.type === 'category' && categories.length > 0) {
                 return (
@@ -329,7 +329,7 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
                     </DropdownMenu>
                 );
             }
-            
+
             return (
                 <Button
                     key={menuItem.id}
@@ -366,11 +366,11 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
                             const logoUrl = settings?.header_logo_url;
                             const siteNameTranslation = settings?.translations?.find(t => t.locale === locale) || settings?.translations?.[0];
                             const siteName = siteNameTranslation?.site_name || 'RosaCare';
-                            
+
                             return logoUrl ? (
-                                <img 
-                                    src={logoUrl} 
-                                    alt={siteName} 
+                                <img
+                                    src={logoUrl}
+                                    alt={siteName}
                                     className="h-10 w-auto object-contain dark:invert"
                                 />
                             ) : (
@@ -382,7 +382,7 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
                     {/* Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-1">
                         {allMenuItems.map((item) => renderMenuItem(item))}
-                        
+
                         {/* Language Switcher - Desktop */}
                         <div className={`relative ml-2 ${isRTL ? 'mr-2 ml-0' : ''}`}>
                             <button
@@ -394,11 +394,11 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
                                 <span className="text-sm font-medium">{getLanguageName(locale)}</span>
                                 <ChevronDownIcon className={`h-4 w-4 transition-transform ${languageMenuOpen ? 'rotate-180' : ''}`} />
                             </button>
-                            
+
                             {languageMenuOpen && (
                                 <>
-                                    <div 
-                                        className="fixed inset-0 z-10" 
+                                    <div
+                                        className="fixed inset-0 z-10"
                                         onClick={() => setLanguageMenuOpen(false)}
                                     />
                                     <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} top-full mt-2 w-40 bg-background border border-border rounded-md shadow-lg z-20 overflow-hidden`}>
@@ -429,12 +429,12 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
                         >
                             <GlobeAltIcon className="h-6 w-6" />
                         </button>
-                        
+
                         {/* Mobile Language Menu */}
                         {languageMenuOpen && (
                             <>
-                                <div 
-                                    className="fixed inset-0 z-10 bg-black/20" 
+                                <div
+                                    className="fixed inset-0 z-10 bg-black/20"
                                     onClick={() => setLanguageMenuOpen(false)}
                                 />
                                 <div className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-16 w-40 bg-background border border-border rounded-md shadow-lg z-20 overflow-hidden`}>
@@ -513,7 +513,7 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
                                             </div>
                                         );
                                     }
-                                    
+
                                     return (
                                         <button
                                             key={staticItem.id}
@@ -527,7 +527,7 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
                                     const menuItem = item as MenuItem;
                                     const url = getMenuItemUrl(menuItem);
                                     const label = getMenuItemLabel(menuItem);
-                                    
+
                                     // Show categories dropdown for category menu items in mobile
                                     if (menuItem.type === 'category' && categories.length > 0) {
                                         const dropdownKey = `category-${menuItem.id}`;
@@ -568,7 +568,7 @@ export function Navbar({ menuItems = [], locale: propLocale }: NavbarProps) {
                                             </div>
                                         );
                                     }
-                                    
+
                                     return (
                                         <button
                                             key={menuItem.id}

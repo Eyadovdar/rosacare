@@ -22,7 +22,7 @@ class EditParallax extends EditRecord
     {
         // Load translations into form data
         $record = $this->record;
-        $translatableFields = ['title', 'description'];
+        $translatableFields = ['button_text','title', 'description'];
 
         foreach ($translatableFields as $field) {
             foreach (['ar', 'en'] as $locale) {
@@ -46,8 +46,8 @@ class EditParallax extends EditRecord
         $this->translations = $this->extractTranslations($data);
 
         // Store image file path - FileUpload stores file paths as strings (single) or arrays (multiple)
-        $this->parallaxImage = is_array($data['image'] ?? null) 
-            ? ($data['image'][0] ?? null) 
+        $this->parallaxImage = is_array($data['image'] ?? null)
+            ? ($data['image'][0] ?? null)
             : ($data['image'] ?? null);
 
         // Set image path directly in data
@@ -82,8 +82,8 @@ class EditParallax extends EditRecord
     protected function extractTranslations(array $data): array
     {
         $translations = [];
-        $translatableFields = ['title', 'description'];
-        
+        $translatableFields = ['button_text','title', 'description'];
+
         foreach ($translatableFields as $field) {
             if (isset($data[$field . ':ar'])) {
                 $translations['ar'][$field] = $data[$field . ':ar'];
@@ -98,8 +98,8 @@ class EditParallax extends EditRecord
 
     protected function removeTranslationFields(array $data): array
     {
-        $translatableFields = ['title', 'description'];
-        
+        $translatableFields = ['button_text','title', 'description'];
+
         foreach ($translatableFields as $field) {
             unset($data[$field . ':ar'], $data[$field . ':en']);
         }

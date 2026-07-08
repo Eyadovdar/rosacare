@@ -214,7 +214,7 @@ export default function TermsOfUse({ locale = 'ar' }: TermsOfUseProps) {
                         </div>
                     </div>
                 </section>
-                <Footer locale={locale} />
+                <Footer locale={locale} menuItems={menuItems} />
             </div>
         </>
     );

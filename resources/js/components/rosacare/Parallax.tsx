@@ -15,6 +15,7 @@ interface ParallaxProps {
             locale: string;
             title?: string;
             description?: string;
+            button_text?: string;
         }>;
     };
 }
@@ -30,6 +31,10 @@ const defaultData = {
         en: 'Explore our complete collection of premium natural products',
     },
     link: '/products',
+    button_text: {
+        ar: 'اكتشف المزيد',
+        en: 'Our Products',
+    },
 };
 
 export function Parallax({ locale = 'ar', parallax }: ParallaxProps) {
@@ -49,6 +54,10 @@ export function Parallax({ locale = 'ar', parallax }: ParallaxProps) {
         || parallax?.translations?.[0]?.description
         || defaultData.description[locale as 'ar' | 'en']
         || defaultData.description.en;
+    const buttonText = parallax?.translations?.find(t => t.locale === locale)?.button_text
+        || parallax?.translations?.[0]?.button_text
+        || defaultData.button_text[locale as 'ar' | 'en']
+        || defaultData.button_text.en;
 
     const link = parallax?.link || defaultData.link;
     const imageUrl = parallax?.image_url || (parallax?.image ? `/storage/${parallax.image}` : null);
@@ -97,7 +106,7 @@ export function Parallax({ locale = 'ar', parallax }: ParallaxProps) {
                             }
                         >
                             <Link href={link}>
-                                {locale === 'ar' ? 'تصفح المنتجات' : 'Browse Products'}
+                                {buttonText}
                             </Link>
                         </Button>
                         <Button
@@ -114,9 +123,6 @@ export function Parallax({ locale = 'ar', parallax }: ParallaxProps) {
                                     : undefined
                             }
                         >
-                            <Link href="/contact">
-                                {locale === 'ar' ? 'تواصل معنا' : 'Contact Us'}
-                            </Link>
                         </Button>
                     </div>
                 </div>

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Abouts\Schemas;
 
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -188,6 +189,14 @@ class AboutForm
                                     ->imageEditor()
                                     ->imageEditorAspectRatios(['1:1'])
                                     ->helperText('Icon for this reason. Recommended size: 64x64px (square).'),
+                                Select::make('language')
+                                    ->label('Language')
+                                    ->options([
+                                        'ar' => 'Arabic',
+                                        'en' => 'English',
+                                    ])
+                                    ->default('ar')
+                                    ->required(),
                                 TextInput::make('title')
                                     ->label('Title')
                                     ->required()

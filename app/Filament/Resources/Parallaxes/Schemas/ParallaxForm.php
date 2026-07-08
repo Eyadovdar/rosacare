@@ -55,6 +55,10 @@ class ParallaxForm
                     ->tabs([
                         Tab::make('Arabic (ar)')
                             ->schema([
+                                TextInput::make('button_text:ar')
+                                    ->label('Button Text (Arabic)')
+                                    ->required()
+                                    ->maxLength(255),
                                 TextInput::make('title:ar')
                                     ->label('Title (Arabic)')
                                     ->required()
@@ -66,6 +70,10 @@ class ParallaxForm
                             ]),
                         Tab::make('English (en)')
                             ->schema([
+                                TextInput::make('button_text:en')
+                                    ->label('Button Text (English)')
+                                    ->required()
+                                    ->maxLength(255),
                                 TextInput::make('title:en')
                                     ->label('Title (English)')
                                     ->required()

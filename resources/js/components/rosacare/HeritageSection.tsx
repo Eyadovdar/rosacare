@@ -21,38 +21,13 @@ interface HeritageSectionProps {
 export function HeritageSection({ locale = 'ar', about = null }: HeritageSectionProps) {
     const isRTL = locale === 'ar';
 
-    // Default content if no about data
-    const defaultTitle = locale === 'ar' ? 'التراث والحرفية' : 'Heritage & Craftsmanship';
-    const defaultContent = [
-        locale === 'ar'
-            ? 'تمتد جذورنا إلى قرون من الحرفية السورية التقليدية في استخراج الوردة الشامية. نحن نستخدم الطرق التقليدية الأصيلة التي تم تناقلها عبر الأجيال، مما يضمن الحفاظ على الجودة والنقاء والخصائص الطبيعية الفريدة لهذه الزهرة المميزة.'
-            : 'Our roots extend to centuries of traditional Syrian craftsmanship in Damask Rose extraction. We use authentic traditional methods passed down through generations, ensuring the preservation of quality, purity, and the unique natural properties of this distinguished flower.',
-        locale === 'ar'
-            ? 'كل قطرة من منتجاتنا تحمل عبق التاريخ والتراث السوري الأصيل. نعتز بهذا الإرث ونسعى للحفاظ عليه وتقديمه للعالم بأعلى معايير الجودة.'
-            : 'Every drop of our products carries the essence of authentic Syrian history and heritage. We cherish this legacy and strive to preserve it and present it to the world with the highest quality standards.',
-    ];
-    const defaultFeatures = [
-        {
-            title: locale === 'ar' ? 'الاستخراج التقليدي' : 'Traditional Extraction',
-            description: locale === 'ar'
-                ? 'طرق استخراج تقليدية محافظة على جميع الخصائص الطبيعية'
-                : 'Traditional extraction methods preserving all natural properties',
-        },
-        {
-            title: locale === 'ar' ? 'جودة ممتازة' : 'Excellence in Quality',
-            description: locale === 'ar'
-                ? 'التزام بأعلى معايير الجودة والنقاء في كل منتج'
-                : 'Commitment to the highest standards of quality and purity in every product',
-        },
-    ];
-
     // Use about data if available, otherwise use default
-    const title = about?.heritage?.title || defaultTitle;
-    const content = about?.heritage?.content || defaultContent[0];
-    const subcontent = about?.heritage?.subcontent || defaultContent[1];
+    const title = about?.heritage?.title || "";
+    const content = about?.heritage?.content || "";
+    const subcontent = about?.heritage?.subcontent || "";
     const features = about?.heritage?.features && about.heritage.features.length > 0
         ? about.heritage.features
-        : defaultFeatures;
+        : [];
 
     return (
         <section className="py-20 bg-gradient-to-br from-secondary/50 to-background relative overflow-hidden">

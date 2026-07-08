@@ -9,6 +9,7 @@ interface AboutData {
             icon_url?: string;
             title?: string;
             description?: string;
+            language?: string;
         }>;
         image_url?: string;
     };
@@ -58,7 +59,7 @@ export function WhyRosaCareSection({ locale = 'ar', about = null }: WhyRosaCareS
     // Use about data if available, otherwise use default
     const title = about?.whyRosaCare?.title || (locale === 'ar' ? 'لماذا روزاكير؟' : 'Why RosaCare?');
     const reasons = about?.whyRosaCare?.reasons && about.whyRosaCare.reasons.length > 0
-        ? about.whyRosaCare.reasons
+        ? about.whyRosaCare.reasons.filter(reason => reason.language === locale)
         : defaultReasons;
 
     return (

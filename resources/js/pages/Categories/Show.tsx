@@ -96,7 +96,7 @@ export default function CategoriesShow({ category, products, locale = 'ar' }: Ca
                         )}
                     </div>
                 </section>
-                <Footer locale={locale} />
+                <Footer locale={locale} menuItems={menuItems} />
             </div>
         </>
     );

@@ -560,7 +560,7 @@ export default function ProductsShow({ product, relatedProducts, locale = 'ar' }
                         )}
                     </div>
                 </section>
-                <Footer locale={locale} />
+                <Footer locale={locale} menuItems={menuItems} />
             </div>
         </>
     );

@@ -11,6 +11,7 @@ class ParallaxTranslation extends Model
     protected $fillable = [
         'parallax_id',
         'locale',
+        'button_text',
         'title',
         'description',
     ];

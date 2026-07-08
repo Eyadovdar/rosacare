@@ -32,9 +32,11 @@
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
-        <link rel="icon" href="/favicon.ico" sizes="any">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        @if($settings['favicon_url'] ?? null)
+            <link rel="icon" href="{{ $settings['favicon_url'] }}" sizes="any">
+            <link rel="icon" href="{{ $settings['favicon_url'] }}" type="image/svg+xml">
+            <link rel="apple-touch-icon" href="{{ $settings['favicon_url'] }}">
+        @endif
 
         {{-- Local font hosting: Alexandria and Tasees fonts per RosaCare Branding Book --}}
         <style>
@@ -88,7 +90,7 @@
                 font-display: swap;
                 src: url('/fonts/alexandria/Alexandria-Bold.ttf') format('truetype');
             }
-            
+
             /* Tasees Bold: Display font for special headings/logos */
             @font-face {
                 font-family: 'Tasees';
@@ -106,7 +108,7 @@
     </head>
     <body class="font-sans antialiased">
         @inertia
-        
+
         {{-- Preloader will be rendered by React --}}
         <div id="preloader-root"></div>
 </html>

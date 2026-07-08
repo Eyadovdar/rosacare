@@ -207,6 +207,7 @@ export function WhatsAppButton({ whatsappUrl, showButton = true, locale = 'ar' }
                                         minHeight: '80px',
                                         maxHeight: '120px',
                                         background: '#ffffff',
+                                        color:'black',
                                     }}
                                     rows={3}
                                 />

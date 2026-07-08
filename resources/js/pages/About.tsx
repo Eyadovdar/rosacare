@@ -81,7 +81,7 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
     // Default static content (fallback)
     const defaultStory = {
         title: locale === 'ar' ? 'قصتنا' : 'Our Story',
-        paragraphs: locale === 'ar' 
+        paragraphs: locale === 'ar'
             ? [
                 'روزاكير هي أكثر من مجرد علامة تجارية - إنها رحلة نحو الطبيعة والأصالة. تأسست من حب عميق للوردة الشامية وتقدير للتراث السوري الأصيل، نسعى لنقل جمال ونقاء هذه الزهرة المميزة إلى العالم.',
                 'بدأت رحلتنا من قلب سوريا، حيث تُزرع أجود أنواع الوردة الشامية في العالم. نحن نعمل مباشرة مع المزارعين المحليين الذين يحافظون على التقاليد القديمة في زراعة وجني الورد، مما يضمن أن كل منتج يحمل جوهر الأصالة والجودة.'
@@ -167,13 +167,13 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
     const benefits = about?.benefits || defaultBenefits;
     const whyRosaCare = about?.whyRosaCare || defaultWhyRosaCare;
 
-    const storyParagraphs = story.paragraphs && story.paragraphs.length > 0 
-        ? story.paragraphs 
+    const storyParagraphs = story.paragraphs && story.paragraphs.length > 0
+        ? story.paragraphs
         : (story.content ? [story.content] : defaultStory.paragraphs);
 
     return (
         <>
-            <Head 
+            <Head
                 title={about?.meta?.title || (locale === 'ar' ? 'من نحن - روزاكير' : 'About Us - RosaCare')}
             >
                 {about?.meta?.description && (
@@ -298,9 +298,9 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                             <div className="max-w-4xl mx-auto section-card" style={{ padding: '3rem 2rem' }}>
                                 {story.icon_url && (
                                     <div className="flex justify-center mb-6 icon-wrapper">
-                                        <img 
-                                            src={story.icon_url} 
-                                            alt="Story Icon" 
+                                        <img
+                                            src={story.icon_url}
+                                            alt="Story Icon"
                                             className="w-20 h-20 object-contain"
                                         />
                                     </div>
@@ -314,9 +314,9 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                             </h1>
                                 {story.image_url && (
                                     <div className="mb-8 rounded-lg overflow-hidden">
-                                        <img 
-                                            src={story.image_url} 
-                                            alt={story.title} 
+                                        <img
+                                            src={story.image_url}
+                                            alt={story.title}
                                             className="w-full h-auto object-cover"
                                             style={{ maxHeight: '500px' }}
                                         />
@@ -324,9 +324,9 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                                 )}
                                 <div className="prose prose-lg max-w-none">
                                     {storyParagraphs.map((paragraph, index) => (
-                                        <p 
+                                        <p
                                             key={index}
-                                            className="text-lg leading-relaxed mb-6 fade-in-up" 
+                                            className="text-lg leading-relaxed mb-6 fade-in-up"
                                             style={{
                                                 fontFamily: "'Alexandria', sans-serif",
                                                 fontWeight: 300,
@@ -348,9 +348,9 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                                 <div className="section-card h-full" style={{ padding: '2.5rem 2rem' }}>
                                     {vision.icon_url && (
                                         <div className="flex justify-center mb-4 icon-wrapper">
-                                            <img 
-                                                src={vision.icon_url} 
-                                                alt="Vision Icon" 
+                                            <img
+                                                src={vision.icon_url}
+                                                alt="Vision Icon"
                                                 className="w-16 h-16 object-contain"
                                             />
                                         </div>
@@ -365,9 +365,9 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                                     <div className="divider" />
                                     {vision.image_url && (
                                         <div className="mb-4 rounded-lg overflow-hidden">
-                                            <img 
-                                                src={vision.image_url} 
-                                                alt={vision.title} 
+                                            <img
+                                                src={vision.image_url}
+                                                alt={vision.title}
                                                 className="w-full h-auto object-cover"
                                                 style={{ maxHeight: '300px' }}
                                             />
@@ -388,9 +388,9 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                                 <div className="section-card h-full" style={{ padding: '2.5rem 2rem' }}>
                                     {mission.icon_url && (
                                         <div className="flex justify-center mb-4 icon-wrapper">
-                                            <img 
-                                                src={mission.icon_url} 
-                                                alt="Mission Icon" 
+                                            <img
+                                                src={mission.icon_url}
+                                                alt="Mission Icon"
                                                 className="w-16 h-16 object-contain"
                                             />
                                         </div>
@@ -405,9 +405,9 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                                     <div className="divider" />
                                     {mission.image_url && (
                                         <div className="mb-4 rounded-lg overflow-hidden">
-                                            <img 
-                                                src={mission.image_url} 
-                                                alt={mission.title} 
+                                            <img
+                                                src={mission.image_url}
+                                                alt={mission.title}
                                                 className="w-full h-auto object-cover"
                                                 style={{ maxHeight: '300px' }}
                                             />
@@ -436,9 +436,9 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                                 </h2>
                                 {benefits.image_url && (
                                     <div className="mb-8 rounded-lg overflow-hidden">
-                                        <img 
-                                            src={benefits.image_url} 
-                                            alt={benefits.title} 
+                                        <img
+                                            src={benefits.image_url}
+                                            alt={benefits.title}
                                             className="w-full h-auto object-cover"
                                             style={{ maxHeight: '400px' }}
                                         />
@@ -456,9 +456,9 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                                         >
                                             {item.icon_url ? (
                                                 <div className="flex justify-center mb-4 icon-wrapper">
-                                                    <img 
-                                                        src={item.icon_url} 
-                                                        alt={item.title} 
+                                                    <img
+                                                        src={item.icon_url}
+                                                        alt={item.title}
                                                         className="w-12 h-12 object-contain"
                                                     />
                                                 </div>
@@ -501,9 +501,9 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                                 </h2>
                                 {heritage.image_url && (
                                     <div className="mb-6 rounded-lg overflow-hidden">
-                                        <img 
-                                            src={heritage.image_url} 
-                                            alt={heritage.title} 
+                                        <img
+                                            src={heritage.image_url}
+                                            alt={heritage.title}
                                             className="w-full h-auto object-cover"
                                             style={{ maxHeight: '400px' }}
                                         />
@@ -531,7 +531,7 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                                 {heritage.features && heritage.features.length > 0 && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
                                         {heritage.features.map((feature, index) => (
-                                            <div 
+                                            <div
                                                 key={index}
                                                 className="p-6 rounded-lg border-2 transition-all hover:border-[#e72177]"
                                                 style={{
@@ -541,9 +541,9 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                                             >
                                                 {feature.icon_url && (
                                                     <div className="flex justify-center mb-3 icon-wrapper">
-                                                        <img 
-                                                            src={feature.icon_url} 
-                                                            alt={feature.title} 
+                                                        <img
+                                                            src={feature.icon_url}
+                                                            alt={feature.title}
                                                             className="w-10 h-10 object-contain"
                                                         />
                                                     </div>
@@ -581,9 +581,9 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                                 </h2>
                                 {whyRosaCare.image_url && (
                                     <div className="mb-8 rounded-lg overflow-hidden">
-                                        <img 
-                                            src={whyRosaCare.image_url} 
-                                            alt={whyRosaCare.title} 
+                                        <img
+                                            src={whyRosaCare.image_url}
+                                            alt={whyRosaCare.title}
                                             className="w-full h-auto object-cover"
                                             style={{ maxHeight: '400px' }}
                                         />
@@ -591,7 +591,7 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                                 )}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
                                     {whyRosaCare.reasons?.map((reason, index) => (
-                                        <div 
+                                        <div
                                             key={index}
                                             className="flex gap-4 p-6 rounded-lg transition-all hover:bg-[#f5f5f5]"
                                             style={{
@@ -601,9 +601,9 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                                         >
                                             <div className="flex-shrink-0">
                                                 {reason.icon_url ? (
-                                                    <img 
-                                                        src={reason.icon_url} 
-                                                        alt={reason.title} 
+                                                    <img
+                                                        src={reason.icon_url}
+                                                        alt={reason.title}
                                                         className="w-8 h-8 object-contain"
                                                     />
                                                 ) : (
@@ -639,7 +639,7 @@ export default function About({ locale = 'ar', about = null }: AboutProps) {
                         </div>
                     </div>
                 </section>
-                <Footer locale={locale} />
+                <Footer locale={locale} menuItems={menuItems} />
             </div>
         </>
     );

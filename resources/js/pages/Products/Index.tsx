@@ -122,7 +122,7 @@ export default function ProductsIndex({ products, categories, selectedCategory, 
                         )}
                     </div>
                 </section>
-                <Footer locale={locale} />
+                <Footer locale={locale} menuItems={menuItems} />
             </div>
         </>
     );

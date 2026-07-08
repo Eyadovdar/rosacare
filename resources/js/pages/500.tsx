@@ -112,13 +112,13 @@ export default function Error500({ locale = 'ar' }: Error500Props) {
             <div className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <div className="rose-petals" />
                 <Navbar menuItems={menuItems} locale={locale} />
-                
+
                 <section className="py-20 min-h-[80vh] flex items-center justify-center bg-gradient-to-b from-secondary/30 via-background to-secondary/30">
                     <div className="error-content container mx-auto px-4 text-center">
                         <div className="fade-in-up">
                             <div className="mb-6 flex justify-center">
-                                <AlertCircle 
-                                    className="h-20 w-20 text-red-500 icon-pulse" 
+                                <AlertCircle
+                                    className="h-20 w-20 text-red-500 icon-pulse"
                                     style={{ color: '#e72177' }}
                                 />
                             </div>
@@ -138,11 +138,11 @@ export default function Error500({ locale = 'ar' }: Error500Props) {
                                 color: '#6b7280',
                                 lineHeight: '1.8'
                             }}>
-                                {locale === 'ar' 
+                                {locale === 'ar'
                                     ? 'نعتذر، حدث خطأ غير متوقع في الخادم. فريقنا يعمل على حل المشكلة. يرجى المحاولة مرة أخرى لاحقاً.'
                                     : 'We apologize, an unexpected server error occurred. Our team is working to fix the issue. Please try again later.'}
                             </p>
-                            
+
                             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
                                 <Button
                                     asChild
@@ -170,7 +170,7 @@ export default function Error500({ locale = 'ar' }: Error500Props) {
                                         {locale === 'ar' ? 'العودة للصفحة الرئيسية' : 'Back to Home'}
                                     </Link>
                                 </Button>
-                                
+
                                 <Button
                                     variant="outline"
                                     size="lg"
@@ -199,20 +199,20 @@ export default function Error500({ locale = 'ar' }: Error500Props) {
 
                             <div className="mt-16 pt-8 border-t border-gray-200">
                                 <p className="text-sm text-gray-500 mb-4" style={{ fontFamily: "'Alexandria', sans-serif" }}>
-                                    {locale === 'ar' 
+                                    {locale === 'ar'
                                         ? 'إذا استمرت المشكلة، يرجى الاتصال بنا:'
                                         : 'If the problem persists, please contact us:'}
                                 </p>
                                 <div className="flex flex-wrap justify-center gap-4">
-                                    <Link 
-                                        href="/contact" 
+                                    <Link
+                                        href="/contact"
                                         className="text-[#e72177] hover:text-[#862b90] transition-colors text-sm"
                                         style={{ fontFamily: "'Alexandria', sans-serif" }}
                                     >
                                         {locale === 'ar' ? 'اتصل بنا' : 'Contact Us'}
                                     </Link>
-                                    <Link 
-                                        href="/about" 
+                                    <Link
+                                        href="/about"
                                         className="text-[#e72177] hover:text-[#862b90] transition-colors text-sm"
                                         style={{ fontFamily: "'Alexandria', sans-serif" }}
                                     >
@@ -223,8 +223,8 @@ export default function Error500({ locale = 'ar' }: Error500Props) {
                         </div>
                     </div>
                 </section>
-                
-                <Footer locale={locale} />
+
+                <Footer locale={locale} menuItems={menuItems} />
             </div>
         </>
     );

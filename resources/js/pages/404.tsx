@@ -101,7 +101,7 @@ export default function Error404({ locale = 'ar' }: Error404Props) {
             <div className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <div className="rose-petals" />
                 <Navbar menuItems={menuItems} locale={locale} />
-                
+
                 <section className="py-20 min-h-[80vh] flex items-center justify-center bg-gradient-to-b from-secondary/30 via-background to-secondary/30">
                     <div className="error-content container mx-auto px-4 text-center">
                         <div className="fade-in-up">
@@ -121,11 +121,11 @@ export default function Error404({ locale = 'ar' }: Error404Props) {
                                 color: '#6b7280',
                                 lineHeight: '1.8'
                             }}>
-                                {locale === 'ar' 
+                                {locale === 'ar'
                                     ? 'يبدو أن الصفحة التي تبحث عنها غير موجودة. ربما تم نقلها أو حذفها.'
                                     : 'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.'}
                             </p>
-                            
+
                             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
                                 <Button
                                     asChild
@@ -153,7 +153,7 @@ export default function Error404({ locale = 'ar' }: Error404Props) {
                                         {locale === 'ar' ? 'العودة للصفحة الرئيسية' : 'Back to Home'}
                                     </Link>
                                 </Button>
-                                
+
                                 <Button
                                     asChild
                                     variant="outline"
@@ -187,29 +187,29 @@ export default function Error404({ locale = 'ar' }: Error404Props) {
                                     {locale === 'ar' ? 'أو جرب هذه الروابط المفيدة:' : 'Or try these helpful links:'}
                                 </p>
                                 <div className="flex flex-wrap justify-center gap-4">
-                                    <Link 
-                                        href="/products" 
+                                    <Link
+                                        href="/products"
                                         className="text-[#e72177] hover:text-[#862b90] transition-colors text-sm"
                                         style={{ fontFamily: "'Alexandria', sans-serif" }}
                                     >
                                         {locale === 'ar' ? 'المنتجات' : 'Products'}
                                     </Link>
-                                    <Link 
-                                        href="/categories" 
+                                    <Link
+                                        href="/categories"
                                         className="text-[#e72177] hover:text-[#862b90] transition-colors text-sm"
                                         style={{ fontFamily: "'Alexandria', sans-serif" }}
                                     >
                                         {locale === 'ar' ? 'الفئات' : 'Categories'}
                                     </Link>
-                                    <Link 
-                                        href="/about" 
+                                    <Link
+                                        href="/about"
                                         className="text-[#e72177] hover:text-[#862b90] transition-colors text-sm"
                                         style={{ fontFamily: "'Alexandria', sans-serif" }}
                                     >
                                         {locale === 'ar' ? 'من نحن' : 'About Us'}
                                     </Link>
-                                    <Link 
-                                        href="/contact" 
+                                    <Link
+                                        href="/contact"
                                         className="text-[#e72177] hover:text-[#862b90] transition-colors text-sm"
                                         style={{ fontFamily: "'Alexandria', sans-serif" }}
                                     >
@@ -220,8 +220,8 @@ export default function Error404({ locale = 'ar' }: Error404Props) {
                         </div>
                     </div>
                 </section>
-                
-                <Footer locale={locale} />
+
+                <Footer locale={locale} menuItems={menuItems} />
             </div>
         </>
     );
