@@ -4,6 +4,7 @@ interface Benefit {
     icon: React.ReactNode;
     title: string;
     description: string;
+    language?: string;
 }
 
 interface AboutData {
@@ -14,6 +15,7 @@ interface AboutData {
             icon_url?: string;
             title?: string;
             description?: string;
+            language?: string;
         }>;
         image_url?: string;
     };
@@ -27,55 +29,27 @@ interface BenefitsSectionProps {
 export function BenefitsSection({ locale = 'ar', about = null }: BenefitsSectionProps) {
     const isRTL = locale === 'ar';
 
-    // Default benefits if no about data
-    const defaultBenefits: Benefit[] = [
-        {
-            icon: <SparklesIcon className="w-12 h-12" />,
-            title: locale === 'ar' ? 'فوائد للبشرة' : 'Skin Benefits',
-            description: locale === 'ar'
-                ? 'ترطيب عميق وتنعيم البشرة وتقليل التجاعيد والخطوط الدقيقة'
-                : 'Deep hydration, skin smoothing, and reduction of wrinkles and fine lines',
-        },
-        {
-            icon: <HeartIcon className="w-12 h-12" />,
-            title: locale === 'ar' ? 'العافية والاسترخاء' : 'Wellness & Relaxation',
-            description: locale === 'ar'
-                ? 'خصائص مهدئة طبيعية تساعد على الاسترخاء وتخفيف التوتر'
-                : 'Natural soothing properties that help with relaxation and stress relief',
-        },
-        {
-            icon: <SunIcon className="w-12 h-12" />,
-            title: locale === 'ar' ? 'القيمة الغذائية' : 'Nutritional Value',
-            description: locale === 'ar'
-                ? 'غنية بالفيتامينات ومضادات الأكسدة الطبيعية المفيدة للصحة'
-                : 'Rich in vitamins and natural antioxidants beneficial for health',
-        },
-        {
-            icon: <BeakerIcon className="w-12 h-12" />,
-            title: locale === 'ar' ? '100% طبيعي' : '100% Natural',
-            description: locale === 'ar'
-                ? 'منتجات طبيعية خالصة بدون إضافات كيميائية أو مواد حافظة'
-                : 'Pure natural products without chemical additives or preservatives',
-        },
-    ];
-
     // Use about data if available, otherwise use default
     const title = about?.benefits?.title || (locale === 'ar' ? 'فوائد الوردة الشامية' : 'Benefits of Damask Rose');
+
+
     const benefitsItems = about?.benefits?.items && about.benefits.items.length > 0
-        ? about.benefits.items.map((item, index) => {
-            const iconComponents = [SparklesIcon, HeartIcon, SunIcon, BeakerIcon];
-            const IconComponent = iconComponents[index % 4] || SparklesIcon;
-            return {
-                icon: item.icon_url ? (
-                    <img src={item.icon_url} alt={item.title || ''} className="w-12 h-12 object-contain" />
-                ) : (
-                    <IconComponent className="w-12 h-12" />
-                ),
-                title: item.title || '',
-                description: item.description || '',
-            };
-        })
-        : defaultBenefits;
+        ? about.benefits.items
+            .filter(item => item.language === locale)
+            .map((item, index) => {
+                const iconComponents = [SparklesIcon, HeartIcon, SunIcon, BeakerIcon];
+                const IconComponent = iconComponents[index % 4] || SparklesIcon;
+                return {
+                    icon: item.icon_url ? (
+                        <img src={item.icon_url} alt={item.title || ''} className="w-12 h-12 object-contain" />
+                    ) : (
+                        <IconComponent className="w-12 h-12" />
+                    ),
+                    title: item.title || '',
+                    description: item.description || '',
+                };
+            })
+        : [];
 
     return (
         <section className="py-20 bg-background">

@@ -157,6 +157,14 @@ class AboutForm
                                     ->imageEditor()
                                     ->imageEditorAspectRatios(['1:1'])
                                     ->helperText('Icon for this benefit. Recommended size: 64x64px (square).'),
+                                Select::make('language')
+                                    ->label('Language')
+                                    ->options([
+                                        'ar' => 'Arabic',
+                                        'en' => 'English',
+                                    ])
+                                    ->default('ar')
+                                    ->required(),
                                 TextInput::make('title')
                                     ->label('Title')
                                     ->required()
